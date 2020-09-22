@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from .MainWindow import MainWindow
+from .SetupWindow import SetupWindow
 
 class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -12,13 +13,13 @@ class ProgramController(tk.Tk):
 
         self.frames = {}
 
-        for F in (MainWindow,):
+        for F in (MainWindow, SetupWindow):
             frame = F(self.container, self)
             self.frames[F] = frame
 
         # Open main page
         self.add_frame_to_paned_window(MainWindow)
-
+    
     def add_frame_to_paned_window(self, container):
         frame = self.frames[container]
         self.container.add(frame, weight=1)
@@ -27,5 +28,9 @@ class ProgramController(tk.Tk):
         frame = self.frames[container]
         self.container.forget(frame)
     
-    def panes(self):
+    def active_panes(self):
         return self.container.panes()
+    
+    def get_last_frame(self):
+        last_frame = list(self.frames.keys())[-1]
+        return last_frame

@@ -1,3 +1,4 @@
+from functools import wraps
 import sqlite3
 import os
 
@@ -20,10 +21,11 @@ class Database:
         self.connection.close()
 
     def _only_context(func):
+        @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not self.context:
                 raise NotWithContext("Database should only be used as a context manager. Call it by using 'with Database()'.")
-            func(self, *args, **kwargs)
+            return func(self, *args, **kwargs)
         return wrapper
     
     @_only_context
@@ -73,6 +75,18 @@ class Database:
         )
 
         self.connection.commit()
+    
+    @_only_context
+    def get_region_name_code(self, region_name):
+        output = self.cursor.execute(
+            f'''
+            SELECT region_code 
+            FROM aws_regions 
+            WHERE region_name_text = '{region_name}';
+            '''
+        ).fetchone()[0]
+
+        return output
 
 
 class NotWithContext(Exception):

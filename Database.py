@@ -4,6 +4,7 @@ import os
 
 class Database:
     def __init__(self, custom_db_path=None):
+        self.create_db = False
         self.context = False
         self.db_path = custom_db_path
 
@@ -12,13 +13,23 @@ class Database:
 
     def __enter__(self):
         self.context = True
+
+        if not os.path.exists(self.db_path):
+            self.create_db = True
+
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
+
+        if self.create_db:
+            self.create_database()
 
         return self
 
     def __exit__(self, type, value, traceback):
+        del self.cursor
+
         self.connection.close()
+        del self.connection
 
     def _only_context(func):
         @wraps(func)
@@ -30,7 +41,6 @@ class Database:
     
     @_only_context
     def create_database(self):
-
         self.cursor.executescript(
             '''
             CREATE TABLE IF NOT EXISTS aws_regions (
@@ -87,6 +97,18 @@ class Database:
         ).fetchone()[0]
 
         return output
+
+    @_only_context
+    def set_aws_config(self, access_key_id, secret_key, region_name_code):
+        self.cursor.execute('DELETE FROM aws_config WHERE EXISTS (SELECT * FROM aws_config);')
+        self.cursor.execute(
+            f'''
+            INSERT INTO aws_config (aws_access_key_id, aws_secret_access_key, region, output)
+            VALUES ('{access_key_id}', '{secret_key}', '{region_name_code}', 'json');
+            '''
+        )
+
+        self.connection.commit()
 
 
 class NotWithContext(Exception):

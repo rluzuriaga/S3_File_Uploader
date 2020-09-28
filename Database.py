@@ -99,6 +99,26 @@ class Database:
         return output
 
     @_only_context
+    def get_aws_config(self, label=False):
+        if label:
+            output = self.cursor.execute(
+                '''
+                SELECT a.aws_access_key_id, a.aws_secret_access_key, r.region_name_text
+                FROM aws_config a
+                INNER JOIN aws_regions r 
+                ON a.region = r.region_code;
+                '''
+            ).fetchone()
+        else:
+            output = self.cursor.execute(
+                '''
+                SELECT aws_access_key_id, aws_secret_access_key, region, output FROM aws_config;
+                '''
+            ).fetchone()
+
+        return output
+
+    @_only_context
     def set_aws_config(self, access_key_id, secret_key, region_name_code):
         self.cursor.execute('DELETE FROM aws_config WHERE EXISTS (SELECT * FROM aws_config);')
         self.cursor.execute(
@@ -109,6 +129,13 @@ class Database:
         )
 
         self.connection.commit()
+    
+    @_only_context
+    def is_aws_config_saved(self):
+        if self.get_aws_config() is None:
+            return False
+        
+        return True
 
 
 class NotWithContext(Exception):

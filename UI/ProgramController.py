@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Database import Database
+
 from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow
+from .MassUpload import MassUpload
 
 class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -13,20 +16,19 @@ class ProgramController(tk.Tk):
 
         self.frames = {}
 
-        for F in (MainWindow, SetupWindow):
+        for F in (MainWindow, SetupWindow, MassUpload):
             frame = F(self.container, self)
             self.frames[F] = frame
 
         # Open main page
         self.add_frame_to_paned_window(MainWindow)
     
-    def add_frame_to_paned_window(self, container):
-        frame = self.frames[container]
+    def add_frame_to_paned_window(self, frame_):
+        frame = self.frames[frame_]
         self.container.add(frame, weight=1)
     
-    def remove_paned_window_frame(self, container):
-        frame = self.frames[container]
-        self.container.forget(frame)
+    def remove_paned_window_frame(self, frame_from_active_panes):
+        self.container.forget(frame_from_active_panes)
     
     def active_panes(self):
         return self.container.panes()

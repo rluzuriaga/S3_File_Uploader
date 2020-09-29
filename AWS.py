@@ -1,6 +1,8 @@
 import boto3
 import botocore
 
+from Database import Database
+
 class AWS:
     def __init__(self):
         pass
@@ -23,6 +25,26 @@ class AWS:
                 raise AWSKeyException
         except botocore.exceptions.EndpointConnectionError:
             raise NoConnectionError
+    
+    def get_s3_buckets(self):
+        with Database() as DB:
+            if DB.is_aws_config_saved:
+                try:
+                    aws_config = DB.get_aws_config()
+                    client = boto3.client(
+                        's3',
+                        aws_access_key_id=aws_config[0],
+                        aws_secret_access_key=aws_config[1],
+                        region_name=aws_config[2]
+                    )
+
+                    buckets_dict = client.list_buckets()
+
+                    buckets_values = tuple(bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
+
+                    return buckets_values
+                except Exception:
+                    pass
 
 
 class AWSKeyException(Exception):

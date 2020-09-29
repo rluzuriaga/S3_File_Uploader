@@ -81,11 +81,30 @@ class Database:
                 region text NOT NULL,
                 output text NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS mass_upload (
+                start_date_time text NOT NULL,
+                mass_upload_path text NOT NULL,
+                s3_bucket text NOT NULL,
+                is_done integer NOT NULL,
+                finish_date_time text
+            );
             '''
         )
 
         self.connection.commit()
-    
+
+    @_only_context
+    def add_mass_upload_data(self, mass_upload_path, s3_bucket):
+        self.cursor.execute(
+            f'''
+            INSERT INTO mass_upload (start_date_time, mass_upload_path, s3_bucket, is_done, finish_date_time)
+            VALUES (datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', 0, NULL);
+            '''
+        )
+        
+        self.connection.commit()
+
     @_only_context
     def get_region_name_code(self, region_name):
         output = self.cursor.execute(

@@ -183,6 +183,9 @@ class SetupWindow(ttk.Frame):
                     self.setup_window_output_message.configure(text='AWS settings saved.', foreground='#3fe03f') # Darker green than foreground='green'
 
                     self.lock_unlock_button.configure(state='normal')
+
+                    # Enable all main window buttons
+                    self.controller.enable_main_window_buttons()
                 else:
                     raise AWSAuthenticationException
             except AWSKeyException:

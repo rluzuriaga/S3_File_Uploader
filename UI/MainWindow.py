@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Database import Database
+
 from .SetupWindow import SetupWindow
 from .MassUpload import MassUpload
 
@@ -10,6 +12,10 @@ class MainWindow(ttk.Frame):
         self.controller = controller
 
         self.ui_elements()
+
+        with Database() as DB:
+            if DB.is_aws_config_saved():
+                self.enable_all_buttons()
 
     def ui_elements(self):
         self.main_window_top_label = ttk.Label(
@@ -32,7 +38,7 @@ class MainWindow(ttk.Frame):
             self,
             text='Start Mass Upload',
             style='regular.TButton',
-            # state='disabled',
+            state='disabled',
             command=self.mass_upload_button_press
         )
         self.mass_upload_window_button.grid(row=2, column=0, pady=(0,10))
@@ -54,3 +60,6 @@ class MainWindow(ttk.Frame):
             self.controller.add_frame_to_paned_window(MassUpload)
         else:
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
+    
+    def enable_all_buttons(self):
+        self.mass_upload_window_button.configure(state='normal')

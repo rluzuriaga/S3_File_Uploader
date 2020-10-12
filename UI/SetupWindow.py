@@ -186,6 +186,9 @@ class SetupWindow(ttk.Frame):
 
                     # Enable all main window buttons
                     self.controller.enable_main_window_buttons()
+
+                    # Run function to lock the settings
+                    self.lock_unlock_aws_settings()
                 else:
                     raise AWSAuthenticationException
             except AWSKeyException:

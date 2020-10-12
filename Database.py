@@ -95,7 +95,7 @@ class Database:
                 general_file_extension text NOT NULL,
                 file_extension text NOT NULL
             );
-            
+
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mp4');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4a');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4v');
@@ -190,6 +190,32 @@ class Database:
             return False
         
         return True
+    
+    @_only_context
+    def get_video_formats(self,labels=False, general_file_ext=None):
+        if labels:
+            output = self.cursor.execute(
+                '''
+                SELECT DISTINCT general_file_extension
+                FROM file_extensions
+                WHERE type_of_file = 'video';
+                '''
+            ).fetchall()
+        else:
+            output = self.cursor.execute(
+                f'''
+                SELECT file_extension
+                FROM file_extensions
+                WHERE type_of_file = 'video'
+                AND general_file_extension = '{general_file_ext}';
+                '''
+            ).fetchall()
+
+        # The output is a list of tuples, but the tuples are just one string
+        # So converting the output to just be a list with the labels (this avoids nested loops)
+        output_ = [val[0] for val in output]
+
+        return output_
 
 
 class NotWithContext(Exception):

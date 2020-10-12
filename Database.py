@@ -89,6 +89,41 @@ class Database:
                 is_done integer NOT NULL,
                 finish_date_time text
             );
+
+            CREATE TABLE IF NOT EXISTS file_extensions (
+                type_of_file text NOT NULL,
+                general_file_extension text NOT NULL,
+                file_extension text NOT NULL
+            );
+
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mp4');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4a');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4v');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'f4v');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'f4a');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4b');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4r');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'f4b');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mov');
+
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gp');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gp2');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3g2');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gpp');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gpp2');
+
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'OGG', 'ogg');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'OGG', 'oga');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'OGG', 'ogv');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'OGG', 'ogx');
+            
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'WMV', 'wmv');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'WMV', 'wma');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'WMV', 'asf');
+
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'WEBM', 'webm');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'FLV', 'flv');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'AVI', 'avi');
             '''
         )
 
@@ -155,6 +190,32 @@ class Database:
             return False
         
         return True
+    
+    @_only_context
+    def get_video_formats(self,labels=False, general_file_ext=None):
+        if labels:
+            output = self.cursor.execute(
+                '''
+                SELECT DISTINCT general_file_extension
+                FROM file_extensions
+                WHERE type_of_file = 'video';
+                '''
+            ).fetchall()
+        else:
+            output = self.cursor.execute(
+                f'''
+                SELECT file_extension
+                FROM file_extensions
+                WHERE type_of_file = 'video'
+                AND general_file_extension = '{general_file_ext}';
+                '''
+            ).fetchall()
+
+        # The output is a list of tuples, but the tuples are just one string
+        # So converting the output to just be a list with the labels (this avoids nested loops)
+        output_ = [val[0] for val in output]
+
+        return output_
 
 
 class NotWithContext(Exception):

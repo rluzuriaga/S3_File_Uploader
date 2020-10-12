@@ -36,3 +36,7 @@ class ProgramController(tk.Tk):
     def get_last_frame(self):
         last_frame = list(self.frames.keys())[-1]
         return last_frame
+    
+    def enable_main_window_buttons(self):
+        mw = self.frames[MainWindow]
+        mw.enable_all_buttons()

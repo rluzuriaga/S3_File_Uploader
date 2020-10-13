@@ -140,10 +140,12 @@ class Database:
 
     @_only_context
     def add_mass_upload_data(self, mass_upload_path, s3_bucket):
+        secret_key = self.cursor.execute('SELECT aws_secret_access_key FROM aws_config WHERE is_active = 1;').fetchone()[0]
+
         self.cursor.execute(
             f'''
-            INSERT INTO mass_upload (start_date_time, mass_upload_path, s3_bucket, is_done, finish_date_time)
-            VALUES (datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', 0, NULL);
+            INSERT INTO mass_upload (aws_secret_access_key, start_date_time, mass_upload_path, s3_bucket, is_done, finish_date_time)
+            VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', 0, NULL);
             '''
         )
         

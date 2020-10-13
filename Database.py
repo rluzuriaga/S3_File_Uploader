@@ -79,7 +79,8 @@ class Database:
                 aws_access_key_id text NOT NULL,
                 aws_secret_access_key text NOT NULL,
                 region text NOT NULL,
-                output text NOT NULL
+                output text NOT NULL,
+                active_config integer NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS mass_upload (

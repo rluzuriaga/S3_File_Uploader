@@ -80,7 +80,8 @@ class Database:
                 aws_secret_access_key text NOT NULL,
                 region text NOT NULL,
                 output text NOT NULL,
-                active_config integer NOT NULL
+                is_active integer NOT NULL,
+                UNIQUE (aws_access_key_id, aws_secret_access_key)
             );
 
             CREATE TABLE IF NOT EXISTS mass_upload (
@@ -168,13 +169,14 @@ class Database:
                 SELECT a.aws_access_key_id, a.aws_secret_access_key, r.region_name_text
                 FROM aws_config a
                 INNER JOIN aws_regions r 
-                ON a.region = r.region_code;
+                ON a.region = r.region_code
+                WHERE a.is_active = 1;
                 '''
             ).fetchone()
         else:
             output = self.cursor.execute(
                 '''
-                SELECT aws_access_key_id, aws_secret_access_key, region, output FROM aws_config;
+                SELECT aws_access_key_id, aws_secret_access_key, region, output FROM aws_config WHERE is_active = 1;
                 '''
             ).fetchone()
 
@@ -182,13 +184,42 @@ class Database:
 
     @_only_context
     def set_aws_config(self, access_key_id, secret_key, region_name_code):
-        self.cursor.execute('DELETE FROM aws_config WHERE EXISTS (SELECT * FROM aws_config);')
-        self.cursor.execute(
-            f'''
-            INSERT INTO aws_config (aws_access_key_id, aws_secret_access_key, region, output)
-            VALUES ('{access_key_id}', '{secret_key}', '{region_name_code}', 'json');
+        # Check if currect saved setting is the same as new one, 
+        # If so then nothing is changed
+        # If they are different, then the old setting will change `is_active` to false
+        output = self.cursor.execute(
             '''
-        )
+            SELECT aws_access_key_id, aws_secret_access_key, region
+            FROM aws_config
+            WHERE is_active = 1;
+            '''
+        ).fetchone()
+
+        if output is None:
+            pass
+        else:
+            if access_key_id == output[0] and secret_key == output[1] and region_name_code == output[2]:
+                return
+            else:
+                self.cursor.execute('UPDATE aws_config SET is_active = 0 WHERE is_active = 1;')
+
+        # Insert new config data
+        try:
+            self.cursor.execute(
+                f'''
+                INSERT INTO aws_config (aws_access_key_id, aws_secret_access_key, region, output, is_active)
+                VALUES ('{access_key_id}', '{secret_key}', '{region_name_code}', 'json', 1);
+                '''
+            )
+        except sqlite3.IntegrityError:
+            self.cursor.execute(
+                f'''
+                UPDATE aws_config
+                SET is_active = 1, region = '{region_name_code}'
+                WHERE aws_access_key_id = '{access_key_id}'
+                AND aws_secret_access_key = '{secret_key}';
+                '''
+            )
 
         self.connection.commit()
     

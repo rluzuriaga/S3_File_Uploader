@@ -83,11 +83,18 @@ class Database:
             );
 
             CREATE TABLE IF NOT EXISTS mass_upload (
+                upload_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                aws_secret_access_key text NOT NULL,
                 start_date_time text NOT NULL,
                 mass_upload_path text NOT NULL,
                 s3_bucket text NOT NULL,
                 is_done integer NOT NULL,
-                finish_date_time text
+                finish_date_time text,
+
+                FOREIGN KEY (aws_secret_access_key)
+                REFERENCES aws_config (aws_secret_access_key)
+                    ON UPDATE CASCADE
+                    ON DELETE RESTRICT
             );
 
             CREATE TABLE IF NOT EXISTS file_extensions (

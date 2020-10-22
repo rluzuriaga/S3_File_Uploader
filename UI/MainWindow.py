@@ -62,4 +62,9 @@ class MainWindow(ttk.Frame):
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
     
     def enable_all_buttons(self):
+        self.main_window_setup_button.configure(state='normal')
         self.mass_upload_window_button.configure(state='normal')
+    
+    def disable_all_buttons(self):
+        self.main_window_setup_button.configure(state='disabled')
+        self.mass_upload_window_button.configure(state='disabled')

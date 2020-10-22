@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-from Database import Database
-
 from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow
 from .MassUpload import MassUpload
@@ -10,6 +8,9 @@ from .MassUpload import MassUpload
 class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+
+        # Make the application not resizable
+        self.resizable(False, False)
         
         self.container = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
         self.container.pack(fill=tk.BOTH, expand=True)
@@ -22,6 +23,24 @@ class ProgramController(tk.Tk):
 
         # Open main page
         self.add_frame_to_paned_window(MainWindow)
+
+        # Center the window
+        screen_x, screen_y = self._get_screen_size()
+
+        windowWidth = self.winfo_reqwidth()
+        windowHeight = self.winfo_reqheight()
+
+        # Subtract some pixels since the application opens a pane on the right
+        positionRight = int((screen_x - 500)/2 - windowWidth/2)
+        positionDown = int((screen_y - 200)/2 - windowHeight/2)
+
+        self.geometry(f"+{positionRight}+{positionDown}")
+    
+    def _get_screen_size(self):
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        return screen_width, screen_height
     
     def add_frame_to_paned_window(self, frame_):
         frame = self.frames[frame_]

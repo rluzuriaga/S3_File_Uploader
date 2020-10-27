@@ -99,6 +99,19 @@ class Database:
                     ON DELETE RESTRICT
             );
 
+            CREATE TABLE IF NOT EXISTS file_upload (
+                file_path text NOT NULL,
+                file_name text NOT NULL,
+                upload_id INTEGER NOT NULL,
+                start_date_time text NOT NULL,
+                finish_date_time text,
+
+                FOREIGN KEY (upload_id)
+                REFERENCES mass_upload (upload_id)
+                    ON UPDATE CASCADE
+                    ON DELETE RESTRICT
+            );
+
             CREATE TABLE IF NOT EXISTS file_extensions (
                 type_of_file text NOT NULL,
                 general_file_extension text NOT NULL,
@@ -149,6 +162,18 @@ class Database:
             '''
         )
         
+        self.connection.commit()
+    
+    @_only_context
+    def finish_mass_upload(self):
+        self.cursor.execute(
+            """
+            UPDATE mass_upload
+            SET is_done = 1, finish_date_time = datetime('now', 'localtime')
+            WHERE is_done = 0;
+            """
+        )
+
         self.connection.commit()
 
     @_only_context
@@ -257,6 +282,43 @@ class Database:
         output_ = [val[0] for val in output]
 
         return output_
+
+    @_only_context
+    def add_file_upload(self, file_path, file_name):
+        output = self.cursor.execute(
+            """
+            SELECT upload_id
+            FROM mass_upload
+            WHERE is_done = 0;
+            """
+        ).fetchall()
+
+        if type(output[0]) is int:
+            upload_id = output[0]
+        else:
+            upload_id = output[0][0]
+
+        self.cursor.execute(
+            f"""
+            INSERT INTO file_upload (file_path, file_name, upload_id, start_date_time, finish_date_time)
+            VALUES ('{file_path}', '{file_name}', {upload_id}, datetime('now', 'localtime'), NULL);
+            """
+        )
+
+        self.connection.commit()
+
+    @_only_context
+    def finish_file_upload(self, file_path, file_name):
+        self.cursor.execute(
+            f"""
+            UPDATE file_upload
+            SET finish_date_time = datetime('now', 'localtime')
+            WHERE file_path = '{file_path}'
+            AND file_name = '{file_name}';
+            """
+        )
+
+        self.connection.commit()
 
 
 class NotWithContext(Exception):

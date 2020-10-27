@@ -1,13 +1,14 @@
+import os
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-import os
 
 from Database import Database
 from AWS import AWS
+import Utils
 
 class MassUpload(ttk.Frame):
-
     # Grids
     # Row 0
     HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
@@ -182,11 +183,80 @@ class MassUpload(ttk.Frame):
         self.mass_upload_path.set(path)
     
     def start_upload(self):
+        # Get the data from what the user added
+        mass_upload_starting_path = self.mass_upload_path.get()
+        bucket_name = self.s3_bucket_name.get()
+        radio_button = self.radio_button_var.get()
+
+        number_of_files = sum([len(files) for r, d, files in os.walk(mass_upload_starting_path)])
+
         with Database() as DB:
-            DB.add_mass_upload_data(self.mass_upload_path.get(), self.s3_bucket_name.get())
+            DB.add_mass_upload_data(mass_upload_starting_path, bucket_name)
+
+        # Create folders in bucket
+        list_of_dirs = Utils.get_folders_to_create_in_bucket(mass_upload_starting_path)
+        self.aws.create_multiple_folders_in_bucket(bucket_name, list_of_dirs)
+
+        # Determine if all files to upload or just videos
+        if radio_button == 1:  # All files
+            # Remove the update label from the grid so that a progress bar can go instead
+            self.update_label.grid_remove()
+            
+            self.pb = ProgressBar(self, self.controller, 400, number_of_files)
+            self.pb.grid(self.UPDATE_LABEL_GRID)
+
+            # Dictionary with the file/directory as key and Byte size as value
+            #  from AWS bucket. (Used to not overwrite file that is already in the bucket)
+            bucket_objects_dict = self.aws.get_bucket_objects_as_dict(bucket_name)
+
+            # Start a new thread calling start_mass_upload_all()
+            self.mass_upload_thread = threading.Thread(target=self.start_mass_upload_all, args=(mass_upload_starting_path, bucket_name, bucket_objects_dict, self.pb))
+            self.mass_upload_thread.start()
+
+        elif radio_button == 2:  # Video files
+            # Get video files checkboxes
+            video_checkboxes_state = self.video_checkboxes.state()
+            # print([a for a in self.video_checkboxes.state()])
+            pass
+
+    def start_mass_upload_all(self, upload_start_path, bucket_name, bucket_objects_dict, progressbar):
+        # Get the position of the actual folder that will get uploaded
+        length_to_remove = upload_start_path.rfind('/') + 1
+
+        for dirpath, dirnames, filenames in os.walk(upload_start_path):
+            bucket_dir_path = dirpath[length_to_remove:] + '/'
+
+            for file in filenames:
+                full_path_from_pc = dirpath + '/' + file
+                full_bucket_path = bucket_dir_path + file
+
+                file_size_from_pc = os.path.getsize(full_path_from_pc)
+
+                # If the file is already in the bucket (with the same byte size),
+                #   then the loop will continue.
+                if full_bucket_path in bucket_objects_dict and file_size_from_pc == bucket_objects_dict[full_bucket_path]:
+                    progressbar.step()
+                    continue
+
+                with Database() as DB:
+                    DB.add_file_upload(dirpath, file)
+
+                self.aws.upload_file(full_path_from_pc, bucket_name, full_bucket_path)
+
+                with Database() as DB:
+                    DB.finish_file_upload(dirpath, file)  
+
+                progressbar.step()
+
+        # Finishing upload
+        with Database() as DB:
+            DB.finish_mass_upload()
         
-        # Use self.video_checkboxes.state() to get the output of which checkbox is pressed for videos extensions
-        # print([a for a in self.video_checkboxes.state()])
+        # Remove the progressbar from grid and re-add the update label
+        #   letting the user know that the upload finished.
+        self.pb.grid_remove()
+        self.update_label.grid(self.UPDATE_LABEL_GRID)
+        self.update_label.configure(text='Finished!', foreground='black')
 
     def refresh_s3_buckets(self):
         self.update_label.configure(text='')
@@ -239,8 +309,6 @@ class VideoCheckboxes(ttk.Frame):
         )
         self.hover_text.grid(row=1, column=0, columnspan=len(self.checkbox_text), pady=(3,0))
 
-        print([a for a in self.state()])
-
     def state(self):
         """ Returns a map of 0 or 1 for which video extension checkbox is selected. """
         return map((lambda var: var.get()), self.checkbox_variables)
@@ -258,3 +326,32 @@ class VideoCheckboxes(ttk.Frame):
     
     def leave_bind(self, event):
         self.hover_text.configure(text='')
+
+
+class ProgressBar(ttk.Frame):
+    def __init__(self, parent, controller, bar_size, number_of_steps):
+        ttk.Frame.__init__(self, parent, relief=tk.FLAT)
+        self.controller = controller
+
+        self.number_of_steps = number_of_steps
+
+        self.var = tk.IntVar()
+        self.progressbar = ttk.Progressbar(
+            self,
+            orient=tk.HORIZONTAL,
+            length=bar_size,
+            maximum=self.number_of_steps,
+            mode='determinate',
+            variable=self.var
+        )
+        self.progressbar.pack()
+
+    def step(self):
+        # If this step is the last one to complete the progressbar
+        # then change the maximum to 100 and the value to 100
+        # Doing this because if it is an odd number of steps the progressbar restarts
+        if self.var.get() + 1 == self.number_of_steps:
+            self.progressbar.configure(maximum=100, value=100)
+            return
+
+        self.progressbar.step()

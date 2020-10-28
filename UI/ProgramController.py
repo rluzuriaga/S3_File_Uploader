@@ -25,7 +25,7 @@ class ProgramController(tk.Tk):
         self.add_frame_to_paned_window(MainWindow)
 
         # Center the window
-        screen_x, screen_y = self._get_screen_size()
+        screen_x, screen_y = self.get_screen_size()
 
         windowWidth = self.winfo_reqwidth()
         windowHeight = self.winfo_reqheight()
@@ -36,7 +36,7 @@ class ProgramController(tk.Tk):
 
         self.geometry(f"+{positionRight}+{positionDown}")
     
-    def _get_screen_size(self):
+    def get_screen_size(self):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
@@ -59,3 +59,7 @@ class ProgramController(tk.Tk):
     def enable_main_window_buttons(self):
         mw = self.frames[MainWindow]
         mw.enable_all_buttons()
+    
+    def disable_main_window_buttons(self):
+        mw = self.frames[MainWindow]
+        mw.disable_all_buttons()

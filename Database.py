@@ -285,6 +285,18 @@ class Database:
         return output_
 
     @_only_context
+    def get_mass_upload_not_ended_data(self):
+        output = self.cursor.execute(
+            '''
+            SELECT upload_id, mass_upload_path, s3_bucket, upload_type
+            FROM mass_upload
+            WHERE is_done = 0;
+            '''
+        ).fetchall()
+
+        return output
+
+    @_only_context
     def add_file_upload(self, file_path, file_name):
         output = self.cursor.execute(
             """

@@ -183,6 +183,32 @@ class MassUpload(ttk.Frame):
         self.mass_upload_path.set(path)
     
     def start_upload(self):
+        # Check if there already was an upload started but didn't finish
+        with Database() as DB:
+            not_finished_mass_upload = DB.get_mass_upload_not_ended_data()
+
+        if not_finished_mass_upload:
+            nw = NotFinishedWindow(self.controller, not_finished_mass_upload[0])
+            nw.grab_set()
+            self.wait_window(nw)
+
+            user_input_button = nw.retrieve_button_pressed()
+
+            if user_input_button is None:
+                return
+
+            if user_input_button == 'n':
+                with Database() as DB:
+                    DB.finish_mass_upload()
+                pass
+
+            if user_input_button == 'y':
+                self.mass_upload_path.set(not_finished_mass_upload[0][1])
+                self.s3_bucket_name.set(not_finished_mass_upload[0][2])
+
+                self.resume_mass_upload(not_finished_mass_upload[0])
+                return
+
         # Get the data from what the user added
         mass_upload_starting_path = self.mass_upload_path.get()
         bucket_name = self.s3_bucket_name.get()
@@ -205,7 +231,7 @@ class MassUpload(ttk.Frame):
 
             # Remove the update label from the grid so that a progress bar can go instead
             self.update_label.grid_remove()
-            
+
             self.pb = ProgressBar(self, self.controller, 400, number_of_files)
             self.pb.grid(self.UPDATE_LABEL_GRID)
 
@@ -213,10 +239,7 @@ class MassUpload(ttk.Frame):
             self.mass_upload_all_thread = threading.Thread(target=self.start_mass_upload_all, args=(mass_upload_starting_path, bucket_name, bucket_objects_dict, self.pb))
             self.mass_upload_all_thread.start()
 
-        elif radio_button == 2:  # Video files
-            with Database() as DB:
-                DB.add_mass_upload_data(mass_upload_starting_path, bucket_name, 'video')
-            
+        elif radio_button == 2:  # Video files            
             # Get video files checkboxes
             video_checkbox_selection = [a for a in self.video_checkboxes.state()]
 
@@ -230,6 +253,9 @@ class MassUpload(ttk.Frame):
                     if checkbox == 1:
                         for vf in DB.get_video_formats(False, format):
                             selected_video_formats.append(vf)
+
+            with Database() as DB:
+                DB.add_mass_upload_data(mass_upload_starting_path, bucket_name, ','.join(selected_video_formats))
 
             self.update_label.grid_remove()
             
@@ -323,8 +349,17 @@ class MassUpload(ttk.Frame):
         self.update_label.grid(self.UPDATE_LABEL_GRID)
         self.update_label.configure(text='Finished!', foreground='black')
 
-    def resume_mass_upload(self):
-        pass
+    def resume_mass_upload(self, not_finished_data):
+        bucket_objects_dict = self.aws.get_bucket_objects_as_dict(not_finished_data[2])
+        number_of_files = sum([len(files) for r, d, files in os.walk(not_finished_data[1])])
+
+        self.pb = ProgressBar(self, self.controller, 400, number_of_files)
+        self.pb.grid(self.UPDATE_LABEL_GRID)
+
+        if not_finished_data[-1] == 'all':
+            threading.Thread(target=self.start_mass_upload_all, args=(not_finished_data[1], not_finished_data[2], bucket_objects_dict, self.pb)).start()
+        else:
+            threading.Thread(target=self.start_mass_upload_video, args=(not_finished_data[1], not_finished_data[2], bucket_objects_dict, self.pb, not_finished_data[-1].split(','))).start()
 
     def refresh_s3_buckets(self):
         self.update_label.configure(text='')
@@ -452,10 +487,11 @@ class ProgressBar(ttk.Frame):
         self.progressbar.step()
 
 
-class NewWindow(tk.Toplevel):
-    def __init__(self, controller):
+class NotFinishedWindow(tk.Toplevel):
+    def __init__(self, controller, not_finished_data):
         tk.Toplevel.__init__(self, controller)
         self.controller = controller
+        self.not_finished_data = not_finished_data
 
         self.no_button_pressed = False
         self.yes_button_pressed = False
@@ -470,23 +506,35 @@ class NewWindow(tk.Toplevel):
 
         top_level = ttk.Label(
             frame,
-            text="There was a mass upload that didn't finish. Do you want to continue the previous upload?"
+            text="There was a mass upload that didn't finish. Do you want to continue this upload?"
         )
-        top_level.grid(row=0, column=0, columnspan=2, pady=15, padx=10)
+        top_level.grid(row=0, column=0, columnspan=2, pady=15, padx=40)
+
+        upload_path = ttk.Label(
+            frame,
+            text=f'Upload directory: {self.not_finished_data[1]}'
+        )
+        upload_path.grid(row=1, column=0, columnspan=2, padx=10, pady=5)
+
+        bucket = ttk.Label(
+            frame,
+            text=f'S3 Bucket: {self.not_finished_data[2]}'
+        )
+        bucket.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
 
         no_button = ttk.Button(
             frame,
             text='NO',
             command=self.no_button_press
         )
-        no_button.grid(row=1, column=0, pady=10, padx=10)
+        no_button.grid(row=3, column=0, pady=10, padx=10)
 
         yes_button = ttk.Button(
             frame,
             text='YES',
             command=self.yes_button_press
         )
-        yes_button.grid(row=1, column=1, pady=10, padx=10)
+        yes_button.grid(row=3, column=1, pady=10, padx=10)
 
 
         # Center the window
@@ -500,19 +548,18 @@ class NewWindow(tk.Toplevel):
 
         self.geometry(f"+{positionRight}+{positionDown}")
 
-    
     def no_button_press(self):
         self.no_button_pressed = True
-        self.controller.full_opacity()
+        # self.controller.full_opacity()
         self.destroy()
 
     def yes_button_press(self):
         self.yes_button_pressed = True
-        self.controller.full_opacity()
+        # self.controller.full_opacity()
         self.destroy()
     
     def retrieve_button_pressed(self):
         if self.no_button_pressed:
             return 'n'
-        
-        return 'y'
+        elif self.yes_button_pressed:
+            return 'y'

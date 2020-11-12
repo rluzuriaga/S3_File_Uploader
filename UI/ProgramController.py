@@ -63,3 +63,9 @@ class ProgramController(tk.Tk):
     def disable_main_window_buttons(self):
         mw = self.frames[MainWindow]
         mw.disable_all_buttons()
+
+    def setup_start_after(self):
+        self.frames[SetupWindow].start_after()
+    
+    def setup_stop_after(self):
+        self.frames[SetupWindow].stop_after()

@@ -3,6 +3,7 @@ import botocore
 
 from Database import Database
 
+
 class AWS:
     def __init__(self):
         pass
@@ -25,11 +26,11 @@ class AWS:
                 raise AWSKeyException
         except botocore.exceptions.EndpointConnectionError:
             raise NoConnectionError
-    
+
     @staticmethod
     def get_s3_buckets():
         with Database() as DB:
-            if DB.is_aws_config_saved:
+            if DB.are_settings_saved:
                 try:
                     aws_config = DB.get_aws_config()
                     client = boto3.client(
@@ -41,7 +42,8 @@ class AWS:
 
                     buckets_dict = client.list_buckets()
 
-                    buckets_values = tuple(bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
+                    buckets_values = tuple(
+                        bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
 
                     return buckets_values
                 except Exception:
@@ -77,8 +79,9 @@ class AWS:
 
             for folder_name in list_of_folder_names:
                 if folder_name + '/' not in bucket_objects_dict:
-                    client.put_object(Bucket=bucket_name, Key=(folder_name+'/'))
-    
+                    client.put_object(Bucket=bucket_name,
+                                      Key=(folder_name+'/'))
+
     @staticmethod
     def get_bucket_objects_as_dict(bucket_name):
         """ Example output: {'file_name': int(filesize)} """
@@ -93,7 +96,7 @@ class AWS:
             )
 
             objects = client.list_objects_v2(Bucket=bucket_name)
-            
+
             try:
                 return {item['Key']: item['Size'] for item in objects['Contents']}
             except KeyError:
@@ -103,8 +106,10 @@ class AWS:
 class AWSKeyException(Exception):
     pass
 
+
 class AWSAuthenticationException(Exception):
     pass
+
 
 class NoConnectionError(Exception):
     pass

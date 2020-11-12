@@ -2,6 +2,7 @@ from functools import wraps
 import sqlite3
 import os
 
+
 class Database:
     def __init__(self, custom_db_path=None):
         self.create_db = False
@@ -35,10 +36,11 @@ class Database:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             if not self.context:
-                raise NotWithContext("Database should only be used as a context manager. Call it by using 'with Database()'.")
+                raise NotWithContext(
+                    "Database should only be used as a context manager. Call it by using 'with Database()'.")
             return func(self, *args, **kwargs)
         return wrapper
-    
+
     @_only_context
     def create_database(self):
         self.cursor.executescript(
@@ -82,6 +84,14 @@ class Database:
                 output text NOT NULL,
                 is_active integer NOT NULL,
                 UNIQUE (aws_access_key_id, aws_secret_access_key)
+            );
+
+            CREATE TABLE IF NOT EXISTS ffmpeg_config (
+                ffmpeg_parameters text,
+                aws_different_output_extension text,
+                local_save_path text,
+                local_different_output_extension text,
+                is_active integer NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS mass_upload (
@@ -154,7 +164,8 @@ class Database:
 
     @_only_context
     def add_mass_upload_data(self, mass_upload_path, s3_bucket, upload_type):
-        secret_key = self.cursor.execute('SELECT aws_secret_access_key FROM aws_config WHERE is_active = 1;').fetchone()[0]
+        secret_key = self.cursor.execute(
+            'SELECT aws_secret_access_key FROM aws_config WHERE is_active = 1;').fetchone()[0]
 
         self.cursor.execute(
             f'''
@@ -162,9 +173,9 @@ class Database:
             VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', '{upload_type}', 0, NULL);
             '''
         )
-        
+
         self.connection.commit()
-    
+
     @_only_context
     def finish_mass_upload(self):
         self.cursor.execute(
@@ -190,6 +201,19 @@ class Database:
         return output
 
     @_only_context
+    def get_region_name_labels(self):
+        output = self.cursor.execute(
+            '''
+            SELECT region_name_text
+            FROM aws_regions;
+            '''
+        ).fetchall()
+
+        output_tuple = tuple(a[0] for a in output)
+
+        return output_tuple
+
+    @_only_context
     def get_aws_config(self, label=False):
         if label:
             output = self.cursor.execute(
@@ -212,7 +236,7 @@ class Database:
 
     @_only_context
     def set_aws_config(self, access_key_id, secret_key, region_name_code):
-        # Check if currect saved setting is the same as new one, 
+        # Check if currect saved setting is the same as new one,
         # If so then nothing is changed
         # If they are different, then the old setting will change `is_active` to false
         output = self.cursor.execute(
@@ -229,7 +253,8 @@ class Database:
             if access_key_id == output[0] and secret_key == output[1] and region_name_code == output[2]:
                 return
             else:
-                self.cursor.execute('UPDATE aws_config SET is_active = 0 WHERE is_active = 1;')
+                self.cursor.execute(
+                    'UPDATE aws_config SET is_active = 0 WHERE is_active = 1;')
 
         # Insert new config data
         try:
@@ -250,16 +275,60 @@ class Database:
             )
 
         self.connection.commit()
-    
+
     @_only_context
-    def is_aws_config_saved(self):
+    def are_settings_saved(self):
         if self.get_aws_config() is None:
             return False
-        
+
+        if self.get_ffmpeg_config() is None:
+            return False
+
         return True
-    
+
     @_only_context
-    def get_video_formats(self,labels=False, general_file_ext=None):
+    def get_ffmpeg_config(self):
+        output = self.cursor.execute(
+            '''
+            SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
+            FROM ffmpeg_config 
+            WHERE is_active = 1;
+            '''
+        ).fetchone()
+
+        return output
+
+    @_only_context
+    def set_ffmpeg_config(self, ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension):
+        output = self.cursor.execute(
+            '''
+            SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
+            FROM ffmpeg_config
+            WHERE is_active = 1;
+            '''
+        ).fetchone()
+
+        if output is None:
+            pass
+        else:
+            if ffmpeg_parameters == output[0] and aws_different_output_extension == output[1] and local_save_path == output[2] and local_different_output_extension == output[3]:
+                return
+            else:
+                self.cursor.execute(
+                    'UPDATE ffmpeg_config SET is_active = 0 WHERE is_active = 1;')
+
+        # Insert new config data
+        self.cursor.execute(
+            f'''
+            INSERT INTO ffmpeg_config (ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension, is_active)
+            VALUES ('{ffmpeg_parameters}', {aws_different_output_extension}, {local_save_path}, {local_different_output_extension}, 1);
+            '''
+        )
+
+        self.connection.commit()
+
+    @_only_context
+    def get_video_formats(self, labels=False, general_file_ext=None):
         if labels:
             output = self.cursor.execute(
                 '''

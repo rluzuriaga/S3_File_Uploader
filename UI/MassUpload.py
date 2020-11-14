@@ -8,30 +8,40 @@ from Database import Database
 from AWS import AWS
 import Utils
 
+
 class MassUpload(ttk.Frame):
     # Grids
     # Row 0
-    HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+    HEADER_LABEL_GRID = {'row': 0, 'column': 0,
+                         'columnspan': 5, 'pady': 10, 'padx': 20}
 
     # Row 1
-    UPDATE_LABEL_GRID = {'row': 1, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+    UPDATE_LABEL_GRID = {'row': 1, 'column': 0,
+                         'columnspan': 5, 'pady': 10, 'padx': 20}
 
     # Row 2
-    PATH_TO_MASS_UPLOAD_LABEL_GRID = {'row': 2, 'column': 0 ,'columnspan': 5, 'padx': 20, 'pady': (10, 5)}
+    PATH_TO_MASS_UPLOAD_LABEL_GRID = {'row': 2, 'column': 0,
+                                      'columnspan': 5, 'padx': 20, 'pady': (10, 5)}
 
     # Row 3
-    MASS_UPLOAD_PATH_INPUT_FIELD_GRID = {'row': 3, 'column':0, 'columnspan': 4, 'padx': (50, 5), 'ipady': 4}
-    MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 3, 'column': 4, 'padx': (5, 50), 'ipady': 2}
+    MASS_UPLOAD_PATH_INPUT_FIELD_GRID = {'row': 3, 'column': 0,
+                                         'columnspan': 4, 'padx': (50, 5), 'ipady': 4}
+    MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 3, 'column': 4,
+                                    'padx': (5, 50), 'ipady': 2}
 
     # Row 4
-    S3_BUCKET_LOCATION_LABEL_GRID = {'row': 4, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
+    S3_BUCKET_LOCATION_LABEL_GRID = {'row': 4, 'column': 0, 'columnspan': 5,
+                                     'padx': 20, 'pady': (25, 5)}
 
     # Row 5
-    S3_BUCKET_SELECTOR_GRID = {'row': 5, 'column': 0, 'columnspan': 4, 'padx': (50, 5)}
-    REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 5, 'column': 4, 'padx': (8, 50), 'ipady': 3}
+    S3_BUCKET_SELECTOR_GRID = {'row': 5, 'column': 0,
+                               'columnspan': 4, 'padx': (50, 5)}
+    REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 5, 'column': 4,
+                                      'padx': (8, 50), 'ipady': 3}
 
     # Row 6
-    RADIO_BUTTON_LABEL_GRID = {'row': 6, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
+    RADIO_BUTTON_LABEL_GRID = {'row': 6, 'column': 0, 'columnspan': 5,
+                               'padx': 20, 'pady': (25, 5)}
 
     # Row 7
     RADIO_BUTTON_ALL_GRID = {'row': 7, 'column': 0, 'padx': 1, 'sticky': 'e'}
@@ -41,10 +51,12 @@ class MassUpload(ttk.Frame):
     VIDEO_FORMAT_GRID = {'row': 8, 'rowspan': 2, 'columnspan': 5, 'pady': 8}
 
     # Row 10
-    START_UPLOAD_BUTTON_GRID = {'row': 10, 'column': 0, 'columnspan': 5, 'pady': (20,15)}
+    START_UPLOAD_BUTTON_GRID = {'row': 10, 'column': 0,
+                                'columnspan': 5, 'pady': (20, 15)}
 
     def __init__(self, parent, controller):
-        ttk.Frame.__init__(self, parent, width=100, height=300, relief=tk.RIDGE)
+        ttk.Frame.__init__(self, parent, width=100,
+                           height=300, relief=tk.RIDGE)
         self.controller = controller
 
         style = ttk.Style()
@@ -53,15 +65,17 @@ class MassUpload(ttk.Frame):
 
         self.aws = AWS()
 
-        self.open_folder_icon_path = tk.PhotoImage(file=os.getcwd() + '/UI/images/open_folder_icon.png')
-        self.refresh_button_image = tk.PhotoImage(file=os.getcwd() + '/UI/images/refresh_icon.png')
-        
+        self.open_folder_icon_path = tk.PhotoImage(
+            file=os.getcwd() + '/UI/images/open_folder_icon.png')
+        self.refresh_button_image = tk.PhotoImage(
+            file=os.getcwd() + '/UI/images/refresh_icon.png')
+
         self.S3_BUCKET_VALUES = self.aws.get_s3_buckets()
 
         self.ui_elements()
 
         self.radio_button_var.set(1)
-    
+
     def ui_elements(self):
         # Row 0
         self.header_label = ttk.Label(
@@ -88,7 +102,8 @@ class MassUpload(ttk.Frame):
             font=('Helvetica', 15),
             justify=tk.CENTER
         )
-        self.path_to_mass_upload_label.grid(self.PATH_TO_MASS_UPLOAD_LABEL_GRID)
+        self.path_to_mass_upload_label.grid(
+            self.PATH_TO_MASS_UPLOAD_LABEL_GRID)
 
         # Row 3
         self.mass_upload_path = tk.StringVar()
@@ -97,7 +112,8 @@ class MassUpload(ttk.Frame):
             width=35,
             textvariable=self.mass_upload_path
         )
-        self.mass_upload_path_input_field.grid(self.MASS_UPLOAD_PATH_INPUT_FIELD_GRID)
+        self.mass_upload_path_input_field.grid(
+            self.MASS_UPLOAD_PATH_INPUT_FIELD_GRID)
 
         self.mass_upload_path_button = ttk.Button(
             self,
@@ -114,7 +130,7 @@ class MassUpload(ttk.Frame):
             justify=tk.CENTER
         )
         self.s3_bucket_location_label.grid(self.S3_BUCKET_LOCATION_LABEL_GRID)
-        
+
         # Row 5
         self.s3_bucket_name = tk.StringVar()
         self.s3_bucket_selector = ttk.Combobox(
@@ -131,7 +147,8 @@ class MassUpload(ttk.Frame):
             image=self.refresh_button_image,
             command=self.refresh_s3_buckets
         )
-        self.refresh_s3_buckets_button.grid(self.REFRESH_S3_BUCKETS_BUTTON_GRID)
+        self.refresh_s3_buckets_button.grid(
+            self.REFRESH_S3_BUCKETS_BUTTON_GRID)
 
         # Row 6
         self.radio_button_label = ttk.Label(
@@ -181,14 +198,17 @@ class MassUpload(ttk.Frame):
     def open_folder_path(self):
         path = filedialog.askdirectory()
         self.mass_upload_path.set(path)
-    
+
     def start_upload(self):
         # Check if there already was an upload started but didn't finish
         with Database() as DB:
             not_finished_mass_upload = DB.get_mass_upload_not_ended_data()
 
         if not_finished_mass_upload:
-            nw = NotFinishedWindow(self.controller, not_finished_mass_upload[0])
+            nw = NotFinishedWindow(
+                self.controller,
+                not_finished_mass_upload[0]
+            )
             nw.grab_set()
             self.wait_window(nw)
 
@@ -214,10 +234,14 @@ class MassUpload(ttk.Frame):
         bucket_name = self.s3_bucket_name.get()
         radio_button = self.radio_button_var.get()
 
-        number_of_files = sum([len(files) for r, d, files in os.walk(mass_upload_starting_path)])
+        number_of_files = sum(
+            [len(files) for r, d, files in os.walk(mass_upload_starting_path)]
+        )
 
         # Create folders in bucket
-        list_of_dirs = Utils.get_folders_to_create_in_bucket(mass_upload_starting_path)
+        list_of_dirs = Utils.get_folders_to_create_in_bucket(
+            mass_upload_starting_path
+        )
         self.aws.create_multiple_folders_in_bucket(bucket_name, list_of_dirs)
 
         # Dictionary with the file/directory as key and Byte size as value
@@ -227,7 +251,11 @@ class MassUpload(ttk.Frame):
         # Determine if all files to upload or just videos
         if radio_button == 1:  # All files
             with Database() as DB:
-                DB.add_mass_upload_data(mass_upload_starting_path, bucket_name, 'all')
+                DB.add_mass_upload_data(
+                    mass_upload_starting_path,
+                    bucket_name,
+                    'all'
+                )
 
             # Remove the update label from the grid so that a progress bar can go instead
             self.update_label.grid_remove()
@@ -236,18 +264,27 @@ class MassUpload(ttk.Frame):
             self.pb.grid(self.UPDATE_LABEL_GRID)
 
             # Start a new thread calling start_mass_upload_all()
-            self.mass_upload_all_thread = threading.Thread(target=self.start_mass_upload_all, args=(mass_upload_starting_path, bucket_name, bucket_objects_dict, self.pb))
+            self.mass_upload_all_thread = threading.Thread(
+                target=self.start_mass_upload_all,
+                args=(
+                    mass_upload_starting_path,
+                    bucket_name,
+                    bucket_objects_dict,
+                    self.pb
+                )
+            )
             self.mass_upload_all_thread.start()
 
-        elif radio_button == 2:  # Video files            
+        elif radio_button == 2:  # Video files
             # Get video files checkboxes
-            video_checkbox_selection = [a for a in self.video_checkboxes.state()]
+            video_checkbox_selection = [
+                a for a in self.video_checkboxes.state()]
 
             with Database() as DB:
                 video_formats = DB.get_video_formats(True)
-            
+
             selected_video_formats = []
-            
+
             with Database() as DB:
                 for checkbox, format in zip(video_checkbox_selection, video_formats):
                     if checkbox == 1:
@@ -255,16 +292,30 @@ class MassUpload(ttk.Frame):
                             selected_video_formats.append(vf)
 
             with Database() as DB:
-                DB.add_mass_upload_data(mass_upload_starting_path, bucket_name, ','.join(selected_video_formats))
+                DB.add_mass_upload_data(
+                    mass_upload_starting_path,
+                    bucket_name,
+                    ','.join(selected_video_formats)
+                )
 
             self.update_label.grid_remove()
-            
+
             self.pb = ProgressBar(self, self.controller, 400, number_of_files)
             self.pb.grid(self.UPDATE_LABEL_GRID)
-            
-            threading.Thread(target=self.start_mass_upload_video, args=(mass_upload_starting_path, bucket_name, bucket_objects_dict, self.pb, selected_video_formats)).start()
 
-    def start_mass_upload_all(self, upload_start_path, bucket_name, bucket_objects_dict, progressbar):
+            threading.Thread(
+                target=self.start_mass_upload_video,
+                args=(
+                    mass_upload_starting_path,
+                    bucket_name,
+                    bucket_objects_dict,
+                    self.pb,
+                    selected_video_formats
+                )
+            ).start()
+
+    def start_mass_upload_all(self, upload_start_path,
+                              bucket_name, bucket_objects_dict, progressbar):
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
@@ -286,24 +337,26 @@ class MassUpload(ttk.Frame):
                 with Database() as DB:
                     DB.add_file_upload(dirpath, file)
 
-                self.aws.upload_file(full_path_from_pc, bucket_name, full_bucket_path)
+                self.aws.upload_file(
+                    full_path_from_pc, bucket_name, full_bucket_path)
 
                 with Database() as DB:
-                    DB.finish_file_upload(dirpath, file)  
+                    DB.finish_file_upload(dirpath, file)
 
                 progressbar.step()
 
         # Finishing upload
         with Database() as DB:
             DB.finish_mass_upload()
-        
+
         # Remove the progressbar from grid and re-add the update label
         #   letting the user know that the upload finished.
         self.pb.grid_remove()
         self.update_label.grid(self.UPDATE_LABEL_GRID)
         self.update_label.configure(text='Finished!', foreground='black')
-    
-    def start_mass_upload_video(self, upload_start_path, bucket_name, bucket_objects_dict, progressbar, video_formats_to_use):
+
+    def start_mass_upload_video(self, upload_start_path, bucket_name,
+                                bucket_objects_dict, progressbar, video_formats_to_use):
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
@@ -332,17 +385,18 @@ class MassUpload(ttk.Frame):
                 with Database() as DB:
                     DB.add_file_upload(dirpath, file)
 
-                self.aws.upload_file(full_path_from_pc, bucket_name, full_bucket_path)
+                self.aws.upload_file(
+                    full_path_from_pc, bucket_name, full_bucket_path)
 
                 with Database() as DB:
-                    DB.finish_file_upload(dirpath, file)  
+                    DB.finish_file_upload(dirpath, file)
 
                 progressbar.step()
 
         # Finishing upload
         with Database() as DB:
             DB.finish_mass_upload()
-        
+
         # Remove the progressbar from grid and re-add the update label
         #   letting the user know that the upload finished.
         self.pb.grid_remove()
@@ -350,16 +404,35 @@ class MassUpload(ttk.Frame):
         self.update_label.configure(text='Finished!', foreground='black')
 
     def resume_mass_upload(self, not_finished_data):
-        bucket_objects_dict = self.aws.get_bucket_objects_as_dict(not_finished_data[2])
-        number_of_files = sum([len(files) for r, d, files in os.walk(not_finished_data[1])])
+        bucket_objects_dict = self.aws.get_bucket_objects_as_dict(
+            not_finished_data[2])
+        number_of_files = sum([len(files)
+                               for r, d, files in os.walk(not_finished_data[1])])
 
         self.pb = ProgressBar(self, self.controller, 400, number_of_files)
         self.pb.grid(self.UPDATE_LABEL_GRID)
 
         if not_finished_data[-1] == 'all':
-            threading.Thread(target=self.start_mass_upload_all, args=(not_finished_data[1], not_finished_data[2], bucket_objects_dict, self.pb)).start()
+            threading.Thread(
+                target=self.start_mass_upload_all,
+                args=(
+                    not_finished_data[1],
+                    not_finished_data[2],
+                    bucket_objects_dict,
+                    self.pb
+                )
+            ).start()
         else:
-            threading.Thread(target=self.start_mass_upload_video, args=(not_finished_data[1], not_finished_data[2], bucket_objects_dict, self.pb, not_finished_data[-1].split(','))).start()
+            threading.Thread(
+                target=self.start_mass_upload_video,
+                args=(
+                    not_finished_data[1],
+                    not_finished_data[2],
+                    bucket_objects_dict,
+                    self.pb,
+                    not_finished_data[-1].split(',')
+                )
+            ).start()
 
     def refresh_s3_buckets(self):
         self.update_label.configure(text='')
@@ -367,8 +440,11 @@ class MassUpload(ttk.Frame):
         s3_bucket_values = self.aws.get_s3_buckets()
         self.s3_bucket_selector.configure(values=s3_bucket_values)
 
-        self.update_label.configure(text='S3 buckets updated', foreground='#3fe03f') # Darker green
-    
+        self.update_label.configure(
+            text='S3 buckets updated',
+            foreground='#3fe03f'  # Darker green
+        )
+
     def all_files_radio_active(self):
         if len(self.start_upload_button.grid_info()) == 0:
             self.start_upload_button.grid(self.START_UPLOAD_BUTTON_GRID)
@@ -424,7 +500,9 @@ class VideoCheckboxes(ttk.Frame):
             font=('Helvetica', 14, 'italic'),
             justify=tk.CENTER
         )
-        self.hover_text.grid(row=1, column=0, columnspan=len(self.checkbox_text), pady=(3,0))
+        self.hover_text.grid(row=1, column=0,
+                             columnspan=len(self.checkbox_text),
+                             pady=(3, 0))
 
     def state(self):
         """ Returns a map of 0 or 1 for which video extension checkbox is selected. """
@@ -440,18 +518,18 @@ class VideoCheckboxes(ttk.Frame):
             text_ += ext + ", "
 
         self.hover_text.configure(text=text_.rstrip(', '))
-    
+
     def leave_bind(self, event):
         self.hover_text.configure(text='')
-    
+
     def disable_all_widgets(self):
         for child in self.winfo_children():
             child.configure(state='disabled')
-    
+
     def reenable_all_widgets(self):
         for child in self.winfo_children():
             child.configure(state='enable')
-    
+
     def unbind_widgets(self):
         for child in self.winfo_children():
             child.unbind("<Enter>")
@@ -536,7 +614,6 @@ class NotFinishedWindow(tk.Toplevel):
         )
         yes_button.grid(row=3, column=1, pady=10, padx=10)
 
-
         # Center the window
         screen_x, screen_y = controller.get_screen_size()
 
@@ -557,7 +634,7 @@ class NotFinishedWindow(tk.Toplevel):
         self.yes_button_pressed = True
         # self.controller.full_opacity()
         self.destroy()
-    
+
     def retrieve_button_pressed(self):
         if self.no_button_pressed:
             return 'n'

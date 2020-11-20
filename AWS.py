@@ -61,8 +61,8 @@ class AWS:
                 region_name=aws_config[2]
             )
 
-            client.upload_file(file_path, bucket_name, file_name)
-            # client.upload_file(file_path, bucket_name, file_name, Callback=ProgressCallback(file_path))
+            client.upload_file(file_path, bucket_name, file_name,
+                               Callback=ProgressCallback)
 
     def create_multiple_folders_in_bucket(self, bucket_name, list_of_folder_names):
         with Database() as DB:

@@ -101,6 +101,7 @@ class Database:
                 mass_upload_path text NOT NULL,
                 s3_bucket text NOT NULL,
                 upload_type text NOT NULL,
+                use_ffmpeg integer NOT NULL,
                 is_done integer NOT NULL,
                 finish_date_time text,
 
@@ -114,6 +115,8 @@ class Database:
                 file_path text NOT NULL,
                 file_name text NOT NULL,
                 upload_id INTEGER NOT NULL,
+                s3_bucket text NOT NULL,
+                file_size_bytes INTEGER NOT NULL,
                 start_date_time text NOT NULL,
                 finish_date_time text,
 
@@ -121,6 +124,21 @@ class Database:
                 REFERENCES mass_upload (upload_id)
                     ON UPDATE CASCADE
                     ON DELETE RESTRICT
+                
+                FOREIGN KEY (s3_bucket)
+                REFERENCES mass_upload (s3_bucket)
+                    ON UPDATE CASCADE
+                    ON DELETE RESTRICT
+            );
+
+            CREATE TABLE IF NOT EXISTS ffmpeg_file_conversion (
+                original_file_path TEXT NOT NULL,
+                original_file_name TEXT NOT NULL,
+                original_file_size INTEGER NOT NULL,
+                converted_file_path	TEXT NOT NULL,
+                converted_file_name	TEXT NOT NULL,
+                converted_file_size	INTEGER NOT NULL,
+                converted_date_time	INTEGER NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS file_extensions (
@@ -163,14 +181,14 @@ class Database:
         self.connection.commit()
 
     @_only_context
-    def add_mass_upload_data(self, mass_upload_path, s3_bucket, upload_type):
+    def add_mass_upload_data(self, mass_upload_path: str, s3_bucket: str, upload_type: str, use_ffmpeg: int) -> None:
         secret_key = self.cursor.execute(
             'SELECT aws_secret_access_key FROM aws_config WHERE is_active = 1;').fetchone()[0]
 
         self.cursor.execute(
             f'''
-            INSERT INTO mass_upload (aws_secret_access_key, start_date_time, mass_upload_path, s3_bucket, upload_type, is_done, finish_date_time)
-            VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', '{upload_type}', 0, NULL);
+            INSERT INTO mass_upload (aws_secret_access_key, start_date_time, mass_upload_path, s3_bucket, upload_type, use_ffmpeg, is_done, finish_date_time)
+            VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', '{upload_type}', {use_ffmpeg}, 0, NULL);
             '''
         )
 
@@ -366,7 +384,7 @@ class Database:
         return output
 
     @_only_context
-    def add_file_upload(self, file_path, file_name):
+    def add_file_upload(self, file_path, file_name, file_size, s3_bucket):
         output = self.cursor.execute(
             """
             SELECT upload_id
@@ -382,8 +400,8 @@ class Database:
 
         self.cursor.execute(
             f"""
-            INSERT INTO file_upload (file_path, file_name, upload_id, start_date_time, finish_date_time)
-            VALUES ('{file_path}', '{file_name}', {upload_id}, datetime('now', 'localtime'), NULL);
+            INSERT INTO file_upload (file_path, file_name, upload_id, s3_bucket, file_size_bytes, start_date_time, finish_date_time)
+            VALUES ('{file_path}', '{file_name}', {upload_id}, '{s3_bucket}', {file_size}, datetime('now', 'localtime'), NULL);
             """
         )
 
@@ -401,6 +419,72 @@ class Database:
         )
 
         self.connection.commit()
+
+    @_only_context
+    def get_file_upload_size(self, file_path, file_name) -> int:
+        output = self.cursor.execute(
+            f'''
+            SELECT file_size_bytes
+            FROM file_upload
+            WHERE file_path = '{file_path}'
+            AND file_name = '{file_name}';
+            '''
+        ).fetchone()
+
+        if output:
+            if type(output[0]) is int:
+                file_size = output[0]
+            else:
+                file_size = output[0][0]
+        else:
+            file_size = 0
+
+        return file_size
+
+    @_only_context
+    def add_ffmpeg_conversion(self, original_file_path, original_file_name, original_file_size,
+                              converted_file_path, converted_file_name, converted_file_size):
+
+        self.cursor.execute(
+            f'''
+            INSERT INTO ffmpeg_file_conversion (
+                original_file_path, original_file_name, original_file_size,
+                converted_file_path, converted_file_name, converted_file_size, converted_date_time
+            )
+            VALUES (
+                '{original_file_path}', '{original_file_name}', '{original_file_size}',
+                '{converted_file_path}', '{converted_file_name}', '{converted_file_size}',
+                datetime('now', 'localtime')
+            );
+            '''
+        )
+
+        self.connection.commit()
+
+    @_only_context
+    def is_file_already_converted_and_uploaded(self, file_path: str, file_name: str,
+                                               file_size: int, s3_bucket: str) -> bool:
+        output = self.cursor.execute(
+            f'''
+            SELECT c.original_file_path, c.original_file_name, c.original_file_size, 
+                   c.converted_file_path, c.converted_file_name, c.converted_file_size,
+                   f.file_path, f.file_name, f.file_size_bytes
+
+            FROM ffmpeg_file_conversion c
+
+            INNER JOIN file_upload f ON c.converted_file_size = f.file_size_bytes
+
+            WHERE f.s3_bucket = '{s3_bucket}'
+            AND c.original_file_path = '{file_path}'
+            AND c.original_file_name = '{file_name}'
+            AND c.original_file_size = '{file_size}'
+            AND f.file_path = c.converted_file_path
+            AND f.file_name = c.converted_file_name
+            AND f.file_size_bytes = c.converted_file_size;
+            '''
+        ).fetchall()
+
+        return bool(output)
 
 
 class NotWithContext(Exception):

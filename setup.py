@@ -6,7 +6,6 @@ Usage:
 """
 
 from setuptools import setup, find_packages
-import os
 
 APP = ['S3_File_Uploader/main.py']
 DATA_FILES = []

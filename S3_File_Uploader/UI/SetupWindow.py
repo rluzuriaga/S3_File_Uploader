@@ -91,7 +91,7 @@ class SetupWindow(ttk.Frame):
         self.different_extension_input_active = False
         self.save_locally = False
 
-        if 'dist' in os.getcwd():
+        if 'Resources' in os.getcwd():
             self.open_folder_icon_path = tk.PhotoImage(
                 file=os.getcwd() + '/images/open_folder_icon.png')
         else:

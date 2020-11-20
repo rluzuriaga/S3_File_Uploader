@@ -10,7 +10,6 @@ import ffmpeg
 
 from Database import Database
 from AWS import AWS
-import Utils
 
 
 class MassUpload(ttk.Frame):
@@ -90,7 +89,7 @@ class MassUpload(ttk.Frame):
         self.aws = AWS()
 
         # Check if program is running through the .app or from direct python
-        if 'dist' in os.getcwd():
+        if 'Resources' in os.getcwd():
             self.open_folder_icon_path = tk.PhotoImage(
                 file=os.getcwd() + '/images/open_folder_icon.png')
             self.refresh_button_image = tk.PhotoImage(
@@ -230,14 +229,14 @@ class MassUpload(ttk.Frame):
         )
         self.radio_button_video.grid(self.RADIO_BUTTON_VIDEO_GRID)
 
-        self.radio_button_audio = ttk.Radiobutton(
-            self,
-            text='Audio Only',
-            value=3,
-            variable=self.radio_button_var,
-            command=self._audio_only_radio_active
-        )
-        self.radio_button_audio.grid(self.RADIO_BUTTON_AUDIO_GRID)
+        # self.radio_button_audio = ttk.Radiobutton(
+        #     self,
+        #     text='Audio Only',
+        #     value=3,
+        #     variable=self.radio_button_var,
+        #     command=self._audio_only_radio_active
+        # )
+        # self.radio_button_audio.grid(self.RADIO_BUTTON_AUDIO_GRID)
 
         # Row 11 & 12
         self.video_checkboxes = VideoCheckboxes(

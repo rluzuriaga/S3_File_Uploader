@@ -91,8 +91,12 @@ class SetupWindow(ttk.Frame):
         self.different_extension_input_active = False
         self.save_locally = False
 
-        self.open_folder_icon_path = tk.PhotoImage(
-            file=os.getcwd() + '/UI/images/open_folder_icon.png')
+        if 'dist' in os.getcwd():
+            self.open_folder_icon_path = tk.PhotoImage(
+                file=os.getcwd() + '/images/open_folder_icon.png')
+        else:
+            self.open_folder_icon_path = tk.PhotoImage(
+                file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
 
         self.ui_elements()
         self.populate_setup_fields()

@@ -64,6 +64,20 @@ class AWS:
             client.upload_file(file_path, bucket_name, file_name,
                                Callback=ProgressCallback)
 
+    @staticmethod
+    def create_single_folder_in_bucket(bucket_name, folder_name):
+        with Database() as DB:
+            aws_config = DB.get_aws_config()
+
+            client = boto3.client(
+                's3',
+                aws_access_key_id=aws_config[0],
+                aws_secret_access_key=aws_config[1],
+                region_name=aws_config[2]
+            )
+
+            client.put_object(Bucket=bucket_name, Key=(folder_name+'/'))
+
     def create_multiple_folders_in_bucket(self, bucket_name, list_of_folder_names):
         with Database() as DB:
             aws_config = DB.get_aws_config()

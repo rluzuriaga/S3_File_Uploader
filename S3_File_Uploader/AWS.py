@@ -30,24 +30,23 @@ class AWS:
     @staticmethod
     def get_s3_buckets():
         with Database() as DB:
-            if DB.are_settings_saved:
-                try:
-                    aws_config = DB.get_aws_config()
-                    client = boto3.client(
-                        's3',
-                        aws_access_key_id=aws_config[0],
-                        aws_secret_access_key=aws_config[1],
-                        region_name=aws_config[2]
-                    )
+            if DB.are_settings_saved():
+                # try:
+                aws_config = DB.get_aws_config()
+                client = boto3.client(
+                    's3',
+                    aws_access_key_id=aws_config[0],
+                    aws_secret_access_key=aws_config[1],
+                    region_name=aws_config[2]
+                )
 
-                    buckets_dict = client.list_buckets()
+                buckets_dict = client.list_buckets()
 
-                    buckets_values = tuple(
-                        bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
-
-                    return buckets_values
-                except Exception:
-                    pass
+                buckets_values = tuple(
+                    bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
+                return buckets_values
+                # except Exception as e:
+                #     pass
 
     @staticmethod
     def upload_file(file_path, bucket_name, file_name, ProgressCallback=None):

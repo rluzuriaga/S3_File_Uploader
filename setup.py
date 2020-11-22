@@ -12,6 +12,14 @@ DATA_FILES = []
 OPTIONS = {
     'resources': [
         'S3_File_Uploader/UI/images'
+    ],
+    # Any package that is not part of the standard library
+    # that is used as an import, needs to be added here
+    'packages': [
+        'botocore',
+        'boto3',
+        'ffmpeg',
+        'pexpect'
     ]
 }
 
@@ -26,10 +34,10 @@ setup(
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
     install_requires=[
-        'boto3',
         'botocore',
+        'boto3',
         'ffmpeg-python',
         'pexpect'
     ],
-    zip_safe=False,
+    zip_safe=True,
 )

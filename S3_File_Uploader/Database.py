@@ -375,7 +375,7 @@ class Database:
     def get_mass_upload_not_ended_data(self):
         output = self.cursor.execute(
             '''
-            SELECT upload_id, mass_upload_path, s3_bucket, upload_type
+            SELECT upload_id, mass_upload_path, s3_bucket, upload_type, use_ffmpeg
             FROM mass_upload
             WHERE is_done = 0;
             '''

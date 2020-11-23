@@ -4,6 +4,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from typing import List
 
 import pexpect
 import ffmpeg
@@ -376,7 +377,7 @@ class MassUpload(ttk.Frame):
         first_full_output_string = f'{input_file_path}/{output_file_name}_converted.{first_output_extension}'
 
         # Setup the ffmpeg command for one output
-        ffmpeg_command_string = f'ffmpeg -i {full_input_string} {ffmpeg_parameters} -y {first_full_output_string}'
+        ffmpeg_command_string = f'ffmpeg -i "{full_input_string}" {ffmpeg_parameters} -y "{first_full_output_string}"'
 
         # Check if there needs to be a second output
         if ffmpeg_config[2] is not None:
@@ -388,7 +389,7 @@ class MassUpload(ttk.Frame):
             else:
                 second_output_file = f'{output_file_name}.{first_output_extension}'
 
-            ffmpeg_command_string += f'{second_output_file}'
+            ffmpeg_command_string += f'"{second_output_file}"'
 
         return ffmpeg_command_string, first_full_output_string
 
@@ -453,6 +454,9 @@ class MassUpload(ttk.Frame):
             not_finished_mass_upload = DB.get_mass_upload_not_ended_data()
 
         if not_finished_mass_upload:
+            upload_id, mass_upload_path, \
+                s3_bucket, upload_type, use_ffmpeg = not_finished_mass_upload[0]
+
             nw = NotFinishedWindow(
                 controller=self.controller,
                 not_finished_data=not_finished_mass_upload[0]
@@ -470,10 +474,16 @@ class MassUpload(ttk.Frame):
                     DB.finish_mass_upload()
                 pass
 
-            # TODO: Need to fix the double indexing
             if user_input_button == 'y':
-                self.mass_upload_path.set(not_finished_mass_upload[0][1])
-                self.s3_bucket_name.set(not_finished_mass_upload[0][2])
+                self.mass_upload_path.set(mass_upload_path)
+                self.s3_bucket_name.set(s3_bucket)
+
+                if upload_type == 'all':
+                    self.radio_button_var.set(1)
+                else:
+                    self.radio_button_var.set(2)
+                    self.video_checkboxes.set_checkbox(upload_type)
+                    self.use_ffmpeg_checkbox_var.set(use_ffmpeg)
 
                 self.resume_mass_upload(not_finished_mass_upload[0])
                 return
@@ -516,18 +526,21 @@ class MassUpload(ttk.Frame):
 
         # If the Video Only radio button is selected
         elif radio_button == 2:
-            # Get video files checkboxes
+            # Get the checkboxes that are selected
             video_checkbox_selection = [
                 a for a in self.video_checkboxes.state()]
 
             with Database() as DB:
-                video_formats = DB.get_video_formats(labels=True)
+                all_video_formats_labels = DB.get_video_formats(labels=True)
 
+            selected_video_format_labels = []
             selected_video_formats = []
 
             with Database() as DB:
-                for checkbox, format in zip(video_checkbox_selection, video_formats):
+                for checkbox, format in zip(video_checkbox_selection, all_video_formats_labels):
                     if checkbox == 1:
+                        selected_video_format_labels.append(format)
+
                         for vf in DB.get_video_formats(False, format):
                             selected_video_formats.append(vf)
 
@@ -539,7 +552,7 @@ class MassUpload(ttk.Frame):
                 DB.add_mass_upload_data(
                     mass_upload_path=mass_upload_starting_path,
                     s3_bucket=bucket_name,
-                    upload_type=','.join(selected_video_formats),
+                    upload_type=','.join(selected_video_format_labels),
                     use_ffmpeg=use_ffmpeg
                 )
 
@@ -557,8 +570,8 @@ class MassUpload(ttk.Frame):
             ).start()
 
         # If the Audio Only radio button is selected
-        elif radio_button == 3:  # Audio only
-            print('audio selected')
+        # elif radio_button == 3:  # Audio only
+        #     print('audio selected')
 
     def start_mass_upload_all(self, upload_start_path,
                               bucket_name, bucket_objects_dict):
@@ -636,8 +649,17 @@ class MassUpload(ttk.Frame):
                 #   then upload that converted file
                 if use_ffmpeg:
                     # Get file size of the non-converted (original) file
-                    original_file_byte_size = int(
-                        os.path.getsize(dirpath + '/' + file))
+                    # If this is a resume upload, then there will be an extra
+                    #   converted file that is non-existant but the os.walk
+                    #   loop thinks is there.
+                    # So this has to be surrounded by
+                    #   a try/except clause
+                    try:
+                        original_file_byte_size = int(
+                            os.path.getsize(dirpath + '/' + file))
+                    except FileNotFoundError:
+                        self.overall_pb.step()
+                        continue
 
                     # Parse together the ffmpeg command and return the command alongside the new
                     #   file path and name
@@ -774,30 +796,43 @@ class MassUpload(ttk.Frame):
         self.update_label.configure(text='Finished!', foreground='black')
 
     def resume_mass_upload(self, not_finished_data):
-        bucket_objects_dict = self.aws.get_bucket_objects_as_dict(
-            not_finished_data[2])
+        upload_id, mass_upload_path, s3_bucket, upload_type, use_ffmpeg = not_finished_data
+
+        bucket_objects_dict = self.aws.get_bucket_objects_as_dict(s3_bucket)
+
         number_of_files = sum([len(files)
-                               for r, d, files in os.walk(not_finished_data[1])])
+                               for r, d, files in os.walk(mass_upload_path)])
 
         self._create_overall_progressbar(number_of_files)
 
-        if not_finished_data[-1] == 'all':
+        if upload_type == 'all':
             threading.Thread(
                 target=self.start_mass_upload_all,
                 args=(
-                    not_finished_data[1],
-                    not_finished_data[2],
+                    mass_upload_path,
+                    s3_bucket,
                     bucket_objects_dict
                 )
             ).start()
         else:
+            # TODO: Fix issue with the resume not actually doing anything
+            video_checkbox_selection = upload_type.split(',')
+
+            selected_video_formats = []
+
+            with Database() as DB:
+                for checkbox in video_checkbox_selection:
+                    for vf in DB.get_video_formats(False, checkbox):
+                        selected_video_formats.append(vf)
+
             threading.Thread(
                 target=self.start_mass_upload_video,
                 args=(
-                    not_finished_data[1],
-                    not_finished_data[2],
+                    mass_upload_path,
+                    s3_bucket,
                     bucket_objects_dict,
-                    not_finished_data[-1].split(',')
+                    selected_video_formats,
+                    use_ffmpeg
                 )
             ).start()
 
@@ -823,20 +858,25 @@ class VideoCheckboxes(ttk.Frame):
 
         self.checkbox_text = ''
         self.checkbox_variables = []
+        self.checkbox_text_and_variables = []
 
         with Database() as DB:
             self.checkbox_text = DB.get_video_formats(labels=True)
 
         for i, text_ in enumerate(self.checkbox_text):
             var = tk.IntVar()
+
             var.set(1)
+
             checkbox = ttk.Checkbutton(
                 self,
                 text=text_,
                 variable=var
             )
             checkbox.grid(row=0, column=i, padx=2)
+
             self.checkbox_variables.append(var)
+            self.checkbox_text_and_variables.append(tuple([text_, var]))
 
             checkbox.bind("<Enter>", self.enter_bind)
             checkbox.bind("<Leave>", self.leave_bind)
@@ -850,6 +890,13 @@ class VideoCheckboxes(ttk.Frame):
         self.hover_text.grid(row=1, column=0,
                              columnspan=len(self.checkbox_text),
                              pady=(3, 0))
+
+    def set_checkbox(self, checkbox_label: List[str]) -> None:
+        for checkbox in self.checkbox_text_and_variables:
+            if checkbox[0] in checkbox_label:
+                checkbox[1].set(1)
+            else:
+                checkbox[1].set(0)
 
     def state(self):
         """ Returns a map of 0 or 1 for which video extension checkbox is selected. """

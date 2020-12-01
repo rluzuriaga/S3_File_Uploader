@@ -156,6 +156,7 @@ class Database:
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4r');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'f4b');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mov');
+            INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mkv');
 
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gp');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', '3GP', '3gp2');

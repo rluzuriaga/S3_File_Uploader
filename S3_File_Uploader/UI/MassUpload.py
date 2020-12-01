@@ -1,6 +1,5 @@
 import os
 import threading
-# import subprocess
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -393,7 +392,7 @@ class MassUpload(ttk.Frame):
 
         return ffmpeg_command_string, first_full_output_string
 
-    def _ffmpeg_controller(self, parsed_ffmpeg_command, ffmpeg_progressbar, total_video_frames):
+    def _ffmpeg_controller(self, parsed_ffmpeg_command, ffmpeg_progressbar, total_video_frames: int):
         """ Function to run FFMPEG using the parsed ffmpeg command.
 
         Args:
@@ -447,6 +446,39 @@ class MassUpload(ttk.Frame):
                 ffmpeg_progressbar.update_progressbar_value(int(frame_num))
 
                 thread.close
+
+    def _ffprobe_controller(full_file_name: str) -> int:
+        """ Function to run the ffprobe command to get the number of frames in the video.
+
+        Args:
+            full_file_name (str): Full path and file name to ffprobe.
+
+        Returns:
+            int: Number of frames in the video
+        """
+        command = f'ffprobe -count_frames -select_streams v:0 -show_entries stream=nb_frames "{full_file_name}"'
+
+        thread = pexpect.spawn(command)
+
+        cpl = thread.compile_pattern_list([
+            pexpect.EOF,
+            'nb_frames=\d+',
+            '(.+)'
+        ])
+
+        frames = "0"
+
+        while True:
+            i = thread.expect_list(cpl, timeout=None)
+            if i == 0:
+                break
+            elif i == 1:
+                frames = thread.match.group(0)
+                thread.close
+
+        number_of_frames = str(frames, 'utf-8').replace('nb_frames=', '')
+
+        return int(number_of_frames)
 
     def start_upload(self):
         # Check if there already was an upload started but didn't finish
@@ -691,8 +723,20 @@ class MassUpload(ttk.Frame):
                             continue
 
                     # Get the Frames of the video to use for the ffmpeg progressbar
-                    total_video_frames = ffmpeg.probe(
-                        dirpath + '/' + file)['streams'][0]['nb_frames']
+                    try:
+                        total_video_frames = ffmpeg.probe(
+                            f"{dirpath}/{file}")['streams'][0]['nb_frames']
+                    except Exception as e:
+                        print(
+                            f"ffprobe exception occurred: {e}\nTrying secondary ffprobe.\n")
+
+                        try:
+                            total_video_frames = self._ffprobe_controller(
+                                f"{dirpath}/{file}")
+                        except Exception as e:
+                            print(
+                                f"Secondary ffprobe exception occurred: {e}\nSkipping ffprobe.\n")
+                            total_video_frames = 10000
 
                     # Run the FFMPEG program
                     self._ffmpeg_controller(
@@ -702,8 +746,16 @@ class MassUpload(ttk.Frame):
                     )
 
                     # Get the file size of the converted video file
-                    converted_file_byte_size = int(
-                        os.path.getsize(converted_file_path_and_name))
+                    # Have to use a try/except clause since some NAS create a hidden file
+                    #   that the program tries to use but isn't really there.
+                    try:
+                        converted_file_byte_size = int(
+                            os.path.getsize(converted_file_path_and_name))
+                    except FileNotFoundError as e:
+                        print(
+                            f"File not found: '{converted_file_path_and_name}'.\nSkipping file.\n")
+                        self.overall_pb.step()
+                        continue
 
                     # Add the FFMPEG converted data to the database
                     with Database() as DB:

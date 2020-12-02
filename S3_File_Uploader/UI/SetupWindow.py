@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -8,97 +9,87 @@ import threading
 from Database import Database
 from AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
 
+# Set up logging
+logger = logging.getLogger('main_logger')
+
 
 class SetupWindow(ttk.Frame):
     # Row 0
-    TOP_LABEL_GRID = {'row': 0, 'column': 0,
-                      'columnspan': 4, 'padx': 280, 'pady': (15, 15)}
+    TOP_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 4, 'padx': 280, 'pady': (15, 15)}
 
     # Row 1
-    OUTPUT_MESSAGE_GRID = {'row': 1, 'column': 0,
-                           'columnspan': 4, 'pady': (5, 5)}
+    OUTPUT_MESSAGE_GRID = {'row': 1, 'column': 0, 'columnspan': 4, 'pady': (5, 5)}
 
     # Row 2
     AWS_HEADING_GRID = {'row': 2, 'column': 0, 'columnspan': 4, 'pady': (5, 1)}
 
     # Row 3
-    ACCESS_KEY_ID_LABEL_GRID = {'row': 3, 'column': 0, 'columnspan': 2, 'padx': (
-        25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    ACCESS_KEY_ID_INPUT_GRID = {'row': 3, 'column': 2, 'columnspan': 2, 'padx': (
-        5, 25), 'pady': (10, 0), 'sticky': 'e'}
+    ACCESS_KEY_ID_LABEL_GRID = {'row': 3, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    ACCESS_KEY_ID_INPUT_GRID = {'row': 3, 'column': 2, 'columnspan': 2, 'padx': (5, 25), 'pady': (10, 0), 'sticky': 'e'}
 
     # Row 4
-    SECRET_KEY_LABEL_GRID = {'row': 4, 'column': 0, 'columnspan': 2, 'padx': (
-        25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    SECRET_KEY_INPUT_GRID = {'row': 4, 'column': 2, 'columnspan': 2, 'padx': (
-        5, 25), 'pady': (10, 0), 'sticky': 'e'}
+    SECRET_KEY_LABEL_GRID = {'row': 4, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    SECRET_KEY_INPUT_GRID = {'row': 4, 'column': 2, 'columnspan': 2, 'padx': (5, 25), 'pady': (10, 0), 'sticky': 'e'}
 
     # Row 5
-    REGION_NAME_LABEL_GRID = {'row': 5, 'column': 0, 'columnspan': 2, 'padx': (
-        25, 0), 'pady': (10, 20), 'sticky': 'w'}
-    REGION_NAME_INPUT_GRID = {'row': 5, 'column': 2, 'columnspan': 2, 'padx': (
-        5, 25), 'pady': (10, 20), 'sticky': 'e'}
+    REGION_NAME_LABEL_GRID = {'row': 5, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 20), 'sticky': 'w'}
+    REGION_NAME_INPUT_GRID = {'row': 5, 'column': 2, 'columnspan': 2, 'padx': (5, 25), 'pady': (10, 20), 'sticky': 'e'}
 
     # Row 6
-    FFMPEG_HEADING_LABEL_GRID = {
-        'row': 6, 'column': 0, 'columnspan': 4, 'pady': (5, 1)}
+    FFMPEG_HEADING_LABEL_GRID = {'row': 6, 'column': 0, 'columnspan': 4, 'pady': (5, 1)}
 
     # Row 7
-    FFMPEG_INPUT_LABEL_GRID = {'row': 7, 'column': 0, 'columnspan': 2, 'padx': (
-        25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    FFMPEG_INPUT_GRID = {'row': 7, 'column': 2, 'columnspan': 2, 'padx': (
-        22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    FFMPEG_INPUT_LABEL_GRID = {'row': 7, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    FFMPEG_INPUT_GRID = {'row': 7, 'column': 2, 'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 8
-    DIFFERENT_EXTENSION_CHECKBOX_GRID = {
-        'row': 8, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 8, 'column': 2, 'columnspan': 2, 'padx': (
-        22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    DIFFERENT_EXTENSION_CHECKBOX_GRID = {'row': 8, 'column': 0,
+                                         'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 8, 'column': 2,
+                                      'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 9
-    LOCAL_SAVE_CHECKBOX_GRID = {'row': 9, 'column': 0, 'columnspan': 2, 'padx': (
-        25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 9, 'column': 2, 'padx': (
-        22, 5), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_BUTTON_GRID = {
-        'row': 9, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
+    LOCAL_SAVE_CHECKBOX_GRID = {'row': 9, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 9, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 9, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
 
     # Row 10
-    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {
-        'row': 10, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {
-        'row': 10, 'column': 2, 'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 10, 'column': 0,
+                                                 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {'row': 10, 'column': 2,
+                                              'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 11
-    FFMPEG_EXAMPLE_LABEL = {'row': 11, 'column': 0,
-                            'columnspan': 4, 'pady': (2, 0)}
+    FFMPEG_EXAMPLE_LABEL = {'row': 11, 'column': 0, 'columnspan': 4, 'pady': (2, 0)}
 
     # Row 12
-    SAVE_BUTTON_GRID = {'row': 12, 'column': 0,
-                        'columnspan': 2, 'pady': (20, 10)}
-    LOCK_UNLOCK_BUTTON_GRID = {'row': 12, 'column': 2, 'columnspan': 2, 'padx': (
-        0, 40), 'pady': (20, 10), 'sticky': 'E'}
+    SAVE_BUTTON_GRID = {'row': 12, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
+    LOCK_UNLOCK_BUTTON_GRID = {'row': 12, 'column': 2, 'columnspan': 2,
+                               'padx': (0, 40), 'pady': (20, 10), 'sticky': 'E'}
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent, width=100,
                            height=300, relief=tk.RIDGE)
         self.controller = controller
 
+        logger.debug('Initializing the SetupWindow ttk frame.')
+
         style = ttk.Style()
         style.configure('regular.TButton', font=('Helvetica', 15))
         style.configure('regular.TCheckbutton', font=('Helvetica', 15))
 
-        self.different_extension_input_active = False
-        self.save_locally = False
-
         if 'Resources' in os.getcwd():
             self.open_folder_icon_path = tk.PhotoImage(
                 file=os.getcwd() + '/images/open_folder_icon.png')
+            logger.debug(f'Retrieving image "{os.getcwd()}/images/open_folder_icon.png"')
         else:
             self.open_folder_icon_path = tk.PhotoImage(
                 file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
+            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/open_folder_icon.png"')
 
         self.ui_elements()
+        logger.debug("Created SetupWindow UI elements.")
+
         self.populate_setup_fields()
 
     def ui_elements(self):
@@ -303,8 +294,10 @@ class SetupWindow(ttk.Frame):
         self.lock_unlock_button.grid(self.LOCK_UNLOCK_BUTTON_GRID)
 
     def _open_folder_path(self):
+        logger.debug('Opening file dialog window for selecting local save path.')
         path = filedialog.askdirectory()
         self.local_save_path_var.set(path)
+        logger.debug(f'Setting local save path to: "{path}"')
 
     def _update_ffmpeg_data(self):
         """ Function to update the example ffmpeg label.
@@ -345,11 +338,12 @@ class SetupWindow(ttk.Frame):
         # If not, then the Entry box is removed from the grid and the output extension
         #  is set to 'avi' so that the example label has the correct value.
         if self.use_different_extension.get():
-            self.different_ffmpeg_output_extension_input.grid(
-                self.DIFFERENT_EXTENSION_INPUT_GRID)
+            self.different_ffmpeg_output_extension_input.grid(self.DIFFERENT_EXTENSION_INPUT_GRID)
+            logger.debug('Adding the `different output extension` entry box to the grid.')
         else:
             self.different_ffmpeg_output_extension_input.grid_remove()
             self.different_output_extension_var.set("avi")
+            logger.debug('Removing the `different output extension` entry box from the grid.')
 
     def _local_save_press(self):
         """ Function that runs when the `Save locally` checkbox is pressed.
@@ -361,17 +355,17 @@ class SetupWindow(ttk.Frame):
         #  different local extension checkbox are added to the grid.
         # If it is unchecked, then those are removed from the grid.
         if self.local_save_var.get():
-            self.local_save_path_input_field.grid(
-                self.LOCAL_SAVE_PATH_INPUT_GRID)
+            self.local_save_path_input_field.grid(self.LOCAL_SAVE_PATH_INPUT_GRID)
             self.local_save_path_button.grid(self.LOCAL_SAVE_PATH_BUTTON_GRID)
-            self.local_save_different_extension_checkbox.grid(
-                self.LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID)
+            self.local_save_different_extension_checkbox.grid(self.LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID)
+            logger.debug('Adding the `local save` input field, button and different extension checkbox to the grid.')
         else:
             self.local_save_path_input_field.grid_remove()
             self.local_save_path_button.grid_remove()
             self.local_save_different_extension_checkbox.grid_remove()
 
             self.local_save_different_output_extension_input.grid_remove()
+            logger.debug('Removing the `local save` input field, button and different extension checkbox from the grid.')
 
     def _local_save_different_extension_press(self):
         """ Function that runs when the `Different local output extension` checkbox is pressed.
@@ -382,65 +376,55 @@ class SetupWindow(ttk.Frame):
         # If the checkbox is selected, then the Entry box is added to the grid.
         # If the checkbox is not selected, then the Entry box is removed from the grid.
         if self.local_save_different_extension_checkbox_var.get():
-            self.local_save_different_output_extension_input.grid(
-                self.LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID)
+            self.local_save_different_output_extension_input.grid(self.LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID)
+            logger.debug('Adding the local save different extension to the grid.')
         else:
             self.local_save_different_output_extension_input.grid_remove()
+            logger.debug('Removing the local save different extension from the grid.')
 
     def _disable_all_widgets(self):
         """ Function to disable all of the input widgets in the SetupWindow. """
         # AWS widgets
-        self.access_key_id_input_field.configure(
-            state='disabled', foreground='gray')
-        self.secret_key_input_field.configure(
-            state='disabled', foreground='gray')
-        self.region_name_input_field.configure(
-            state='disabled', foreground='gray')
+        self.access_key_id_input_field.configure(state='disabled', foreground='gray')
+        self.secret_key_input_field.configure(state='disabled', foreground='gray')
+        self.region_name_input_field.configure(state='disabled', foreground='gray')
+        logger.debug('Disabling the AWS input fields.')
 
         # FFMPEG widgets
         self.ffmpeg_input.configure(state='disabled', foreground='gray')
 
-        self.different_ffmpeg_output_extension_checkbutton.configure(
-            state='disabled')
-        self.different_ffmpeg_output_extension_input.configure(
-            state='disabled', foreground='grey')
+        self.different_ffmpeg_output_extension_checkbutton.configure(state='disabled')
+        self.different_ffmpeg_output_extension_input.configure(state='disabled', foreground='grey')
 
         self.local_save_checkbox.configure(state='disabled')
-        self.local_save_path_input_field.configure(
-            state='disabled', foreground='grey')
+        self.local_save_path_input_field.configure(state='disabled', foreground='grey')
         self.local_save_path_button.configure(state='disabled')
 
-        self.local_save_different_extension_checkbox.configure(
-            state='disabled')
-        self.local_save_different_output_extension_input.configure(
-            state='disabled', foreground='grey')
+        self.local_save_different_extension_checkbox.configure(state='disabled')
+        self.local_save_different_output_extension_input.configure(state='disabled', foreground='grey')
+        logger.debug('Disabling the FFMPEG input fields.')
 
     def _enable_all_widgets(self):
         """ Function to enable all of the input widgets in the SetupWindow. """
         # AWS options
-        self.access_key_id_input_field.configure(
-            state='normal', foreground='black')
-        self.secret_key_input_field.configure(
-            state='normal', foreground='black')
-        self.region_name_input_field.configure(
-            state='readonly', foreground='black')
+        self.access_key_id_input_field.configure(state='normal', foreground='black')
+        self.secret_key_input_field.configure(state='normal', foreground='black')
+        self.region_name_input_field.configure(state='readonly', foreground='black')
+        logger.debug('Enabling the AWS input fields.')
 
         # FFMPEG options
         self.ffmpeg_input.configure(state='normal', foreground='black')
 
-        self.different_ffmpeg_output_extension_checkbutton.configure(
-            state='normal')
-        self.different_ffmpeg_output_extension_input.configure(
-            state='normal', foreground='black')
+        self.different_ffmpeg_output_extension_checkbutton.configure(state='normal')
+        self.different_ffmpeg_output_extension_input.configure(state='normal', foreground='black')
 
         self.local_save_checkbox.configure(state='normal')
-        self.local_save_path_input_field.configure(
-            state='normal', foreground='black')
+        self.local_save_path_input_field.configure(state='normal', foreground='black')
         self.local_save_path_button.configure(state='normal')
 
         self.local_save_different_extension_checkbox.configure(state='normal')
-        self.local_save_different_output_extension_input.configure(
-            state='normal', foreground='black')
+        self.local_save_different_output_extension_input.configure(state='normal', foreground='black')
+        logger.debug('Enabling the FFMPEG input fields.')
 
     def start_after(self):
         """ Function to activate the method that updates the FFMPEG example label.
@@ -450,6 +434,7 @@ class SetupWindow(ttk.Frame):
         trying to update something the user isn't needing every 750 milliseconds.
         """
         self._update_ffmpeg_data()
+        logger.debug('Starting the tkinter after() method for updating the example ffmpeg text.')
 
     def stop_after(self):
         """ Function to cancel the method that updates the FFMPEG example label.
@@ -459,9 +444,12 @@ class SetupWindow(ttk.Frame):
         trying to update something the user isn't needing every 750 milliseconds.
         """
         self.ffmpeg_input.after_cancel(self.after_id)
+        logger.debug('Stopping the tkinter after() method.')
 
     def save_configuration(self):
         """ Function that runs when the `Save Configuration` button is pressed. """
+        logger.debug('Starting save configuration process.')
+
         self.setup_window_output_message.configure(text='')
 
         # Get AWS input data
@@ -487,6 +475,7 @@ class SetupWindow(ttk.Frame):
         if use_different_output_extension_for_aws and output_extension_for_aws == '':
             self.setup_window_output_message.configure(
                 text='The output extension for AWS cannot be empty.', foreground='red')
+            logger.warning('No extension entered when the `Different output extension for AWS`checkbox was selected.')
             return
 
         # Check if the user checked the "Save locally" box but didn't input
@@ -495,6 +484,7 @@ class SetupWindow(ttk.Frame):
         if use_local_save and local_save_path == '':
             self.setup_window_output_message.configure(
                 text='The local save path cannot be empty.', foreground='red')
+            logger.warning('No local save path entered when the `Save locally` checkbox was selected.')
             return
 
         # Check if the user checked the "Different local output extension" box but didn't
@@ -503,6 +493,7 @@ class SetupWindow(ttk.Frame):
         if use_different_output_extension_for_local and output_extension_for_local == '':
             self.setup_window_output_message.configure(
                 text='The local output extension cannot be empty.', foreground='red')
+            logger.warning('No extension entered when the `Different local output extension` checkbox was selected.')
             return
 
         with Database() as DB:
@@ -525,6 +516,7 @@ class SetupWindow(ttk.Frame):
         if access_key_id == '' or secret_key == '' or region_name == '':
             self.setup_window_output_message.configure(
                 text='All AWS fields must to be filled in.', foreground='red')
+            logger.warning('Not all AWS fields are filled in.')
         else:
             self.setup_window_output_message.configure(
                 text='Configuring AWS settings. Please wait.', foreground='black')
@@ -583,12 +575,15 @@ class SetupWindow(ttk.Frame):
             except AWSKeyException:
                 self.setup_window_output_message.configure(
                     text='ERROR: Access Key ID or Secret Access Key invalid.', foreground='red')
+                logger.error('ERROR: Invalid AWS Access Key ID or Secret Access Key entered.')
             except AWSAuthenticationException:
                 self.setup_window_output_message.configure(
                     text='ERROR: Keys are correct but they may be inactive.', foreground='red')
+                logger.error('ERROR: Innactive AWS keys entered.')
             except NoConnectionError:
                 self.setup_window_output_message.configure(
                     text='ERROR: No Internet connection detected.', foreground='red')
+                logger.error('ERROR: No Internet connection, cannot authenticate AWS keys.')
 
     def lock_unlock_aws_settings(self):
         """ This function executes when the 'Lock/Unlock' button is clicked. """
@@ -604,6 +599,8 @@ class SetupWindow(ttk.Frame):
                 # text is grayed out, the save button is removed, and the button is
                 # renamed to 'Unlock'
                 if self.lock_unlock_button['text'] == 'Lock':
+                    logger.debug('Configuration window locked.')
+
                     self._disable_all_widgets()
 
                     self.lock_unlock_button['text'] = 'Unlock'
@@ -614,6 +611,8 @@ class SetupWindow(ttk.Frame):
                 # text is changed to black, the save button is added to the screen, and
                 # the button is renamed to 'Lock'
                 elif self.lock_unlock_button['text'] == 'Unlock':
+                    logger.debug('Configuration window unlocked.')
+
                     self._enable_all_widgets()
 
                     self.lock_unlock_button['text'] = 'Lock'
@@ -635,6 +634,8 @@ class SetupWindow(ttk.Frame):
         """
         with Database() as DB:
             if DB.are_settings_saved():
+                logger.debug('Populating setup fields with data from the database.')
+
                 # AWS settings
                 aws_config_data = DB.get_aws_config(label=True)
 

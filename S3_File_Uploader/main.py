@@ -9,12 +9,17 @@ from UI.ProgramController import ProgramController
 current_datetime = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 log_path = os.getcwd() + f'/logs/{current_datetime}.log'
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(filename)s:%(funcName)s - %(message)s',
-                    filename=log_path,
-                    filemode='a')
-
+# Changed the setup of the logger from the basicConfig so that the file isn't logging the imported modules
 logger = logging.getLogger('main_logger')
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler(log_path)
+fh.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 
 logger.debug("Logger setup.")
 

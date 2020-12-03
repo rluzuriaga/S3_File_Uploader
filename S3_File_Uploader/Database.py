@@ -1,10 +1,16 @@
-from functools import wraps
-import sqlite3
 import os
+import sqlite3
+import logging
+from functools import wraps
+
+
+logger = logging.getLogger('main_logger')
 
 
 class Database:
     def __init__(self, custom_db_path=None):
+        logger.info('Initializing the database.')
+
         self.create_db = False
         self.context = False
         self.db_path = custom_db_path
@@ -13,6 +19,8 @@ class Database:
             self.db_path = os.getcwd() + "/db.sqlite3"
 
     def __enter__(self):
+        logger.info('Entering database context.')
+
         self.context = True
 
         if not os.path.exists(self.db_path):
@@ -27,6 +35,8 @@ class Database:
         return self
 
     def __exit__(self, type, value, traceback):
+        logger.info('Exiting database context.')
+
         del self.cursor
 
         self.connection.close()
@@ -43,6 +53,8 @@ class Database:
 
     @_only_context
     def create_database(self):
+        logger.debug('Creating database.')
+
         self.cursor.executescript(
             '''
             CREATE TABLE IF NOT EXISTS aws_regions (
@@ -180,9 +192,12 @@ class Database:
         )
 
         self.connection.commit()
+        logger.debug('Commiting database creation.')
 
     @_only_context
     def add_mass_upload_data(self, mass_upload_path: str, s3_bucket: str, upload_type: str, use_ffmpeg: int) -> None:
+        logger.debug(f'Adding mass upload data to database.')
+
         secret_key = self.cursor.execute(
             'SELECT aws_secret_access_key FROM aws_config WHERE is_active = 1;').fetchone()[0]
 
@@ -192,11 +207,15 @@ class Database:
             VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', '{upload_type}', {use_ffmpeg}, 0, NULL);
             '''
         )
+        logger.debug(f'Inserting `mass_upload_path={mass_upload_path}`, `s3_bucket={s3_bucket}`, `upload_type={upload_type}`, `use_ffmpeg={use_ffmpeg}`')
 
         self.connection.commit()
+        logger.debug(f'Commiting database insertion.')
 
     @_only_context
     def finish_mass_upload(self):
+        logger.debug(f'Updating mass upload table with finish_date_time.')
+
         self.cursor.execute(
             """
             UPDATE mass_upload
@@ -206,6 +225,7 @@ class Database:
         )
 
         self.connection.commit()
+        logger.debug(f'Commiting database update.')
 
     @_only_context
     def get_region_name_code(self, region_name):
@@ -216,6 +236,8 @@ class Database:
             WHERE region_name_text = '{region_name}';
             '''
         ).fetchone()[0]
+
+        logger.debug(f'Returning region code `{output}`')
 
         return output
 
@@ -229,6 +251,8 @@ class Database:
         ).fetchall()
 
         output_tuple = tuple(a[0] for a in output)
+
+        logger.debug(f'Returning all region name labels as a tuple: `{output_tuple}`')
 
         return output_tuple
 
@@ -244,12 +268,18 @@ class Database:
                 WHERE a.is_active = 1;
                 '''
             ).fetchone()
+
+            logger.debug(f'Returning AWS config labels `{output}`')
         else:
             output = self.cursor.execute(
                 '''
-                SELECT aws_access_key_id, aws_secret_access_key, region, output FROM aws_config WHERE is_active = 1;
+                SELECT aws_access_key_id, aws_secret_access_key, region, output
+                FROM aws_config
+                WHERE is_active = 1;
                 '''
             ).fetchone()
+
+            logger.debug(f'Returning AWS config `{output}`')
 
         return output
 
@@ -293,10 +323,15 @@ class Database:
                 '''
             )
 
+        logger.debug(f'Setting AWS config on database.')
+
         self.connection.commit()
+        logger.debug(f'Commiting database.')
 
     @_only_context
     def are_settings_saved(self):
+        logger.debug(f'Checking if settings are saved on the database.')
+
         if self.get_aws_config() is None:
             return False
 
@@ -315,10 +350,13 @@ class Database:
             '''
         ).fetchone()
 
+        logger.debug(f'Retrieving ffmpeg config `{output}`')
+
         return output
 
     @_only_context
-    def set_ffmpeg_config(self, ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension):
+    def set_ffmpeg_config(self, ffmpeg_parameters, aws_different_output_extension, local_save_path,
+                          local_different_output_extension):
         output = self.cursor.execute(
             '''
             SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
@@ -344,7 +382,10 @@ class Database:
             '''
         )
 
+        logger.debug(f'Setting ffmpeg config on the database.')
+
         self.connection.commit()
+        logger.debug(f'Commiting database.')
 
     @_only_context
     def get_video_formats(self, labels=False, general_file_ext=None):
@@ -356,6 +397,9 @@ class Database:
                 WHERE type_of_file = 'video';
                 '''
             ).fetchall()
+
+            logger.debug(f'Retriving video format labels.')
+
         else:
             output = self.cursor.execute(
                 f'''
@@ -365,6 +409,8 @@ class Database:
                 AND general_file_extension = '{general_file_ext}';
                 '''
             ).fetchall()
+
+            logger.debug(f'Retrieving the video format extensions.')
 
         # The output is a list of tuples, but the tuples are just one string
         # So converting the output to just be a list with the labels (this avoids nested loops)
@@ -382,10 +428,14 @@ class Database:
             '''
         ).fetchall()
 
+        logger.debug(f'Retrieving data from mass upload that is not finished.')
+
         return output
 
     @_only_context
     def add_file_upload(self, file_path, file_name, file_size, s3_bucket):
+        logger.debug(f'Adding file upload data to database.')
+
         output = self.cursor.execute(
             """
             SELECT upload_id
@@ -407,6 +457,7 @@ class Database:
         )
 
         self.connection.commit()
+        logger.debug(f'Commiting database.')
 
     @_only_context
     def finish_file_upload(self, file_path, file_name):
@@ -419,7 +470,10 @@ class Database:
             """
         )
 
+        logger.debug(f'Finalizing file upload.')
+
         self.connection.commit()
+        logger.debug(f'Commiting database.')
 
     @_only_context
     def get_file_upload_size(self, file_path, file_name) -> int:
@@ -439,6 +493,8 @@ class Database:
                 file_size = output[0][0]
         else:
             file_size = 0
+
+        logger.debug(f'Retrieving file upload size: `file_size={file_size}`')
 
         return file_size
 
@@ -460,7 +516,10 @@ class Database:
             '''
         )
 
+        logger.debug(f'Inserting ffmpeg file conversion data.')
+
         self.connection.commit()
+        logger.debug(f'Commiting database.')
 
     @_only_context
     def is_file_already_converted_and_uploaded(self, file_path: str, file_name: str,
@@ -484,6 +543,8 @@ class Database:
             AND f.file_size_bytes = c.converted_file_size;
             '''
         ).fetchall()
+
+        logger.debug(f'Checking if a file is already converted and uploaded.')
 
         return bool(output)
 

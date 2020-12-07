@@ -9,6 +9,10 @@ from UI.ProgramController import ProgramController
 current_datetime = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 log_path = os.getcwd() + f'/logs/{current_datetime}.log'
 
+# Check if a logs directory is created, if not then it is created.
+if not os.path.exists(os.getcwd() + '/logs'):
+    os.makedirs(os.getcwd() + '/logs')
+
 # Changed the setup of the logger from the basicConfig so that the file isn't logging the imported modules
 logger = logging.getLogger('main_logger')
 logger.setLevel(logging.DEBUG)

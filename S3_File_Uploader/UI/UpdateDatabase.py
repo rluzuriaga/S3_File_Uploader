@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
+from Database import Database
+
 logger = logging.getLogger('main_logger')
 
 
@@ -75,4 +77,14 @@ class UpdateDatabase(ttk.Frame):
         logger.debug(f'Setting the file path in the file path entry field.')
 
     def _update_database(self):
-        pass
+        """ Function that runs when the `Update` button is pressed. """
+        # TODO: Need to find a way to validate the database update.
+
+        logger.debug(f'Retrieving the sql file path from the file path entry box.')
+        sql_file = self.file_path.get()
+
+        with Database() as DB:
+            DB.update_database_with_sql_file(sql_file)
+
+        logger.debug(f'Database updated.')
+        self.update_label.configure(text='Done!')

@@ -195,6 +195,23 @@ class Database:
         logger.debug('Commiting database creation.')
 
     @_only_context
+    def update_database_with_sql_file(self, sql_file: str) -> None:
+        """ Function to use when trying to update the database using an SQL file.
+
+        Args:
+            sql_file (str): The full file path to where the SQL file is downloaded on the computer.
+        """
+
+        logger.debug(f'Opening the sql file to set as string.')
+        sql_as_string = open(sql_file).read()
+
+        logger.debug(f'Executing SQL file as script.')
+        self.cursor.executescript(sql_as_string)
+
+        logger.debug(f'Commiting database with new changes.')
+        self.connection.commit()
+
+    @_only_context
     def add_mass_upload_data(self, mass_upload_path: str, s3_bucket: str, upload_type: str, use_ffmpeg: int) -> None:
         logger.debug(f'Adding mass upload data to database.')
 
@@ -207,7 +224,8 @@ class Database:
             VALUES ('{secret_key}', datetime('now', 'localtime'), '{mass_upload_path}', '{s3_bucket}', '{upload_type}', {use_ffmpeg}, 0, NULL);
             '''
         )
-        logger.debug(f'Inserting `mass_upload_path={mass_upload_path}`, `s3_bucket={s3_bucket}`, `upload_type={upload_type}`, `use_ffmpeg={use_ffmpeg}`')
+        logger.debug(
+            f'Inserting `mass_upload_path={mass_upload_path}`, `s3_bucket={s3_bucket}`, `upload_type={upload_type}`, `use_ffmpeg={use_ffmpeg}`')
 
         self.connection.commit()
         logger.debug(f'Commiting database insertion.')

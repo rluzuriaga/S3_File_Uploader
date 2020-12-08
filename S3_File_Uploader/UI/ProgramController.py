@@ -5,6 +5,7 @@ from tkinter import ttk
 from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow
 from .MassUpload import MassUpload
+from .UpdateDatabase import UpdateDatabase
 
 # Setup logger
 logger = logging.getLogger('main_logger')
@@ -23,7 +24,7 @@ class ProgramController(tk.Tk):
 
         self.frames = {}
 
-        for F in (MainWindow, SetupWindow, MassUpload):
+        for F in (MainWindow, SetupWindow, UpdateDatabase, MassUpload):
             frame = F(self.container, self)
             self.frames[F] = frame
 

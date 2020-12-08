@@ -57,7 +57,22 @@ class UpdateDatabase(ttk.Frame):
         self.update_button.grid(row=3, column=0, columnspan=2, padx=30, pady=10)
 
     def _select_sql_file(self):
-        pass
+        """ Function that runs when the `Select SQL File` button is pressed. """
+
+        # Open a file dialog window to select an sql file
+        file_path = filedialog.askopenfile(filetypes=[('SQL files', '.sql')])
+        logger.debug(f'Opening a file dialog window to select an sql file.')
+
+        # If the user clicks on cancel, the file_path would be None.
+        # The return is needed so that there is no error thrown when setting the file path
+        if file_path is None:
+            logger.debug(f'The user exited out of the file dialog window without selecting a file.')
+            return
+
+        logger.debug(f'User selected file: {file_path.name}')
+
+        self.file_path.set(file_path.name)
+        logger.debug(f'Setting the file path in the file path entry field.')
 
     def _update_database(self):
         pass

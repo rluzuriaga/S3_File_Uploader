@@ -182,10 +182,12 @@ class MainWindow(ttk.Frame):
 
     def enable_all_buttons(self):
         self.main_window_setup_button.configure(state='normal')
+        self.update_database_button.configure(state='normal')
         self.mass_upload_window_button.configure(state='normal')
         logger.debug("Enable setup and mass upload buttons.")
 
     def disable_all_buttons(self):
         self.main_window_setup_button.configure(state='disabled')
+        self.update_database_button.configure(state='disabled')
         self.mass_upload_window_button.configure(state='disabled')
         logger.debug("Disable setup and mass upload buttons.")

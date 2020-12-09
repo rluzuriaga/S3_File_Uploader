@@ -71,7 +71,7 @@ class SetupWindow(ttk.Frame):
 
     # Row 13
     SAVE_BUTTON_GRID = {'row': 13, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
-    LOCK_UNLOCK_BUTTON_GRID = {'row': 12, 'column': 2, 'columnspan': 2,
+    LOCK_UNLOCK_BUTTON_GRID = {'row': 13, 'column': 2, 'columnspan': 2,
                                'padx': (0, 40), 'pady': (20, 10), 'sticky': 'E'}
 
     def __init__(self, parent, controller):
@@ -220,6 +220,7 @@ class SetupWindow(ttk.Frame):
         self.converted_file_suffix_label.grid(self.CONVERTED_FILE_SUFFIX_LABEL_GRID)
 
         self.converted_file_suffix_input_var = tk.StringVar()
+        self.converted_file_suffix_input_var.set('_converted')
         self.converted_file_suffix_input = ttk.Entry(
             self,
             width=20,
@@ -417,6 +418,8 @@ class SetupWindow(ttk.Frame):
         # FFMPEG widgets
         self.ffmpeg_input.configure(state='disabled', foreground='gray')
 
+        self.converted_file_suffix_input.configure(state='disabled', foreground='gray')
+
         self.different_ffmpeg_output_extension_checkbutton.configure(state='disabled')
         self.different_ffmpeg_output_extension_input.configure(state='disabled', foreground='grey')
 
@@ -438,6 +441,8 @@ class SetupWindow(ttk.Frame):
 
         # FFMPEG options
         self.ffmpeg_input.configure(state='normal', foreground='black')
+
+        self.converted_file_suffix_input.configure(state='normal', foreground='black')
 
         self.different_ffmpeg_output_extension_checkbutton.configure(state='normal')
         self.different_ffmpeg_output_extension_input.configure(state='normal', foreground='black')

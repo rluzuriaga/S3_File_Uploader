@@ -43,27 +43,34 @@ class SetupWindow(ttk.Frame):
     FFMPEG_INPUT_GRID = {'row': 7, 'column': 2, 'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 8
-    DIFFERENT_EXTENSION_CHECKBOX_GRID = {'row': 8, 'column': 0,
-                                         'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 8, 'column': 2,
-                                      'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    CONVERTED_FILE_SUFFIX_LABEL_GRID = {'row': 8, 'column': 0, 'columnspan': 2,
+                                        'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    CONVERTED_FILE_SUFFIX_INPUT_GRID = {'row': 8, 'column': 2, 'columnspan': 2,
+                                        'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 9
-    LOCAL_SAVE_CHECKBOX_GRID = {'row': 9, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 9, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 9, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
+    DIFFERENT_EXTENSION_CHECKBOX_GRID = {'row': 9, 'column': 0,
+                                         'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 9, 'column': 2,
+                                      'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 10
-    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 10, 'column': 0,
-                                                 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {'row': 10, 'column': 2,
-                                              'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_CHECKBOX_GRID = {'row': 10, 'column': 0, 'columnspan': 2,
+                                'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 10, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 10, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
 
     # Row 11
-    FFMPEG_EXAMPLE_LABEL = {'row': 11, 'column': 0, 'columnspan': 4, 'pady': (2, 0)}
+    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 11, 'column': 0,
+                                                 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {'row': 11, 'column': 2,
+                                              'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 12
-    SAVE_BUTTON_GRID = {'row': 12, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
+    FFMPEG_EXAMPLE_LABEL = {'row': 12, 'column': 0, 'columnspan': 4, 'pady': (2, 0)}
+
+    # Row 13
+    SAVE_BUTTON_GRID = {'row': 13, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
     LOCK_UNLOCK_BUTTON_GRID = {'row': 12, 'column': 2, 'columnspan': 2,
                                'padx': (0, 40), 'pady': (20, 10), 'sticky': 'E'}
 
@@ -204,6 +211,23 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_input.grid(self.FFMPEG_INPUT_GRID)
 
         # Row 8
+        self.converted_file_suffix_label = ttk.Label(
+            self,
+            text='Converted file suffix:',
+            font=('Helvetica', 15),
+            justify=tk.LEFT
+        )
+        self.converted_file_suffix_label.grid(self.CONVERTED_FILE_SUFFIX_LABEL_GRID)
+
+        self.converted_file_suffix_input_var = tk.StringVar()
+        self.converted_file_suffix_input = ttk.Entry(
+            self,
+            width=20,
+            textvariable=self.converted_file_suffix_input_var
+        )
+        self.converted_file_suffix_input.grid(self.CONVERTED_FILE_SUFFIX_INPUT_GRID)
+
+        # Row 9
         self.use_different_extension = tk.IntVar()
         self.different_ffmpeg_output_extension_checkbutton = ttk.Checkbutton(
             self,
@@ -223,7 +247,7 @@ class SetupWindow(ttk.Frame):
             textvariable=self.different_output_extension_var
         )
 
-        # Row 9
+        # Row 10
         self.local_save_var = tk.IntVar()
         self.local_save_checkbox = ttk.Checkbutton(
             self,
@@ -247,7 +271,7 @@ class SetupWindow(ttk.Frame):
             command=self._open_folder_path
         )
 
-        # Row 10
+        # Row 11
         self.local_save_different_extension_checkbox_var = tk.IntVar()
         self.local_save_different_extension_checkbox = ttk.Checkbutton(
             self,
@@ -265,7 +289,7 @@ class SetupWindow(ttk.Frame):
             textvariable=self.local_save_different_output_extension_input_var
         )
 
-        # Row 11
+        # Row 12
         self.ffmpeg_example_label = ttk.Label(
             self,
             text='',
@@ -274,7 +298,7 @@ class SetupWindow(ttk.Frame):
         )
         self.ffmpeg_example_label.grid(self.FFMPEG_EXAMPLE_LABEL)
 
-        # Row 12
+        # Row 13
         self.save_button = ttk.Button(
             self,
             text="Save Configuration",

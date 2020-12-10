@@ -489,6 +489,8 @@ class SetupWindow(ttk.Frame):
         # Get FFMPEG input data
         ffmpeg_parameters = self.ffmpeg_input_var.get()
 
+        converted_file_suffix = str(self.converted_file_suffix_input.get()).strip()
+
         use_different_output_extension_for_aws = self.use_different_extension.get()
         output_extension_for_aws = self.different_output_extension_var.get()
 
@@ -497,6 +499,13 @@ class SetupWindow(ttk.Frame):
 
         use_different_output_extension_for_local = self.local_save_different_extension_checkbox_var.get()
         output_extension_for_local = self.local_save_different_output_extension_input_var.get()
+
+        # Check if the user left the converted file suffix input box empty.
+        # If the input is empty then an error message is displayed that it cannot be empty.
+        if converted_file_suffix == '':
+            self.setup_window_output_message.configure(
+                text='The converted file suffix cannot be empty.', foreground='red')
+            logger.warning(f'No converted file suffix provided.')
 
         # Check if the user checked the "Different output extension for AWS" box but didn't
         #  input the extension in the entry box.
@@ -532,6 +541,7 @@ class SetupWindow(ttk.Frame):
             # or pass "NULL" if it's not needed
             DB.set_ffmpeg_config(
                 ffmpeg_parameters,
+                converted_file_suffix,
                 "'{}'".format(
                     output_extension_for_aws) if use_different_output_extension_for_aws else "NULL",
                 "'{}'".format(local_save_path) if use_local_save else "NULL",

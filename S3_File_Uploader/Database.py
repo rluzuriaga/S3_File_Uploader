@@ -362,7 +362,7 @@ class Database:
     def get_ffmpeg_config(self):
         output = self.cursor.execute(
             '''
-            SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
+            SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
             FROM ffmpeg_config 
             WHERE is_active = 1;
             '''

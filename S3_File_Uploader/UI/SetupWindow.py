@@ -683,7 +683,7 @@ class SetupWindow(ttk.Frame):
                 self.region_name_var.set(aws_config_data[2])
 
                 # FFMPEG settings
-                ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension = DB.get_ffmpeg_config()
+                ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension = DB.get_ffmpeg_config()
 
                 # Set the ffmpeg_parameters data into the entry box,
                 # if there is data for that in the database.
@@ -691,6 +691,11 @@ class SetupWindow(ttk.Frame):
                 self.ffmpeg_input_var.set(
                     ffmpeg_parameters if ffmpeg_parameters is not None else ""
                 )
+
+                # Set converted file suffix data into the entry box from the database
+                # Since the table schema says that it cannot be NULL then there is no need
+                #   to check if the output is NULL before setting it.
+                self.converted_file_suffix_input_var.set(file_suffix)
 
                 # If the database's `aws_different_output_extension` field is NULL/None,
                 # then the different_ffmpeg_output_extension_checkbutton is unchecked

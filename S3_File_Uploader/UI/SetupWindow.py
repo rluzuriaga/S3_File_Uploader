@@ -43,28 +43,35 @@ class SetupWindow(ttk.Frame):
     FFMPEG_INPUT_GRID = {'row': 7, 'column': 2, 'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 8
-    DIFFERENT_EXTENSION_CHECKBOX_GRID = {'row': 8, 'column': 0,
-                                         'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 8, 'column': 2,
-                                      'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    CONVERTED_FILE_SUFFIX_LABEL_GRID = {'row': 8, 'column': 0, 'columnspan': 2,
+                                        'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    CONVERTED_FILE_SUFFIX_INPUT_GRID = {'row': 8, 'column': 2, 'columnspan': 2,
+                                        'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 9
-    LOCAL_SAVE_CHECKBOX_GRID = {'row': 9, 'column': 0, 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 9, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 9, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
+    DIFFERENT_EXTENSION_CHECKBOX_GRID = {'row': 9, 'column': 0,
+                                         'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    DIFFERENT_EXTENSION_INPUT_GRID = {'row': 9, 'column': 2,
+                                      'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 10
-    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 10, 'column': 0,
-                                                 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {'row': 10, 'column': 2,
-                                              'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_CHECKBOX_GRID = {'row': 10, 'column': 0, 'columnspan': 2,
+                                'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_INPUT_GRID = {'row': 10, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 10, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
 
     # Row 11
-    FFMPEG_EXAMPLE_LABEL = {'row': 11, 'column': 0, 'columnspan': 4, 'pady': (2, 0)}
+    LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 11, 'column': 0,
+                                                 'columnspan': 2, 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
+    LOCAL_SAVE_OUTPUT_EXTENSION_INPUT_GRID = {'row': 11, 'column': 2,
+                                              'columnspan': 2, 'padx': (22, 25), 'pady': (10, 0), 'sticky': 'w'}
 
     # Row 12
-    SAVE_BUTTON_GRID = {'row': 12, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
-    LOCK_UNLOCK_BUTTON_GRID = {'row': 12, 'column': 2, 'columnspan': 2,
+    FFMPEG_EXAMPLE_LABEL = {'row': 12, 'column': 0, 'columnspan': 4, 'pady': (2, 0)}
+
+    # Row 13
+    SAVE_BUTTON_GRID = {'row': 13, 'column': 0, 'columnspan': 2, 'pady': (20, 10)}
+    LOCK_UNLOCK_BUTTON_GRID = {'row': 13, 'column': 2, 'columnspan': 2,
                                'padx': (0, 40), 'pady': (20, 10), 'sticky': 'E'}
 
     def __init__(self, parent, controller):
@@ -204,6 +211,24 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_input.grid(self.FFMPEG_INPUT_GRID)
 
         # Row 8
+        self.converted_file_suffix_label = ttk.Label(
+            self,
+            text='Converted file suffix:',
+            font=('Helvetica', 15),
+            justify=tk.LEFT
+        )
+        self.converted_file_suffix_label.grid(self.CONVERTED_FILE_SUFFIX_LABEL_GRID)
+
+        self.converted_file_suffix_input_var = tk.StringVar()
+        self.converted_file_suffix_input_var.set('_converted')
+        self.converted_file_suffix_input = ttk.Entry(
+            self,
+            width=20,
+            textvariable=self.converted_file_suffix_input_var
+        )
+        self.converted_file_suffix_input.grid(self.CONVERTED_FILE_SUFFIX_INPUT_GRID)
+
+        # Row 9
         self.use_different_extension = tk.IntVar()
         self.different_ffmpeg_output_extension_checkbutton = ttk.Checkbutton(
             self,
@@ -223,7 +248,7 @@ class SetupWindow(ttk.Frame):
             textvariable=self.different_output_extension_var
         )
 
-        # Row 9
+        # Row 10
         self.local_save_var = tk.IntVar()
         self.local_save_checkbox = ttk.Checkbutton(
             self,
@@ -247,7 +272,7 @@ class SetupWindow(ttk.Frame):
             command=self._open_folder_path
         )
 
-        # Row 10
+        # Row 11
         self.local_save_different_extension_checkbox_var = tk.IntVar()
         self.local_save_different_extension_checkbox = ttk.Checkbutton(
             self,
@@ -265,7 +290,7 @@ class SetupWindow(ttk.Frame):
             textvariable=self.local_save_different_output_extension_input_var
         )
 
-        # Row 11
+        # Row 12
         self.ffmpeg_example_label = ttk.Label(
             self,
             text='',
@@ -274,7 +299,7 @@ class SetupWindow(ttk.Frame):
         )
         self.ffmpeg_example_label.grid(self.FFMPEG_EXAMPLE_LABEL)
 
-        # Row 12
+        # Row 13
         self.save_button = ttk.Button(
             self,
             text="Save Configuration",
@@ -310,14 +335,14 @@ class SetupWindow(ttk.Frame):
         if self.local_save_different_extension_checkbox_var.get():
             text_ = 'Example: ffmpeg -i input.avi ' + \
                     self.ffmpeg_input_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.different_output_extension_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.local_save_different_output_extension_input_var.get()
         else:
             text_ = 'Example: ffmpeg -i input.avi ' + \
                     self.ffmpeg_input_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.different_output_extension_var.get()
 
         self.ffmpeg_example_label.configure(text=text_)
@@ -393,6 +418,8 @@ class SetupWindow(ttk.Frame):
         # FFMPEG widgets
         self.ffmpeg_input.configure(state='disabled', foreground='gray')
 
+        self.converted_file_suffix_input.configure(state='disabled', foreground='gray')
+
         self.different_ffmpeg_output_extension_checkbutton.configure(state='disabled')
         self.different_ffmpeg_output_extension_input.configure(state='disabled', foreground='grey')
 
@@ -414,6 +441,8 @@ class SetupWindow(ttk.Frame):
 
         # FFMPEG options
         self.ffmpeg_input.configure(state='normal', foreground='black')
+
+        self.converted_file_suffix_input.configure(state='normal', foreground='black')
 
         self.different_ffmpeg_output_extension_checkbutton.configure(state='normal')
         self.different_ffmpeg_output_extension_input.configure(state='normal', foreground='black')
@@ -460,6 +489,8 @@ class SetupWindow(ttk.Frame):
         # Get FFMPEG input data
         ffmpeg_parameters = self.ffmpeg_input_var.get()
 
+        converted_file_suffix = str(self.converted_file_suffix_input.get()).strip()
+
         use_different_output_extension_for_aws = self.use_different_extension.get()
         output_extension_for_aws = self.different_output_extension_var.get()
 
@@ -468,6 +499,13 @@ class SetupWindow(ttk.Frame):
 
         use_different_output_extension_for_local = self.local_save_different_extension_checkbox_var.get()
         output_extension_for_local = self.local_save_different_output_extension_input_var.get()
+
+        # Check if the user left the converted file suffix input box empty.
+        # If the input is empty then an error message is displayed that it cannot be empty.
+        if converted_file_suffix == '':
+            self.setup_window_output_message.configure(
+                text='The converted file suffix cannot be empty.', foreground='red')
+            logger.warning(f'No converted file suffix provided.')
 
         # Check if the user checked the "Different output extension for AWS" box but didn't
         #  input the extension in the entry box.
@@ -503,6 +541,7 @@ class SetupWindow(ttk.Frame):
             # or pass "NULL" if it's not needed
             DB.set_ffmpeg_config(
                 ffmpeg_parameters,
+                converted_file_suffix,
                 "'{}'".format(
                     output_extension_for_aws) if use_different_output_extension_for_aws else "NULL",
                 "'{}'".format(local_save_path) if use_local_save else "NULL",
@@ -644,7 +683,7 @@ class SetupWindow(ttk.Frame):
                 self.region_name_var.set(aws_config_data[2])
 
                 # FFMPEG settings
-                ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension = DB.get_ffmpeg_config()
+                ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension = DB.get_ffmpeg_config()
 
                 # Set the ffmpeg_parameters data into the entry box,
                 # if there is data for that in the database.
@@ -652,6 +691,11 @@ class SetupWindow(ttk.Frame):
                 self.ffmpeg_input_var.set(
                     ffmpeg_parameters if ffmpeg_parameters is not None else ""
                 )
+
+                # Set converted file suffix data into the entry box from the database
+                # Since the table schema says that it cannot be NULL then there is no need
+                #   to check if the output is NULL before setting it.
+                self.converted_file_suffix_input_var.set(file_suffix)
 
                 # If the database's `aws_different_output_extension` field is NULL/None,
                 # then the different_ffmpeg_output_extension_checkbutton is unchecked

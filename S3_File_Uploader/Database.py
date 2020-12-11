@@ -362,7 +362,7 @@ class Database:
     def get_ffmpeg_config(self):
         output = self.cursor.execute(
             '''
-            SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
+            SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
             FROM ffmpeg_config 
             WHERE is_active = 1;
             '''
@@ -373,11 +373,12 @@ class Database:
         return output
 
     @_only_context
-    def set_ffmpeg_config(self, ffmpeg_parameters, aws_different_output_extension, local_save_path,
-                          local_different_output_extension):
+    def set_ffmpeg_config(self, ffmpeg_parameters,
+                          file_suffix, aws_different_output_extension,
+                          local_save_path, local_different_output_extension):
         output = self.cursor.execute(
             '''
-            SELECT ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension
+            SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
             FROM ffmpeg_config
             WHERE is_active = 1;
             '''
@@ -386,7 +387,7 @@ class Database:
         if output is None:
             pass
         else:
-            if ffmpeg_parameters == output[0] and aws_different_output_extension == output[1] and local_save_path == output[2] and local_different_output_extension == output[3]:
+            if ffmpeg_parameters == output[0] and file_suffix == output[1] and aws_different_output_extension == output[2] and local_save_path == output[3] and local_different_output_extension == output[4]:
                 return
             else:
                 self.cursor.execute(
@@ -395,8 +396,8 @@ class Database:
         # Insert new config data
         self.cursor.execute(
             f'''
-            INSERT INTO ffmpeg_config (ffmpeg_parameters, aws_different_output_extension, local_save_path, local_different_output_extension, is_active)
-            VALUES ('{ffmpeg_parameters}', {aws_different_output_extension}, {local_save_path}, {local_different_output_extension}, 1);
+            INSERT INTO ffmpeg_config (ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension, is_active)
+            VALUES ('{ffmpeg_parameters}', '{file_suffix}', {aws_different_output_extension}, {local_save_path}, {local_different_output_extension}, 1);
             '''
         )
 

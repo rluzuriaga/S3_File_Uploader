@@ -375,30 +375,33 @@ class MassUpload(ttk.Frame):
         """
         logger.debug(f'Creating string with ffmpeg command.')
 
+        # Doing this so that it is more readable than `ffmpeg_config[0]...`
+        ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension = ffmpeg_config
+
         # Create a string with the full input file
         full_input_string = input_file_path
         full_input_string += '/' if input_file_path[-1] != '/' else ''
         full_input_string += input_file_name
         full_input_string += f'.{input_file_extension}'
 
-        ffmpeg_parameters = ffmpeg_config[0] if ffmpeg_config[0] is not None else ''
+        ffmpeg_parameters = ffmpeg_parameters if ffmpeg_parameters is not None else ''
 
         # Create first output file
         output_file_name = input_file_name
-        first_output_extension = ffmpeg_config[1] if ffmpeg_config[1] is not None else input_file_extension
+        first_output_extension = aws_different_output_extension if aws_different_output_extension is not None else input_file_extension
 
-        first_full_output_string = f'{input_file_path}/{output_file_name}_converted.{first_output_extension}'
+        first_full_output_string = f'{input_file_path}/{output_file_name}{file_suffix}.{first_output_extension}'
 
         # Setup the ffmpeg command for one output
         ffmpeg_command_string = f'ffmpeg -i "{full_input_string}" {ffmpeg_parameters} -y "{first_full_output_string}"'
 
         # Check if there needs to be a second output
-        if ffmpeg_config[2] is not None:
-            ffmpeg_command_string += f' {ffmpeg_config[2]}/'
+        if local_save_path is not None:
+            ffmpeg_command_string += f' {local_save_path}/'
 
             # Check if using a different output extension for the local save
-            if ffmpeg_config[3] is not None:
-                second_output_file = f'{output_file_name}_converted.{ffmpeg_config[3]}'
+            if local_different_output_extension is not None:
+                second_output_file = f'{output_file_name}{file_suffix}.{local_different_output_extension}'
             else:
                 second_output_file = f'{output_file_name}.{first_output_extension}'
 

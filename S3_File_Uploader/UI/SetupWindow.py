@@ -335,14 +335,14 @@ class SetupWindow(ttk.Frame):
         if self.local_save_different_extension_checkbox_var.get():
             text_ = 'Example: ffmpeg -i input.avi ' + \
                     self.ffmpeg_input_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.different_output_extension_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.local_save_different_output_extension_input_var.get()
         else:
             text_ = 'Example: ffmpeg -i input.avi ' + \
                     self.ffmpeg_input_var.get() + \
-                    ' output.' + \
+                    f' output{self.converted_file_suffix_input_var.get()}.' + \
                     self.different_output_extension_var.get()
 
         self.ffmpeg_example_label.configure(text=text_)

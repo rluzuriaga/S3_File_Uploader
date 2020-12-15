@@ -100,6 +100,7 @@ class Database:
 
             CREATE TABLE IF NOT EXISTS ffmpeg_config (
                 ffmpeg_parameters text,
+                file_suffix TEXT NOT NULL,
                 aws_different_output_extension text,
                 local_save_path text,
                 local_different_output_extension text,

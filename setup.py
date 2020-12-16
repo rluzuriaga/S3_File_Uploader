@@ -6,6 +6,7 @@ Usage:
 """
 
 from setuptools import setup, find_packages
+from S3_File_Uploader import APP_VERSION
 
 APP = ['S3_File_Uploader/main.py']
 DATA_FILES = []
@@ -19,12 +20,20 @@ OPTIONS = {
         'botocore',
         'boto3',
         'ffmpeg',
-        'pexpect'
+        'pexpect',
+        'requests'
     ]
 }
 
 setup(
     name='S3 File Uploader',
+    version=APP_VERSION,
+    license='MIT',
+    url='https://github.com/rluzuriaga/S3_File_Uploader',
+    author="Rodrigo Luzuriaga",
+    author_email='me@rodrigoluzuriaga.com',
+    maintainer='Rodrigo Luzuriaga',
+    maintainer_email='me@rodrigoluzuriaga.com',
     app=APP,
     packages=find_packages(),
     data_files=DATA_FILES,
@@ -37,7 +46,17 @@ setup(
         'botocore',
         'boto3',
         'ffmpeg-python',
-        'pexpect'
+        'pexpect',
+        'requests'
     ],
     zip_safe=True,
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: MacOS X',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: MacOS :: MacOS X',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: SQL'
+    ]
 )

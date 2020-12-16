@@ -2,6 +2,8 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 
+from S3_File_Uploader import APP_TITLE
+
 from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow
 from .MassUpload import MassUpload
@@ -15,6 +17,9 @@ class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         logger.debug("Initializing the Tkinter program controller.")
+
+        # Setting App title
+        self.title(APP_TITLE)
 
         # Make the application not resizable
         self.resizable(False, False)

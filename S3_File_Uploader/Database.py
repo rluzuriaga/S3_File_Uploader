@@ -160,6 +160,12 @@ class Database:
                 file_extension text NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS versioning (
+                db_version INTEGER NOT NULL
+            );
+
+            INSERT INTO versioning (db_version) VALUES (2);
+
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mp4');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4a');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4v');
@@ -361,15 +367,30 @@ class Database:
 
     @_only_context
     def get_ffmpeg_config(self):
-        output = self.cursor.execute(
-            '''
-            SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
-            FROM ffmpeg_config 
-            WHERE is_active = 1;
-            '''
-        ).fetchone()
+        try:
+            output = self.cursor.execute(
+                '''
+                SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
+                FROM ffmpeg_config 
+                WHERE is_active = 1;
+                '''
+            ).fetchone()
 
-        logger.debug(f'Retrieving ffmpeg config `{output}`')
+            logger.debug(f'Retrieving ffmpeg config `{output}`')
+        except sqlite3.OperationalError as e:
+            logger.error(f'ERROR: {e}')
+
+            if "no such column: file_suffix" in str(e):
+                logger.warning(f'Database schema out of date.')
+                output = self.cursor.execute(
+                    '''
+                    SELECT ffmpeg_parameters, '_converted', aws_different_output_extension, local_save_path, local_different_output_extension
+                    FROM ffmpeg_config 
+                    WHERE is_active = 1;
+                    '''
+                ).fetchone()
+
+                logger.debug(f'Retrieving ffmpeg config `{output}`')
 
         return output
 
@@ -567,6 +588,13 @@ class Database:
         logger.debug(f'Checking if a file is already converted and uploaded.')
 
         return bool(output)
+
+    @_only_context
+    def get_db_version(self):
+        logger.debug(f'Retrieving DB version.')
+        output = self.cursor.execute('SELECT db_version FROM versioning;').fetchone()[0]
+
+        return output
 
 
 class NotWithContext(Exception):

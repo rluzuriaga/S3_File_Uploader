@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from Database import Database
+from S3_File_Uploader import APP_VERSION, DB_VERSION
 
 from .SetupWindow import SetupWindow
 from .UpdateDatabase import UpdateDatabase
@@ -22,6 +23,8 @@ class MainWindow(ttk.Frame):
         logger.debug("Initializing the MainWindow ttk frame.")
 
         self.ui_elements()
+        # Set the status bar labels to always be on the bottom when opening a new pane window.
+        self.rowconfigure(100, weight=1)
         logger.debug("Created MainWindow UI elements.")
 
         with Database() as DB:
@@ -35,8 +38,7 @@ class MainWindow(ttk.Frame):
             font=('Helvetica', 15),
             justify=tk.CENTER
         )
-        self.main_window_top_label.grid(
-            row=0, column=0, padx=60, pady=(10, 30))
+        self.main_window_top_label.grid(row=0, column=0, columnspan=2, padx=60, pady=(10, 30))
 
         self.main_window_setup_button = ttk.Button(
             self,
@@ -44,7 +46,7 @@ class MainWindow(ttk.Frame):
             style='regular.TButton',
             command=self.initial_setup_button_press
         )
-        self.main_window_setup_button.grid(row=1, column=0, pady=(0, 10))
+        self.main_window_setup_button.grid(row=1, column=0, columnspan=2, pady=(0, 10))
 
         self.update_database_button = ttk.Button(
             self,
@@ -52,7 +54,7 @@ class MainWindow(ttk.Frame):
             style='regular.TButton',
             command=self.update_database_button_press
         )
-        self.update_database_button.grid(row=2, column=0, pady=(0, 10))
+        self.update_database_button.grid(row=2, column=0, columnspan=2, pady=(0, 10))
 
         self.mass_upload_window_button = ttk.Button(
             self,
@@ -61,7 +63,19 @@ class MainWindow(ttk.Frame):
             state='disabled',
             command=self.mass_upload_button_press
         )
-        self.mass_upload_window_button.grid(row=3, column=0, pady=(0, 10))
+        self.mass_upload_window_button.grid(row=3, column=0, columnspan=2, pady=(0, 10))
+
+        self.statusbar_app_version = ttk.Label(
+            self,
+            text=f'App Version: {APP_VERSION}'
+        )
+        self.statusbar_app_version.grid(row=100, column=0, padx=4, pady=(15, 2), sticky='ws')
+
+        self.statusbar_db_version = ttk.Label(
+            self,
+            text=f'DB Version: {DB_VERSION}'
+        )
+        self.statusbar_db_version.grid(row=100, column=1, padx=4, pady=(15, 2), sticky='es')
 
     def initial_setup_button_press(self):
         """ Function that determines what happens when the 'Initial Setup' button is pressed """

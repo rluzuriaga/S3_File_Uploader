@@ -1,8 +1,13 @@
 import os
+import sys
 import logging
+import requests
 from datetime import datetime
 
-from UI.ProgramController import ProgramController
+from S3_File_Uploader.UI.ProgramController import ProgramController
+from S3_File_Uploader.UI.UpdateApp import UpdateApp
+from S3_File_Uploader.Database import Database
+from S3_File_Uploader import APP_VERSION, DB_VERSION
 
 
 # Set up file based logger
@@ -28,6 +33,50 @@ logger.addHandler(fh)
 logger.debug("Logger setup.")
 
 
+def request_data_from_gist():
+    logger.debug(f'Retrieving response from gist.')
+
+    header = {"Accept": "application/vnd.github.v3+json"}
+    url = "https://api.github.com/gists/d052b99ca4eab941fff359810aa16ff7"
+
+    response = requests.get(
+        url,
+        headers=header
+    ).json()
+
+    return response
+
+
+def check_app_version(response):
+    logger.debug(f'Checking if app version is out of date.')
+    newest_app_version = response['files']['app_version.txt']['content']
+
+    if APP_VERSION == newest_app_version:
+        logger.debug(f'App version is up to date.')
+        return
+    else:
+        logger.debug(f'App version is out of date.')
+        UpdateApp()
+        sys.exit(0)
+
+
+def database_updater(response):
+    logger.debug(f'Starting database updater.')
+    newest_db_version = response['files']['db_version.txt']['content']
+
+    if newest_db_version != DB_VERSION:
+        for i in range(int(DB_VERSION) + 1, int(newest_db_version) + 1):
+            sql_file_name = f'db_update_{str(i)}.sql'
+            sql_file_url = response['files'][sql_file_name]['raw_url']
+            r = requests.get(sql_file_url)
+            open(sql_file_name, 'wb').write(r.content)
+
+            with Database() as DB:
+                DB.update_database_with_sql_file(sql_file_name)
+
+            os.remove(sql_file_name)
+
+
 def main():
     logger.debug("Starting program.")
 
@@ -38,4 +87,7 @@ def main():
 
 
 if __name__ == "__main__":
+    response = request_data_from_gist()
+    check_app_version(response)
+    database_updater(response)
     main()

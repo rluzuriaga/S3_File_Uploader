@@ -511,6 +511,9 @@ class MassUpload(ttk.Frame):
     def start_upload(self):
         logger.debug(f'Start Upload button pressed.')
 
+        logger.debug(f'Disabling widgets.')
+        self.disable_widgets()
+
         # Check if there already was an upload started but didn't finish
         with Database() as DB:
             not_finished_mass_upload = DB.get_mass_upload_not_ended_data()
@@ -689,6 +692,8 @@ class MassUpload(ttk.Frame):
         self.update_label.configure(text='Finished!', foreground='black')
 
         logger.debug(f'Mass upload finished.')
+        logger.debug(f'Enabling widgets.')
+        self.enable_widgets()
 
     def start_mass_upload_video(self, upload_start_path, bucket_name,
                                 bucket_objects_dict, video_formats_to_use, use_ffmpeg):
@@ -907,8 +912,14 @@ class MassUpload(ttk.Frame):
         self.update_label.configure(text='Finished!', foreground='black')
         logger.debug(f'Changing text to `finished` to let user know that the upload is complete.')
 
+        logger.debug(f'Enabling widgets.')
+        self.enable_widgets()
+
     def resume_mass_upload(self, not_finished_data):
         logger.debug(f'Starting resume mass upload.')
+
+        logger.debug(f'Disabling widgets.')
+        self.disable_widgets()
 
         upload_id, mass_upload_path, s3_bucket, upload_type, use_ffmpeg = not_finished_data
 
@@ -952,6 +963,9 @@ class MassUpload(ttk.Frame):
             ).start()
 
     def disable_widgets(self):
+        logger.debug(f'Disabling all main window buttons.')
+        self.controller.disable_main_window_buttons()
+
         logger.debug(f'Disabling all the MassUpload window widgets.')
 
         self.mass_upload_path_input_field.configure(state='disabled')
@@ -960,6 +974,7 @@ class MassUpload(ttk.Frame):
         self.refresh_s3_buckets_button.configure(state='disabled')
         self.radio_button_all.configure(state='disabled')
         self.radio_button_video.configure(state='disabled')
+        self.use_ffmpeg_checkbox.configure(state='disabled')
         self.start_upload_button.configure(state='disabled')
 
         # Since the video checkboxes is a different class,
@@ -968,6 +983,9 @@ class MassUpload(ttk.Frame):
         self.video_checkboxes.unbind_widgets()
 
     def enable_widgets(self):
+        logger.debug(f'Enabling all main window buttons.')
+        self.controller.enable_main_window_buttons()
+
         logger.debug(f'Enabling all the MassUpload window widgets.')
 
         self.mass_upload_path_input_field.configure(state='normal')
@@ -976,6 +994,7 @@ class MassUpload(ttk.Frame):
         self.refresh_s3_buckets_button.configure(state='normal')
         self.radio_button_all.configure(state='normal')
         self.radio_button_video.configure(state='normal')
+        self.use_ffmpeg_checkbox.configure(state='normal')
         self.start_upload_button.configure(state='normal')
 
         # Since the video checkboxes is a different class,

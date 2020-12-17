@@ -54,7 +54,7 @@ class MassUpload(ttk.Frame):
     RADIO_BUTTON_LABEL_GRID = {'row': 9, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
 
     # Row 10
-    RADIO_BUTTON_ALL_GRID = {'row': 10, 'column': 0, 'padx': 1, 'sticky': 'e'}
+    RADIO_BUTTON_ALL_GRID = {'row': 10, 'column': 0, 'padx': (3, 1), 'sticky': 'e'}
     RADIO_BUTTON_VIDEO_GRID = {'row': 10, 'column': 1, 'padx': 1}
     RADIO_BUTTON_AUDIO_GRID = {'row': 10, 'column': 2, 'padx': 1}
 
@@ -65,7 +65,7 @@ class MassUpload(ttk.Frame):
     USE_FFMPEG_GRID = {'row': 13, 'column': 0, 'columnspan': 5, 'padx': 20}
 
     # Row 14
-    START_UPLOAD_BUTTON_GRID = {'row': 14, 'column': 0, 'columnspan': 5, 'pady': (20, 15)}
+    START_UPLOAD_AND_CANCEL_BUTTON_GRID = {'row': 14, 'column': 0, 'columnspan': 5, 'pady': (20, 15)}
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent, width=100,
@@ -73,6 +73,8 @@ class MassUpload(ttk.Frame):
         self.controller = controller
 
         logger.debug(f'Initializing the MassUpload ttk frame.')
+
+        self._is_cancel = False
 
         style = ttk.Style()
         style.configure('TRadiobutton', font=('Helvetica', 15))
@@ -255,7 +257,56 @@ class MassUpload(ttk.Frame):
             style='regular.TButton',
             command=self.start_upload
         )
-        self.start_upload_button.grid(self.START_UPLOAD_BUTTON_GRID)
+        self.start_upload_button.grid(self.START_UPLOAD_AND_CANCEL_BUTTON_GRID)
+
+        self.cancel_upload_button = ttk.Button(
+            self,
+            text='Cancel Upload',
+            style='regular.TButton',
+            command=self._cancel_upload_button_pressed
+        )
+
+    def _add_cancel_buttons(self):
+        """ Function that removes the Start Upload button from grid and add the Cancel Upload button in its place. """
+        logger.debug(f'Removing `Start Upload` button from grid.')
+        self.start_upload_button.grid_remove()
+
+        logger.debug(f'Attaching cancel buttons to the grid.')
+        self.cancel_upload_button.configure(state='normal')
+        self.cancel_upload_button.grid(self.START_UPLOAD_AND_CANCEL_BUTTON_GRID)
+
+    def _remove_cancel_buttons(self):
+        """ Function that removes the Cancel Upload button from the grid and add the Start Upload button in its place. """
+        logger.debug(f'Removing cancel buttons from the grid.')
+        self.cancel_upload_button.grid_remove()
+
+        logger.debug(f'Setting _is_cancel variable to False.')
+        self._is_cancel = False
+
+        logger.debug(f'Adding the `Start Upload` button to the grid.')
+        self.start_upload_button.grid(self.START_UPLOAD_AND_CANCEL_BUTTON_GRID)
+
+    def _cancel_upload_button_pressed(self):
+        """ Function that runs when the Cancel Upload button is pressed.
+
+        The function makes the `self._is_cancel` instance variable True and disables the cancel button.
+        """
+        logger.debug(f'Cancel Upload button pressed.')
+        self._is_cancel = True
+
+        logger.debug(f'disabling the cancel button')
+        self.cancel_upload_button.configure(state='disabled')
+
+    def _cancel_upload(self):
+        """ Function that runs when canceling an upload. """
+        self._destroy_overall_progressbar()
+        self._destroy_ffmpeg_and_upload_progressbar()
+
+        self.update_label.configure(text='Upload Canceled', foreground='black')
+
+        self._remove_cancel_buttons()
+
+        self.enable_widgets()
 
     def _open_folder_path(self):
         """ Function that runs when the open folder button is clicked. """
@@ -652,6 +703,8 @@ class MassUpload(ttk.Frame):
                               bucket_name, bucket_objects_dict):
         logger.debug(f'Starting mass upload for all files.')
 
+        self._add_cancel_buttons()
+
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
@@ -659,6 +712,11 @@ class MassUpload(ttk.Frame):
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
             for file in filenames:
+                if self._is_cancel:
+                    logger.debug(f'Canceling upload.')
+                    self._cancel_upload()
+                    return
+
                 full_path_from_pc = dirpath + '/' + file
                 full_bucket_path = bucket_dir_path + file
 
@@ -695,9 +753,13 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Enabling widgets.')
         self.enable_widgets()
 
+        self._remove_cancel_buttons()
+
     def start_mass_upload_video(self, upload_start_path, bucket_name,
                                 bucket_objects_dict, video_formats_to_use, use_ffmpeg):
         logger.debug(f'Starting mass upload for video files.')
+
+        self._add_cancel_buttons()
 
         ffmpeg_config = []
         if use_ffmpeg:
@@ -718,6 +780,11 @@ class MassUpload(ttk.Frame):
 
             # Iterate through all the files in the directory
             for file in filenames:
+                if self._is_cancel:
+                    logger.debug(f'Canceling upload.')
+                    self._cancel_upload()
+                    return
+
                 logger.debug(f'Current file in loop: {file}')
                 # Get the file extension for the iterated file
                 file_extension_start = str(file).rfind('.') + 1
@@ -914,6 +981,8 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Enabling widgets.')
         self.enable_widgets()
+
+        self._remove_cancel_buttons()
 
     def resume_mass_upload(self, not_finished_data):
         logger.debug(f'Starting resume mass upload.')

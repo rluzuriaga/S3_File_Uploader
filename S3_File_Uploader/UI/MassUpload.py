@@ -408,7 +408,9 @@ class MassUpload(ttk.Frame):
         self.ffmpeg_and_upload_pb.grid_remove()
 
     @staticmethod
-    def _parse_ffmpeg_command(ffmpeg_config, input_file_path, input_file_name, input_file_extension):
+    def _parse_ffmpeg_command(ffmpeg_config, input_file_path,
+                              input_file_name, input_file_extension,
+                              directory_structure_for_local_save):
         """ Function to parse together the FFMPEG command to a string.
 
         This function parses together the FFMPEG command from that data the user entered on the setup page,
@@ -448,7 +450,8 @@ class MassUpload(ttk.Frame):
 
         # Check if there needs to be a second output
         if local_save_path is not None:
-            ffmpeg_command_string += f' {local_save_path}/'
+            # Make sure to always leave the start double quotes so that the command doesn't fail for directories/files with spaces
+            ffmpeg_command_string += f' "{local_save_path}/{directory_structure_for_local_save}'
 
             # Check if using a different output extension for the local save
             if local_different_output_extension is not None:
@@ -456,7 +459,8 @@ class MassUpload(ttk.Frame):
             else:
                 second_output_file = f'{output_file_name}.{first_output_extension}'
 
-            ffmpeg_command_string += f'"{second_output_file}"'
+            # Make sure to always have the ending double quotes so that the command doesn't fail for directories/files with spaces
+            ffmpeg_command_string += f'{second_output_file}"'
 
         logger.debug(f'Ffmpeg command string created: `{ffmpeg_command_string}`.')
 
@@ -515,7 +519,7 @@ class MassUpload(ttk.Frame):
                 frame_num = str(
                     frame_number, 'utf-8').replace('frame=', '').lstrip()
 
-                logger.debug(f'Updating ffmpeg progressbar.')
+                logger.debug(f'Updating ffmpeg progressbar: {frame_num} of {str(total_video_frames)} frames.')
                 ffmpeg_progressbar.update_progressbar_value(int(frame_num))
 
                 thread.close
@@ -800,6 +804,14 @@ class MassUpload(ttk.Frame):
                 # If use_ffmpeg is true then convert the file first
                 #   then upload that converted file
                 if use_ffmpeg:
+                    # Check if the local save option is selected in the ffmpeg settings
+                    if ffmpeg_config[3] is not None:
+                        # If the the local save option is used, then check if the directory is already created
+                        if not os.path.exists(ffmpeg_config[3] + '/' + bucket_dir_path):
+                            # If the directory is not created, the ffmpeg command will fail
+                            #   so the directory needs to be created
+                            os.makedirs(ffmpeg_config[3] + '/' + bucket_dir_path)
+
                     # Get file size of the non-converted (original) file
                     # If this is a resume upload, then there will be an extra
                     #   converted file that is non-existant but the os.walk
@@ -821,7 +833,7 @@ class MassUpload(ttk.Frame):
                     # Parse together the ffmpeg command and return the command alongside the new
                     #   file path and name
                     parsed_ffmpeg_command, converted_file_path_and_name = self._parse_ffmpeg_command(
-                        ffmpeg_config, dirpath, file[:file.rfind('.')], file[file.rfind('.') + 1:])
+                        ffmpeg_config, dirpath, file[:file.rfind('.')], file[file.rfind('.') + 1:], bucket_dir_path)
 
                     # Get a separate file path and name for the converted video
                     converted_file_path = converted_file_path_and_name[

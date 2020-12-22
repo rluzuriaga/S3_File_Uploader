@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest py2app
+        pip install flake8 pytest py2app requests botocore boto3 ffmpeg-python pexpect
         if [ -f setup.py ]; then python setup.py py2app; fi
 #     - name: Lint with flake8
 #       run: |

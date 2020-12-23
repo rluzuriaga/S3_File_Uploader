@@ -1,4 +1,6 @@
 import os
+import sys
+import signal
 import logging
 import threading
 import tkinter as tk
@@ -75,6 +77,13 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Initializing the MassUpload ttk frame.')
 
         self._is_cancel = False
+
+        if 'darwin' in sys.platform:
+            self._is_windows = False
+            self._is_mac = True
+        elif 'win' in sys.platform:
+            self._is_windows = True
+            self._is_mac = False
 
         style = ttk.Style()
         style.configure('TRadiobutton', font=('Helvetica', 15))
@@ -464,6 +473,8 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Ffmpeg command string created: `{ffmpeg_command_string}`.')
 
+        ffmpeg_command_string = ffmpeg_command_string.replace('\\', '/')
+
         return ffmpeg_command_string, first_full_output_string
 
     def _ffmpeg_controller(self, parsed_ffmpeg_command, ffmpeg_progressbar, total_video_frames: int):
@@ -491,7 +502,12 @@ class MassUpload(ttk.Frame):
         # )
 
         # Create a new thread running the parsed ffmpeg command
-        thread = pexpect.spawn(parsed_ffmpeg_command)
+        if self._is_mac:
+            thread = pexpect.spawn(parsed_ffmpeg_command)
+
+        if self._is_windows:
+            from pexpect import popen_spawn
+            thread = popen_spawn.PopenSpawn(parsed_ffmpeg_command)
 
         # Compile a patters of what to to look for in the stdout.
         # In this case, the number next to `frame=`.
@@ -522,7 +538,11 @@ class MassUpload(ttk.Frame):
                 logger.debug(f'Updating ffmpeg progressbar: {frame_num} of {str(total_video_frames)} frames.')
                 ffmpeg_progressbar.update_progressbar_value(int(frame_num))
 
-                thread.close
+                if self._is_mac:
+                    thread.close
+
+                if self._is_windows:
+                    thread.kill(signal.SIG_DFL)
 
         logger.debug(f'Ffmpeg conversion completed.')
 
@@ -713,6 +733,10 @@ class MassUpload(ttk.Frame):
         length_to_remove = upload_start_path.rfind('/') + 1
 
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
+            # Replace the `\` used in windows for `/`
+            if self._is_windows:
+                dirpath = dirpath.replace('\\', '/')
+
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
             for file in filenames:
@@ -779,6 +803,10 @@ class MassUpload(ttk.Frame):
 
         # Iterate through the upload directory
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
+            # Replace the `\` used in windows for `/`
+            if self._is_windows:
+                dirpath = dirpath.replace('\\', '/')
+
             # Get the directory path that is used for S3
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 

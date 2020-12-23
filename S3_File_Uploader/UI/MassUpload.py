@@ -9,8 +9,8 @@ from typing import List
 import pexpect
 import ffmpeg
 
-from Database import Database
-from AWS import AWS
+from S3_File_Uploader.Database import Database
+from S3_File_Uploader.AWS import AWS
 
 
 logger = logging.getLogger('main_logger')

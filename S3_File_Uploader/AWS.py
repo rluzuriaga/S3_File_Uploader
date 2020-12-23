@@ -3,7 +3,7 @@ import logging
 import boto3
 import botocore
 
-from Database import Database
+from S3_File_Uploader.Database import Database
 
 logger = logging.getLogger('main_logger')
 

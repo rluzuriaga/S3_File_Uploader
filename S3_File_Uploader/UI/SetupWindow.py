@@ -6,8 +6,8 @@ from tkinter import filedialog
 import os
 import threading
 
-from Database import Database
-from AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
+from S3_File_Uploader.Database import Database
+from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
 
 # Set up logging
 logger = logging.getLogger('main_logger')

@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
-from Database import Database
+from S3_File_Uploader.Database import Database
 
 logger = logging.getLogger('main_logger')
 

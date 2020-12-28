@@ -35,7 +35,7 @@ class MainWindow(ttk.Frame):
         self.main_window_top_label = ttk.Label(
             self,
             text='Please select one of the options below.',
-            font=('Helvetica', 15),
+            style='main_window_top_label.TLabel',
             justify=tk.CENTER
         )
         self.main_window_top_label.grid(row=0, column=0, columnspan=2, padx=60, pady=(10, 30))
@@ -67,13 +67,15 @@ class MainWindow(ttk.Frame):
 
         self.statusbar_app_version = ttk.Label(
             self,
-            text=f'App Version: {APP_VERSION}'
+            text=f'App Version: {APP_VERSION}',
+            style='main_window_statusbar.TLabel'
         )
         self.statusbar_app_version.grid(row=100, column=0, padx=4, pady=(15, 2), sticky='ws')
 
         self.statusbar_db_version = ttk.Label(
             self,
-            text=f'DB Version: {DB_VERSION}'
+            text=f'DB Version: {DB_VERSION}',
+            style='main_window_statusbar.TLabel'
         )
         self.statusbar_db_version.grid(row=100, column=1, padx=4, pady=(15, 2), sticky='es')
 

@@ -8,6 +8,7 @@ from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow
 from .MassUpload import MassUpload
 from .UpdateDatabase import UpdateDatabase
+from .Styles import Styles
 
 # Setup logger
 logger = logging.getLogger('main_logger')
@@ -17,6 +18,8 @@ class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         logger.debug("Initializing the Tkinter program controller.")
+
+        Styles()
 
         # Setting App title
         self.title(APP_TITLE)

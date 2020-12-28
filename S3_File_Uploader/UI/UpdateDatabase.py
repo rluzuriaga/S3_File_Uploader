@@ -22,7 +22,7 @@ class UpdateDatabase(ttk.Frame):
         top_label = ttk.Label(
             self,
             text="Update the program's database.",
-            font=('Helvetica', 18, 'underline'),
+            style='update_db_top_label.TLabel',
             justify=tk.CENTER
         )
         top_label.grid(row=0, column=0, columnspan=2, padx=50, pady=(10, 30))
@@ -31,7 +31,7 @@ class UpdateDatabase(ttk.Frame):
         self.update_label = ttk.Label(
             self,
             text=explanation_text,
-            font=('Helvetica', 15),
+            style='explanation_text_label.TLabel',
             justify=tk.CENTER
         )
         self.update_label.grid(row=1, column=0, columnspan=2, padx=20, pady=(0, 20))
@@ -47,6 +47,7 @@ class UpdateDatabase(ttk.Frame):
         self.file_path_button = ttk.Button(
             self,
             text='Select SQL File',
+            style='regular.TButton',
             command=self._select_sql_file
         )
         self.file_path_button.grid(row=2, column=1, padx=(0, 20), pady=(0, 20))
@@ -54,6 +55,7 @@ class UpdateDatabase(ttk.Frame):
         self.update_button = ttk.Button(
             self,
             text="Update",
+            style='regular.TButton',
             command=self._update_database
         )
         self.update_button.grid(row=3, column=0, columnspan=2, padx=30, pady=10)

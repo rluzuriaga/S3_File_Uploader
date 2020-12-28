@@ -81,10 +81,6 @@ class SetupWindow(ttk.Frame):
 
         logger.debug('Initializing the SetupWindow ttk frame.')
 
-        style = ttk.Style()
-        style.configure('regular.TButton', font=('Helvetica', 15))
-        style.configure('regular.TCheckbutton', font=('Helvetica', 15))
-
         if 'Resources' in os.getcwd():
             self.open_folder_icon_path = tk.PhotoImage(
                 file=os.getcwd() + '/images/open_folder_icon.png')
@@ -104,7 +100,7 @@ class SetupWindow(ttk.Frame):
         self.setup_window_top_label = ttk.Label(
             self,
             text='Please enter all the data.',
-            font=('Helvetica', 15),
+            style='setup_window_top_label.TLabel',
             justify=tk.CENTER
         )
         self.setup_window_top_label.grid(self.TOP_LABEL_GRID)
@@ -113,7 +109,7 @@ class SetupWindow(ttk.Frame):
         self.setup_window_output_message = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 15),
+            style='setup_window_output_message_label.TLabel',
             justify=tk.CENTER
         )
         self.setup_window_output_message.grid(self.OUTPUT_MESSAGE_GRID)
@@ -122,7 +118,7 @@ class SetupWindow(ttk.Frame):
         self.aws_heading_label = ttk.Label(
             self,
             text='AWS Settings',
-            font=('Helvetica', 15, 'bold', 'underline'),
+            style='aws_heading_label.TLabel',
             justify=tk.CENTER
         )
         self.aws_heading_label.grid(self.AWS_HEADING_GRID)
@@ -131,7 +127,7 @@ class SetupWindow(ttk.Frame):
         self.access_key_id_label = ttk.Label(
             self,
             text='AWS Access Key ID:',
-            font=('Helvetica', 15),
+            style='access_key_id_label.TLabel',
             justify=tk.LEFT
         )
         self.access_key_id_label.grid(self.ACCESS_KEY_ID_LABEL_GRID)
@@ -148,7 +144,7 @@ class SetupWindow(ttk.Frame):
         self.secret_key_label = ttk.Label(
             self,
             text='AWS Secret Access Key:',
-            font=('Helvetica', 15),
+            style='aws_secret_key_label.TLabel',
             justify=tk.LEFT
         )
         self.secret_key_label.grid(self.SECRET_KEY_LABEL_GRID)
@@ -165,7 +161,7 @@ class SetupWindow(ttk.Frame):
         self.region_name_label = ttk.Label(
             self,
             text='Default Region Name:',
-            font=('Helvetica', 15),
+            style='region_name_label.TLabel',
             justify=tk.LEFT
         )
         self.region_name_label.grid(self.REGION_NAME_LABEL_GRID)
@@ -187,7 +183,7 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_heading_label = ttk.Label(
             self,
             text='FFMPEG Settings',
-            font=('Helvetica', 15, 'bold', 'underline'),
+            style='ffmpeg_heading_label.TLabel',
             justify=tk.CENTER
         )
         self.ffmpeg_heading_label.grid(self.FFMPEG_HEADING_LABEL_GRID)
@@ -196,7 +192,7 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_input_label = ttk.Label(
             self,
             text='FFMPEG parameters: ',
-            font=('Helvetica', 15),
+            style='ffmpeg_input_label.TLabel',
             justify=tk.LEFT
         )
         self.ffmpeg_input_label.grid(self.FFMPEG_INPUT_LABEL_GRID)
@@ -214,7 +210,7 @@ class SetupWindow(ttk.Frame):
         self.converted_file_suffix_label = ttk.Label(
             self,
             text='Converted file suffix:',
-            font=('Helvetica', 15),
+            style='converted_file_suffix_label.TLabel',
             justify=tk.LEFT
         )
         self.converted_file_suffix_label.grid(self.CONVERTED_FILE_SUFFIX_LABEL_GRID)
@@ -294,7 +290,7 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_example_label = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 13),
+            style='ffmpeg_example_label.TLabel',
             justify=tk.CENTER
         )
         self.ffmpeg_example_label.grid(self.FFMPEG_EXAMPLE_LABEL)

@@ -13,23 +13,33 @@ class Styles:
 
         self.style = ttk.Style()
 
-        self.label_styles()
+        self.all_ui_styles()
+        self.main_window_styles()
+        self.update_database_styles()
 
-    def label_styles(self) -> None:
+    def all_ui_styles(self) -> None:
         if self._is_mac:
-            # All UI
             self.style.configure('regular.TButton', font=('Helvetica', 15))
             self.style.configure('regular.TCheckbutton', font=('Helvetica', 15))
 
-            # MainWindow.py
+        if self._is_window:
+            self.style.configure('regular.TButton', font=('Helvetica', 12))
+            self.style.configure('regular.TCheckbutton', font=('Helvetica', 12))
+
+    def main_window_styles(self) -> None:
+        if self._is_mac:
             self.style.configure('main_window_top_label.TLabel', font=('Helvetica', 15))
             self.style.configure('main_window_statusbar.TLabel', font=('Helvetica', 10))
 
         if self._is_window:
-            # All UI
-            self.style.configure('regular.TButton', font=('Helvetica', 12))
-            self.style.configure('regular.TCheckbutton', font=('Helvetica', 12))
-
-            # MainWindow.py
             self.style.configure('main_window_top_label.TLabel', font=('Helvetica', 14))
             self.style.configure('main_window_statusbar.TLabel', font=('Helvetica', 9))
+
+    def update_database_styles(self) -> None:
+        if self._is_mac:
+            self.style.configure('update_db_top_label.TLabel', font=('Helvetica', 18, 'underline'))
+            self.style.configure('explanation_text_label.TLabel', font=('Helvetica', 15))
+
+        if self._is_window:
+            self.style.configure('update_db_top_label.TLabel', font=('Helvetica', 18, 'underline'))
+            self.style.configure('explanation_text_label.TLabel', font=('Helvetica', 15))

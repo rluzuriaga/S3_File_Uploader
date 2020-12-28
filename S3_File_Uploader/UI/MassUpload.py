@@ -118,7 +118,7 @@ class MassUpload(ttk.Frame):
         self.header_label = ttk.Label(
             self,
             text='Start a mass upload batch',
-            font=('Helvetica', 18, 'underline'),
+            style='mass_upload_header_label.TLabel',
             justify=tk.CENTER
         )
         self.header_label.grid(self.HEADER_LABEL_GRID)
@@ -127,7 +127,7 @@ class MassUpload(ttk.Frame):
         self.update_label = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 15),
+            style='update_label.TLabel',
             justify=tk.CENTER
         )
         self.update_label.grid(self.UPDATE_LABEL_GRID)
@@ -135,7 +135,7 @@ class MassUpload(ttk.Frame):
         self.overall_progressbar_label = ttk.Label(
             self,
             text='Total Progress',
-            font=('Helvetica', 13),
+            style='overall_progressbar_label.TLabel',
             justify=tk.CENTER
         )
 
@@ -145,7 +145,7 @@ class MassUpload(ttk.Frame):
         self.ffmpeg_and_upload_progressbar_label = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 13),
+            style='ffmpeg_upload_progressbar_label.TLabel',
             justify=tk.CENTER
         )
 
@@ -155,7 +155,7 @@ class MassUpload(ttk.Frame):
         self.path_to_mass_upload_label = ttk.Label(
             self,
             text='Directory path for mass upload:',
-            font=('Helvetica', 15),
+            style='path_to_mass_upload_label.TLabel',
             justify=tk.CENTER
         )
         self.path_to_mass_upload_label.grid(
@@ -182,7 +182,7 @@ class MassUpload(ttk.Frame):
         self.s3_bucket_location_label = ttk.Label(
             self,
             text='Please select the S3 bucket to upload to:',
-            font=('Helvetica', 15),
+            style='s3_bucket_location_label.TLabel',
             justify=tk.CENTER
         )
         self.s3_bucket_location_label.grid(self.S3_BUCKET_LOCATION_LABEL_GRID)
@@ -210,7 +210,7 @@ class MassUpload(ttk.Frame):
         self.radio_button_label = ttk.Label(
             self,
             text='Please select what type file to upload:',
-            font=('Helvetica', 15),
+            style='radio_button_label.TLabel',
             justify=tk.CENTER
         )
         self.radio_button_label.grid(self.RADIO_BUTTON_LABEL_GRID)
@@ -1146,7 +1146,7 @@ class VideoCheckboxes(ttk.Frame):
         self.hover_text = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 14, 'italic'),
+            style='hover_text_label.TLabel',
             justify=tk.CENTER
         )
         self.hover_text.grid(row=1, column=0, columnspan=len(self.checkbox_text), pady=(3, 0))

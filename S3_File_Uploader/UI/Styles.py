@@ -17,6 +17,7 @@ class Styles:
         self.main_window_styles()
         self.setup_window_styles()
         self.update_database_styles()
+        self.mass_upload_styles()
 
     def all_ui_styles(self) -> None:
         if self._is_mac:
@@ -77,3 +78,28 @@ class Styles:
         if self._is_window:
             self.style.configure('update_db_top_label.TLabel', font=('Helvetica', 18, 'underline'))
             self.style.configure('explanation_text_label.TLabel', font=('Helvetica', 15))
+
+    def mass_upload_styles(self) -> None:
+        if self._is_mac:
+            self.style.configure('mass_upload_header_label.TLabel', font=('Helvetica', 18, 'underline'))
+            self.style.configure('update_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('overall_progressbar_label.TLabel', font=('Helvetica', 13))
+            self.style.configure('ffmpeg_upload_progressbar_label.TLabel', font=('Helvetica', 13))
+            self.style.configure('path_to_mass_upload_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('s3_bucket_location_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('radio_button_label.TLabel', font=('Helvetica', 15))
+
+            # VideoCheckboxes
+            self.style.configure('hover_text_label.TLabel', font=('Helvetica', 14, 'italic'))
+
+        if self._is_window:
+            self.style.configure('mass_upload_header_label.TLabel', font=('Helvetica', 18, 'underline'))
+            self.style.configure('update_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('overall_progressbar_label.TLabel', font=('Helvetica', 13))
+            self.style.configure('ffmpeg_upload_progressbar_label.TLabel', font=('Helvetica', 13))
+            self.style.configure('path_to_mass_upload_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('s3_bucket_location_label.TLabel', font=('Helvetica', 15))
+            self.style.configure('radio_button_label.TLabel', font=('Helvetica', 15))
+
+            # VideoCheckboxes
+            self.style.configure('hover_text_label.TLabel', font=('Helvetica', 14, 'italic'))

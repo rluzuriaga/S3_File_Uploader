@@ -11,6 +11,7 @@ from typing import List
 import pexpect
 import ffmpeg
 
+from S3_File_Uploader import IS_MAC, IS_WINDOWS
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
 
@@ -77,13 +78,6 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Initializing the MassUpload ttk frame.')
 
         self._is_cancel = False
-
-        if 'darwin' in sys.platform:
-            self._is_windows = False
-            self._is_mac = True
-        elif 'win' in sys.platform:
-            self._is_windows = True
-            self._is_mac = False
 
         style = ttk.Style()
         style.configure('TRadiobutton', font=('Helvetica', 15))
@@ -502,10 +496,10 @@ class MassUpload(ttk.Frame):
         # )
 
         # Create a new thread running the parsed ffmpeg command
-        if self._is_mac:
+        if IS_MAC:
             thread = pexpect.spawn(parsed_ffmpeg_command)
 
-        if self._is_windows:
+        if IS_WINDOWS:
             from pexpect import popen_spawn
             thread = popen_spawn.PopenSpawn(parsed_ffmpeg_command)
 
@@ -538,10 +532,10 @@ class MassUpload(ttk.Frame):
                 logger.debug(f'Updating ffmpeg progressbar: {frame_num} of {str(total_video_frames)} frames.')
                 ffmpeg_progressbar.update_progressbar_value(int(frame_num))
 
-                if self._is_mac:
+                if IS_MAC:
                     thread.close
 
-                if self._is_windows:
+                if IS_WINDOWS:
                     thread.kill(signal.SIG_DFL)
 
         logger.debug(f'Ffmpeg conversion completed.')

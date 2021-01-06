@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
+
+from S3_File_Uploader import IS_MAC
 from S3_File_Uploader.Database import Database
 
 logger = logging.getLogger('main_logger')
@@ -39,7 +41,7 @@ class UpdateDatabase(ttk.Frame):
         self.file_path = tk.StringVar()
         self.file_path_input_field = ttk.Entry(
             self,
-            width=30,
+            width=30 if IS_MAC else 45,
             textvariable=self.file_path
         )
         self.file_path_input_field.grid(row=2, column=0, padx=(20, 10), pady=(0, 20))

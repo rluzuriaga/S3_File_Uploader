@@ -22,7 +22,11 @@ logger = logging.getLogger('main_logger')
 class MassUpload(ttk.Frame):
     # Grids
     # Row 0
-    HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+    if IS_MAC:
+        HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+
+    if IS_WINDOWS:
+        HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 150}
 
     # Row 1
     UPDATE_LABEL_GRID = {'row': 1, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
@@ -44,14 +48,23 @@ class MassUpload(ttk.Frame):
 
     # Row 6
     MASS_UPLOAD_PATH_INPUT_FIELD_GRID = {'row': 6, 'column': 0, 'columnspan': 4, 'padx': (50, 5), 'ipady': 4}
-    MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2}
+    if IS_MAC:
+        MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2}
+
+    if IS_WINDOWS:
+        MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2, 'ipadx': 5}
 
     # Row 7
     S3_BUCKET_LOCATION_LABEL_GRID = {'row': 7, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
 
     # Row 8
     S3_BUCKET_SELECTOR_GRID = {'row': 8, 'column': 0, 'columnspan': 4, 'padx': (50, 5)}
-    REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3}
+
+    if IS_MAC:
+        REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3}
+
+    if IS_WINDOWS:
+        REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3, 'ipadx': 5}
 
     # Row 9
     RADIO_BUTTON_LABEL_GRID = {'row': 9, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
@@ -159,7 +172,7 @@ class MassUpload(ttk.Frame):
         self.mass_upload_path = tk.StringVar()
         self.mass_upload_path_input_field = ttk.Entry(
             self,
-            width=35,
+            width=35 if IS_MAC else 55,
             textvariable=self.mass_upload_path
         )
         self.mass_upload_path_input_field.grid(
@@ -187,7 +200,7 @@ class MassUpload(ttk.Frame):
             self,
             textvariable=self.s3_bucket_name,
             values=self.S3_BUCKET_VALUES,
-            width=35,
+            width=35 if IS_MAC else 55,
             state='readonly'
         )
         self.s3_bucket_selector.grid(self.S3_BUCKET_SELECTOR_GRID)
@@ -217,6 +230,7 @@ class MassUpload(ttk.Frame):
             text="All Files",
             value=1,
             variable=self.radio_button_var,
+            style='radio_buttons.TRadiobutton',
             command=self._all_files_radio_active
         )
         self.radio_button_all.grid(self.RADIO_BUTTON_ALL_GRID)
@@ -226,6 +240,7 @@ class MassUpload(ttk.Frame):
             text="Videos Only",
             value=2,
             variable=self.radio_button_var,
+            style='radio_buttons.TRadiobutton',
             command=self._video_only_radio_active
         )
         self.radio_button_video.grid(self.RADIO_BUTTON_VIDEO_GRID)
@@ -250,6 +265,7 @@ class MassUpload(ttk.Frame):
         self.use_ffmpeg_checkbox = ttk.Checkbutton(
             self,
             text="Use FFMPEG",
+            style='regular.TCheckbutton',
             variable=self.use_ffmpeg_checkbox_var
         )
 
@@ -1129,6 +1145,7 @@ class VideoCheckboxes(ttk.Frame):
             checkbox = ttk.Checkbutton(
                 self,
                 text=text_,
+                style='regular.TCheckbutton',
                 variable=var
             )
             checkbox.grid(row=0, column=i, padx=2)

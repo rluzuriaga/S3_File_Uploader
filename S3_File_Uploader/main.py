@@ -39,17 +39,25 @@ def request_data_from_gist():
     header = {"Accept": "application/vnd.github.v3+json"}
     url = "https://api.github.com/gists/d052b99ca4eab941fff359810aa16ff7"
 
-    response = requests.get(
-        url,
-        headers=header
-    ).json()
+    try:
+        response = requests.get(
+            url,
+            headers=header
+        ).json()
+    except requests.exceptions.ConnectionError:
+        # TODO: need to let user know that there is no network connected
+        return None
 
     return response
 
 
 def check_app_version(response):
     logger.debug(f'Checking if app version is out of date.')
-    newest_app_version = response['files']['app_version.txt']['content']
+    try:
+        newest_app_version = response['files']['app_version.txt']['content']
+    except TypeError:
+        # TODO: need to let user know that there is no network connected
+        return
 
     if APP_VERSION == newest_app_version:
         logger.debug(f'App version is up to date.')
@@ -62,7 +70,11 @@ def check_app_version(response):
 
 def database_updater(response):
     logger.debug(f'Starting database updater.')
-    newest_db_version = response['files']['db_version.txt']['content']
+    try:
+        newest_db_version = response['files']['db_version.txt']['content']
+    except TypeError:
+        # TODO: need to let user know that there is no network connected
+        return
 
     if newest_db_version != DB_VERSION:
         for i in range(int(DB_VERSION) + 1, int(newest_db_version) + 1):

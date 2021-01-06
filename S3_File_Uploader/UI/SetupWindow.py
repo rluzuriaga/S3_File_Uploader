@@ -6,6 +6,7 @@ from tkinter import filedialog
 import os
 import threading
 
+from S3_File_Uploader import IS_MAC, IS_WINDOWS
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
 
@@ -15,7 +16,11 @@ logger = logging.getLogger('main_logger')
 
 class SetupWindow(ttk.Frame):
     # Row 0
-    TOP_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 4, 'padx': 280, 'pady': (15, 15)}
+    if IS_MAC:
+        TOP_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 4, 'padx': 280, 'pady': (15, 15)}
+
+    if IS_WINDOWS:
+        TOP_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 4, 'padx': 180, 'pady': (15, 15)}
 
     # Row 1
     OUTPUT_MESSAGE_GRID = {'row': 1, 'column': 0, 'columnspan': 4, 'pady': (5, 5)}
@@ -58,7 +63,11 @@ class SetupWindow(ttk.Frame):
     LOCAL_SAVE_CHECKBOX_GRID = {'row': 10, 'column': 0, 'columnspan': 2,
                                 'padx': (25, 0), 'pady': (10, 0), 'sticky': 'w'}
     LOCAL_SAVE_PATH_INPUT_GRID = {'row': 10, 'column': 2, 'padx': (22, 5), 'pady': (10, 0), 'sticky': 'w'}
-    LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 10, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
+    if IS_MAC:
+        LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 10, 'column': 3, 'padx': (0, 20), 'pady': (10, 0)}
+
+    if IS_WINDOWS:
+        LOCAL_SAVE_PATH_BUTTON_GRID = {'row': 10, 'column': 3, 'padx': (0, 20), 'pady': (10, 0), 'ipadx': 5}
 
     # Row 11
     LOCAL_SAVE_OUTPUT_EXTENSION_CHECKBOX_GRID = {'row': 11, 'column': 0,

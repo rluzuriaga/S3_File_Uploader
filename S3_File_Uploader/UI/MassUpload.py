@@ -744,7 +744,7 @@ class MassUpload(ttk.Frame):
 
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
             # Replace the `\` used in windows for `/`
-            if self._is_windows:
+            if IS_WINDOWS:
                 dirpath = dirpath.replace('\\', '/')
 
             bucket_dir_path = dirpath[length_to_remove:] + '/'
@@ -814,7 +814,7 @@ class MassUpload(ttk.Frame):
         # Iterate through the upload directory
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
             # Replace the `\` used in windows for `/`
-            if self._is_windows:
+            if IS_WINDOWS:
                 dirpath = dirpath.replace('\\', '/')
 
             # Get the directory path that is used for S3

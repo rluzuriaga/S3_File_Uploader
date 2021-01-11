@@ -1,7 +1,11 @@
+import msilib
 from setuptools import find_packages
 import cx_Freeze as cx
 
 from S3_File_Uploader import APP_TITLE, APP_VERSION
+
+UPGRADE_CODE = '{6ADD4904-6A36-4D2F-BF96-8241B3D8D474}'
+PRODUCT_CODE = msilib.gen_uuid()
 
 cx.setup(
     name=APP_TITLE,
@@ -36,7 +40,11 @@ cx.setup(
     executables=[
         cx.Executable(
             'S3_File_Uploader/main.py',
-            targetName='S3 File Uploader'
+            targetName='S3 File Uploader',
+            # Comment out the `base="Win32GUI"` line to create a debug msi install.
+            # The debug install would run the program opening a command prompt too.
+            base="Win32GUI",
+            icon="S3_File_Uploader/UI/images/logo.ico"
         )
     ],
     options={
@@ -61,9 +69,44 @@ cx.setup(
                 ('S3_File_Uploader', 'S3_File_Uploader')
             ]
         },
-        # 'bdist_msi': {
-        #     'upgrade_code': '{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}',
-        # TODO: Check https://cx-freeze.readthedocs.io/en/latest/distutils.html#bdist-msi to see how to implement this
-        # }
+        'bdist_msi': {
+            'upgrade_code': UPGRADE_CODE,
+            'all_users': False,
+            'product_code': PRODUCT_CODE,
+
+            # https://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop#15736406
+            'data': {
+                'Shortcut': [
+                    (
+                        "DesktopShortcut",                  # Shortcut
+                        "DesktopFolder",                    # Directory_
+                        "S3 File Uploader",                 # Name
+                        "TARGETDIR",                        # Component_
+                        "[TARGETDIR]S3 File Uploader.exe",  # Target
+                        None,                               # Arguments
+                        None,                               # Description
+                        None,                               # Hotkey
+                        None,                               # Icon
+                        None,                               # IconIndex
+                        None,                               # ShowCmd
+                        "TARGETDIR"                         # WkDir
+                    ),
+                    (
+                        "MenuShortcut",                     # Shortcut
+                        "ProgramMenuFolder",                # Directory_
+                        "S3 File Uploader",                 # Name
+                        "TARGETDIR",                        # Component_
+                        "[TARGETDIR]S3 File Uploader.exe",  # Target
+                        None,                               # Arguments
+                        None,                               # Description
+                        None,                               # Hotkey
+                        None,                               # Icon
+                        None,                               # IconIndex
+                        None,                               # ShowCmd
+                        "TARGETDIR"                         # WkDir
+                    )
+                ]
+            }
+        }
     }
 )

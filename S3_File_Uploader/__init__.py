@@ -5,7 +5,7 @@ with Database() as DB:
     DB_VERSION = DB.get_db_version()
 
 APP_TITLE = "S3 File Uploader"
-APP_VERSION = "0.3"
+APP_VERSION = "0.4"
 
 if 'darwin' in sys.platform:
     IS_MAC = True

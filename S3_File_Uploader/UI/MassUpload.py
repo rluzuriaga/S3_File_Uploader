@@ -1,4 +1,6 @@
 import os
+import sys
+import signal
 import logging
 import threading
 import tkinter as tk
@@ -9,6 +11,7 @@ from typing import List
 import pexpect
 import ffmpeg
 
+from S3_File_Uploader import IS_MAC, IS_WINDOWS
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
 
@@ -19,7 +22,11 @@ logger = logging.getLogger('main_logger')
 class MassUpload(ttk.Frame):
     # Grids
     # Row 0
-    HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+    if IS_MAC:
+        HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
+
+    if IS_WINDOWS:
+        HEADER_LABEL_GRID = {'row': 0, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 150}
 
     # Row 1
     UPDATE_LABEL_GRID = {'row': 1, 'column': 0, 'columnspan': 5, 'pady': 10, 'padx': 20}
@@ -41,14 +48,23 @@ class MassUpload(ttk.Frame):
 
     # Row 6
     MASS_UPLOAD_PATH_INPUT_FIELD_GRID = {'row': 6, 'column': 0, 'columnspan': 4, 'padx': (50, 5), 'ipady': 4}
-    MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2}
+    if IS_MAC:
+        MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2}
+
+    if IS_WINDOWS:
+        MASS_UPLOAD_PATH_BUTTON_GRID = {'row': 6, 'column': 4, 'padx': (5, 50), 'ipady': 2, 'ipadx': 5}
 
     # Row 7
     S3_BUCKET_LOCATION_LABEL_GRID = {'row': 7, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
 
     # Row 8
     S3_BUCKET_SELECTOR_GRID = {'row': 8, 'column': 0, 'columnspan': 4, 'padx': (50, 5)}
-    REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3}
+
+    if IS_MAC:
+        REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3}
+
+    if IS_WINDOWS:
+        REFRESH_S3_BUCKETS_BUTTON_GRID = {'row': 8, 'column': 4, 'padx': (8, 50), 'ipady': 3, 'ipadx': 5}
 
     # Row 9
     RADIO_BUTTON_LABEL_GRID = {'row': 9, 'column': 0, 'columnspan': 5, 'padx': 20, 'pady': (25, 5)}
@@ -109,7 +125,7 @@ class MassUpload(ttk.Frame):
         self.header_label = ttk.Label(
             self,
             text='Start a mass upload batch',
-            font=('Helvetica', 18, 'underline'),
+            style='mass_upload_header_label.TLabel',
             justify=tk.CENTER
         )
         self.header_label.grid(self.HEADER_LABEL_GRID)
@@ -118,7 +134,7 @@ class MassUpload(ttk.Frame):
         self.update_label = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 15),
+            style='update_label.TLabel',
             justify=tk.CENTER
         )
         self.update_label.grid(self.UPDATE_LABEL_GRID)
@@ -126,7 +142,7 @@ class MassUpload(ttk.Frame):
         self.overall_progressbar_label = ttk.Label(
             self,
             text='Total Progress',
-            font=('Helvetica', 13),
+            style='overall_progressbar_label.TLabel',
             justify=tk.CENTER
         )
 
@@ -136,7 +152,7 @@ class MassUpload(ttk.Frame):
         self.ffmpeg_and_upload_progressbar_label = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 13),
+            style='ffmpeg_upload_progressbar_label.TLabel',
             justify=tk.CENTER
         )
 
@@ -146,7 +162,7 @@ class MassUpload(ttk.Frame):
         self.path_to_mass_upload_label = ttk.Label(
             self,
             text='Directory path for mass upload:',
-            font=('Helvetica', 15),
+            style='path_to_mass_upload_label.TLabel',
             justify=tk.CENTER
         )
         self.path_to_mass_upload_label.grid(
@@ -156,7 +172,7 @@ class MassUpload(ttk.Frame):
         self.mass_upload_path = tk.StringVar()
         self.mass_upload_path_input_field = ttk.Entry(
             self,
-            width=35,
+            width=35 if IS_MAC else 55,
             textvariable=self.mass_upload_path
         )
         self.mass_upload_path_input_field.grid(
@@ -173,7 +189,7 @@ class MassUpload(ttk.Frame):
         self.s3_bucket_location_label = ttk.Label(
             self,
             text='Please select the S3 bucket to upload to:',
-            font=('Helvetica', 15),
+            style='s3_bucket_location_label.TLabel',
             justify=tk.CENTER
         )
         self.s3_bucket_location_label.grid(self.S3_BUCKET_LOCATION_LABEL_GRID)
@@ -184,7 +200,7 @@ class MassUpload(ttk.Frame):
             self,
             textvariable=self.s3_bucket_name,
             values=self.S3_BUCKET_VALUES,
-            width=35,
+            width=35 if IS_MAC else 55,
             state='readonly'
         )
         self.s3_bucket_selector.grid(self.S3_BUCKET_SELECTOR_GRID)
@@ -201,7 +217,7 @@ class MassUpload(ttk.Frame):
         self.radio_button_label = ttk.Label(
             self,
             text='Please select what type file to upload:',
-            font=('Helvetica', 15),
+            style='radio_button_label.TLabel',
             justify=tk.CENTER
         )
         self.radio_button_label.grid(self.RADIO_BUTTON_LABEL_GRID)
@@ -214,6 +230,7 @@ class MassUpload(ttk.Frame):
             text="All Files",
             value=1,
             variable=self.radio_button_var,
+            style='radio_buttons.TRadiobutton',
             command=self._all_files_radio_active
         )
         self.radio_button_all.grid(self.RADIO_BUTTON_ALL_GRID)
@@ -223,6 +240,7 @@ class MassUpload(ttk.Frame):
             text="Videos Only",
             value=2,
             variable=self.radio_button_var,
+            style='radio_buttons.TRadiobutton',
             command=self._video_only_radio_active
         )
         self.radio_button_video.grid(self.RADIO_BUTTON_VIDEO_GRID)
@@ -247,6 +265,7 @@ class MassUpload(ttk.Frame):
         self.use_ffmpeg_checkbox = ttk.Checkbutton(
             self,
             text="Use FFMPEG",
+            style='regular.TCheckbutton',
             variable=self.use_ffmpeg_checkbox_var
         )
 
@@ -464,6 +483,8 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Ffmpeg command string created: `{ffmpeg_command_string}`.')
 
+        ffmpeg_command_string = ffmpeg_command_string.replace('\\', '/')
+
         return ffmpeg_command_string, first_full_output_string
 
     def _ffmpeg_controller(self, parsed_ffmpeg_command, ffmpeg_progressbar, total_video_frames: int):
@@ -491,7 +512,12 @@ class MassUpload(ttk.Frame):
         # )
 
         # Create a new thread running the parsed ffmpeg command
-        thread = pexpect.spawn(parsed_ffmpeg_command)
+        if IS_MAC:
+            thread = pexpect.spawn(parsed_ffmpeg_command)
+
+        if IS_WINDOWS:
+            from pexpect import popen_spawn
+            thread = popen_spawn.PopenSpawn(parsed_ffmpeg_command)
 
         # Compile a patters of what to to look for in the stdout.
         # In this case, the number next to `frame=`.
@@ -522,7 +548,11 @@ class MassUpload(ttk.Frame):
                 logger.debug(f'Updating ffmpeg progressbar: {frame_num} of {str(total_video_frames)} frames.')
                 ffmpeg_progressbar.update_progressbar_value(int(frame_num))
 
-                thread.close
+                if IS_MAC:
+                    thread.close
+
+                if IS_WINDOWS:
+                    thread.kill(signal.SIG_DFL)
 
         logger.debug(f'Ffmpeg conversion completed.')
 
@@ -713,6 +743,10 @@ class MassUpload(ttk.Frame):
         length_to_remove = upload_start_path.rfind('/') + 1
 
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
+            # Replace the `\` used in windows for `/`
+            if self._is_windows:
+                dirpath = dirpath.replace('\\', '/')
+
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
             for file in filenames:
@@ -779,6 +813,10 @@ class MassUpload(ttk.Frame):
 
         # Iterate through the upload directory
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
+            # Replace the `\` used in windows for `/`
+            if self._is_windows:
+                dirpath = dirpath.replace('\\', '/')
+
             # Get the directory path that is used for S3
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
@@ -1107,6 +1145,7 @@ class VideoCheckboxes(ttk.Frame):
             checkbox = ttk.Checkbutton(
                 self,
                 text=text_,
+                style='regular.TCheckbutton',
                 variable=var
             )
             checkbox.grid(row=0, column=i, padx=2)
@@ -1118,7 +1157,7 @@ class VideoCheckboxes(ttk.Frame):
         self.hover_text = ttk.Label(
             self,
             text='',
-            font=('Helvetica', 14, 'italic'),
+            style='hover_text_label.TLabel',
             justify=tk.CENTER
         )
         self.hover_text.grid(row=1, column=0, columnspan=len(self.checkbox_text), pady=(3, 0))

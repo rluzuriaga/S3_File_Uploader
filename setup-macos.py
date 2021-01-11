@@ -6,7 +6,7 @@ Usage:
 """
 
 from setuptools import setup, find_packages
-from S3_File_Uploader import APP_VERSION
+from S3_File_Uploader import APP_VERSION, APP_TITLE
 
 APP = ['S3_File_Uploader/main.py']
 DATA_FILES = []
@@ -26,7 +26,7 @@ OPTIONS = {
 }
 
 setup(
-    name='S3 File Uploader',
+    name=APP_TITLE,
     version=APP_VERSION,
     license='MIT',
     url='https://github.com/rluzuriaga/S3_File_Uploader',

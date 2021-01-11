@@ -62,6 +62,9 @@ def check_app_version(response):
     if APP_VERSION == newest_app_version:
         logger.debug(f'App version is up to date.')
         return
+    elif float(APP_VERSION) > float(newest_app_version):
+        logger.debug(f'App version newer than what is on gist.')
+        return
     else:
         logger.debug(f'App version is out of date.')
         UpdateApp()

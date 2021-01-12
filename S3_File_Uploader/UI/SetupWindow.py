@@ -99,6 +99,8 @@ class SetupWindow(ttk.Frame):
                 file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
             logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/open_folder_icon.png"')
 
+        self._ff_in_path = self._check_if_in_path()
+
         self.ui_elements()
         logger.debug("Created SetupWindow UI elements.")
 
@@ -323,6 +325,22 @@ class SetupWindow(ttk.Frame):
         )
         self.lock_unlock_button.grid(self.LOCK_UNLOCK_BUTTON_GRID)
 
+    def _check_if_in_path(self) -> bool:
+        """ Check if ffmpeg and ffprobe are in the PATH.
+
+        Returns:
+            bool: True if both ffmpeg and ffprobe are in PATH.
+                  False if either ffmpeg or ffprobe are not in PATH.
+        """
+        from shutil import which
+
+        if which('ffmpeg') is None or which('ffprobe') is None:
+            logger.warning(f'Either ffmpeg or ffprobe not in PATH.')
+            return False
+
+        logger.debug(f'Both ffmpeg and ffprobe in PATH.')
+        return True
+
     def _open_folder_path(self):
         logger.debug('Opening file dialog window for selecting local save path.')
         path = filedialog.askdirectory()
@@ -483,6 +501,13 @@ class SetupWindow(ttk.Frame):
     def save_configuration(self):
         """ Function that runs when the `Save Configuration` button is pressed. """
         logger.debug('Starting save configuration process.')
+
+        if not self._ff_in_path:
+            self.setup_window_output_message.configure(
+                text='Did not find ffmpeg or ffprobe on the system PATH.\nPlease install and add ffmpeg and ffprobe to PATH to use this program correctly.\nNo data saved.',
+                foreground='red')
+
+            return
 
         self.setup_window_output_message.configure(text='')
 

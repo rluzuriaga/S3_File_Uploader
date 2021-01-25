@@ -1,3 +1,23 @@
+"""
+Script to create the executable application on Windows and Mac.
+
+Usage:
+    - python3.9 setup.py COMMAND
+        - Multiple commands can be used.
+
+Commands:
+    - clean                 -  Remove `build`, `dist`, `__pycache__` folder and content.
+    - clean --full-clean    -  Remove everything that `clean` removes plus `distribution`, `logs`, and `db.sqlite3` folders and files.
+    - create                -  Build the application.
+                                - Creates ZIP and MSI files if running on Windows
+                                - Creates .app bundle and DMG file if running on Mac.
+    - distribute            -  Move the created application files that were created with the `create` command to a `distribution` folder.
+
+Example:
+    - python3.9 setup.py clean --full-clean create distributes
+        - This command would run each command one after the other.
+"""
+
 import os
 import sys
 import shutil

@@ -99,50 +99,6 @@ class Clean(distutils.core.Command):
 
 COMMANDS['clean'] = Clean
 
-
-if WINDOWS:
-    class Build(cx_Freeze.build_exe):
-        def initialize_options(self):
-            self.dist_dir = None
-            user_options = cx_Freeze.build_exe.user_options
-            user_options.extend([('dist-dir=', 'd', "directory where to put final distributions in [default: dist]")])
-            super().initialize_options()
-
-            if not os.path.exists(FINAL_DISTRIBUTION_DIR):
-                os.mkdir(FINAL_DISTRIBUTION_DIR)
-
-        def finalize_options(self):
-            if self.dist_dir is None:
-                self.dist_dir = self.build_exe
-            super().finalize_options()
-
-        def run(self):
-            super().run()
-            self.execute(self.make_dist_folder, ())
-            self.execute(self.make_zip, ())
-            self.execute(self.copy_to_final_distribute_folder, ())
-
-        def make_dist_folder(self):
-            """ Make dist folder to add distribution files to. """
-            if not os.path.exists(DIST_DIR):
-                os.mkdir(DIST_DIR)
-
-        def make_zip(self):
-            """ Create ZIP distribution. """
-            self.zip_path = os.path.join(DIST_DIR, f'{DIST_NAME}.zip')
-            with zipfile.ZipFile(self.zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for dirpath, dirnames, filenames in os.walk(os.path.join(os.getcwd(), self.build_exe)):
-                    for file in filenames:
-                        path = os.path.join(os.getcwd(), dirpath, file)
-                        arcname = os.path.relpath(path, self.build_exe)
-                        zipf.write(path, arcname)
-
-        def copy_to_final_distribute_folder(self):
-            if os.path.exists(self.zip_path):
-                shutil.copy(self.zip_path, FINAL_DISTRIBUTION_DIR)
-
-    COMMANDS['build'] = Build
-
 if MAC:
     class Create(distutils.core.Command):
         user_options = []
@@ -245,7 +201,6 @@ class Distribute(distutils.core.Command):
     user_options = []
 
     def initialize_options(self) -> None:
-
         if not os.path.exists(FINAL_DISTRIBUTION_DIR):
             os.mkdir(FINAL_DISTRIBUTION_DIR)
 
@@ -343,7 +298,7 @@ if WINDOWS:
         executables=[
             cx_Freeze.Executable(
                 'S3_File_Uploader/main.py',
-                targetName='S3 File Uploader',
+                targetName=EXEC_NAME,
                 base=BASE,
                 icon=ICON
             )

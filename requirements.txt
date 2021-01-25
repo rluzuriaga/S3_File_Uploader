@@ -3,5 +3,4 @@ boto3
 ffmpeg-python
 pexpect
 requests
-html
 cx_Freeze

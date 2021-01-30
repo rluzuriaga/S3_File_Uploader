@@ -59,18 +59,30 @@ jobs:
         ls -l
         ls -l distribution
     
-    - name: Check if executables were actually created Windows
+    - name: Check if Windows build created MSI file
       if: matrix.os == 'windows-latest'
       run: |
-        if ! [[ -f "$WINDOWS_MSI_FILE_NAME" && -f "$WINDOWS_ZIP_FILE_NAME" ]]; then exit 1; else echo 'Both "$(WINDOWS_MSI_FILE_NAME)" and "$(WINDOWS_ZIP_FILE_NAME)" were created successfully'; fi
+        if [ -f "$WINDOWS_MSI_FILE_NAME" ]; then echo 'MSI file ("$(WINDOWS_MSI_FILE_NAME)") created successfully.'; else exit 1; fi
       env:
         WINDOWS_MSI_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.msi"
+
+    - name: Check if Windows build created ZIP file
+      if: matrix.os == 'windows-latest'
+      run: |
+        if [-f "$WINDOWS_ZIP_FILE_NAME" ]; then echo 'ZIP file ("$(WINDOWS_ZIP_FILE_NAME)") created successfully.'; else exit 1; fi
+      env:
         WINDOWS_ZIP_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.zip"
       
-    - name: Check if executables were actually created Mac
+    - name: Check if Mac build created DMG file
       if: matrix.os == 'macos-10.15'
       run: |
-        if ! [ -f "$MAC_DMG_FILE_NAME" && -d "$MAC_APP_FILE_NAME" ]; then exit 1; else echo 'Both "$(MAC_DMG_FILE_NAME)" and "$(MAC_APP_FILE_NAME)" were created successfully'; fi
+        if [ -f "$MAC_DMG_FILE_NAME" ]; then echo 'DMG file ("$(MAC_DMG_FILE_NAME)") created successfully.'; else exit 1; fi
+      env:
+        MAC_DMG_FILE_NAME: "distribution/S3 File Uploader Installer.dmg"
+
+    - name: Check if Mac build created APP bundle
+      if: matrix.os == 'macos-10.15'
+      run: |
+        if [ -d "$MAC_APP_FILE_NAME" ]; then echo 'APP bundle ("$(MAC_APP_FILE_NAME)") created successfully.'; else exit 1; fi
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
-        MAC_DMG_FILE_NAME: "distribution/S3 File Uploader Installer.dmg"

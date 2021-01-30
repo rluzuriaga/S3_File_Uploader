@@ -3,6 +3,10 @@
 
 name: S3 File Uploader
 
+defaults:
+  run:
+    shell: bash
+
 on:
   push:
     branches:
@@ -51,4 +55,5 @@ jobs:
 #     - name: Check if executables were created succesfully
     - name: Check file structure
       run: |
+        pwd
         ls -l

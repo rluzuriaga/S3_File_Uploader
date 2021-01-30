@@ -57,3 +57,4 @@ jobs:
       run: |
         pwd
         ls -l
+        ls -l distribution

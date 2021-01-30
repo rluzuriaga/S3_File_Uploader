@@ -68,7 +68,7 @@ jobs:
     - name: Check if Windows build created ZIP file
       if: matrix.os == 'windows-latest'
       run: |
-        if [-f "$WINDOWS_ZIP_FILE_NAME" ]; then echo "ZIP file (${WINDOWS_ZIP_FILE_NAME}) created successfully."; else exit 1; fi
+        if [ -f "$WINDOWS_ZIP_FILE_NAME" ]; then echo "ZIP file (${WINDOWS_ZIP_FILE_NAME}) created successfully."; else exit 1; fi
       env:
         WINDOWS_ZIP_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.zip"
       

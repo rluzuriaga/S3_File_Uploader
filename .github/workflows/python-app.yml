@@ -62,8 +62,8 @@ jobs:
     - name: Check if executables were actually created Windows
       if: matrix.os == 'windows-latest'
       run: |
-        if ! [ -f $WINDOWS_MSI_FILE_NAME ]; then exit 1; fi
-        if ! [ -f $WINDOWS_ZIP_FILE_NAME ]; then exit 1; fi
+        if ! [ -f "$WINDOWS_MSI_FILE_NAME" ]; then exit 1; fi
+        if ! [ -f "$WINDOWS_ZIP_FILE_NAME" ]; then exit 1; fi
       env:
         WINDOWS_MSI_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.msi"
         WINDOWS_ZIP_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.zip"
@@ -71,8 +71,8 @@ jobs:
     - name: Check if executables were actually created Mac
       if: matrix.os == 'macos-10.15'
       run: |
-        if ! [ -f $MAC_DMG_FILE_NAME ]; then exit 1; fi
-        if ! [ -d $MAC_APP_FILE_NAME ]; then exit 1; fi
+        if ! [ -f "$MAC_DMG_FILE_NAME" ]; then exit 1; fi
+        if ! [ -d "$MAC_APP_FILE_NAME" ]; then exit 1; fi
       env:
-        MAC_APP_FILE_NAME: "distribution/S3\ File\ Uploader.app"
-        MAC_DMG_FILE_NAME: "distribution/S3\ File\ Uploader\ Installer.dmg"
+        MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
+        MAC_DMG_FILE_NAME: "distribution/S3 File Uploader Installer.dmg"

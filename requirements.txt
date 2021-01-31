@@ -4,3 +4,4 @@ ffmpeg-python
 pexpect
 requests
 cx_Freeze
+python-dotenv

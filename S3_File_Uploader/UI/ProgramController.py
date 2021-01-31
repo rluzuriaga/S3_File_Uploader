@@ -101,3 +101,6 @@ class ProgramController(tk.Tk):
         self.frames[SetupWindow].stop_after()
 
         logger.debug('Stopping the tkinter after method for "SetupWindow".')
+
+    def select_frame(self, frame_):
+        return self.frames[frame_]

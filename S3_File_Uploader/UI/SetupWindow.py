@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog
 
 import os
+import queue
 import threading
 
 from S3_File_Uploader import IS_MAC, IS_WINDOWS
@@ -88,6 +89,12 @@ class SetupWindow(ttk.Frame):
                            height=300, relief=tk.RIDGE)
         self.controller = controller
 
+        # Create queues for using in non-main threads.
+        self.function_queue = queue.Queue()
+        self.label_variable_queue = queue.Queue()
+        self.variable_configure_queue = queue.Queue()
+        self._update_queue()
+
         logger.debug('Initializing the SetupWindow ttk frame.')
 
         if 'Resources' in os.getcwd():
@@ -117,11 +124,13 @@ class SetupWindow(ttk.Frame):
         self.setup_window_top_label.grid(self.TOP_LABEL_GRID)
 
         # Row 1
+        self.setup_window_output_message_variable = tk.StringVar()
         self.setup_window_output_message = ttk.Label(
             self,
             text='',
             style='setup_window_output_message_label.TLabel',
-            justify=tk.CENTER
+            justify=tk.CENTER,
+            textvariable=self.setup_window_output_message_variable
         )
         self.setup_window_output_message.grid(self.OUTPUT_MESSAGE_GRID)
 
@@ -324,6 +333,27 @@ class SetupWindow(ttk.Frame):
             state='disabled'
         )
         self.lock_unlock_button.grid(self.LOCK_UNLOCK_BUTTON_GRID)
+
+    def _update_queue(self) -> None:
+        """ Function to update variables/functions from non-main threads using the main thread. """
+
+        if not self.label_variable_queue.empty():
+            var, arg = self.label_variable_queue.get_nowait()
+
+            var(arg)
+
+        if not self.variable_configure_queue.empty():
+            var, args_dict = self.variable_configure_queue.get_nowait()
+
+            var.configure(**args_dict)
+
+        if not self.function_queue.empty():
+            func, args = self.function_queue.get_nowait()
+
+            if func:
+                func(*args)
+
+        self.after(50, self._update_queue)
 
     def _check_if_in_path(self) -> bool:
         """ Check if ffmpeg and ffprobe are in the PATH.
@@ -628,19 +658,32 @@ class SetupWindow(ttk.Frame):
                     DB.set_aws_config(
                         access_key_id, secret_key, region_name_code)
 
-                    self.setup_window_output_message.configure(text='')
-                    self.setup_window_output_message.configure(
-                        text='Settings saved.', foreground='#3fe03f')  # Darker green than foreground='green'
+                    # Change setup_window_output_message_variable text to `Settings saved.`
+                    self.label_variable_queue.put_nowait((
+                        self.setup_window_output_message_variable.set, 'Settings saved.'
+                    ))
 
-                    self.lock_unlock_button.configure(state='normal')
+                    # Set the color of the above text to green.
+                    self.variable_configure_queue.put_nowait((
+                        self.setup_window_output_message,
+                        dict(foreground='#3fe03f')
+                    ))
+
+                    # Enable the lock/unlock button.
+                    self.variable_configure_queue.put_nowait((
+                        self.lock_unlock_button,
+                        {'state': 'normal'}
+                    ))
 
                     # Enable all main window buttons
-                    self.controller.enable_main_window_buttons()
+                    self.function_queue.put_nowait((self.controller.enable_main_window_buttons, ()))
 
                     # Run function to lock the settings
-                    self.lock_unlock_aws_settings()
+                    self.function_queue.put_nowait((self.lock_unlock_aws_settings, ()))
                 else:
                     raise AWSAuthenticationException
+
+            # TODO: Change these to use the new queues
             except AWSKeyException:
                 self.setup_window_output_message.configure(
                     text='ERROR: Access Key ID or Secret Access Key invalid.', foreground='red')

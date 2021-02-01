@@ -95,6 +95,16 @@ class MainTestCase(unittest.TestCase):
         self.assertEqual(str(setup_window.secret_key_input_field.cget('state')), 'disabled')
         self.assertEqual(str(setup_window.region_name_input_field.cget('state')), 'disabled')
 
+        # Interact with the UI to unlock the settings
+        setup_window.lock_unlock_button.invoke()
+        self._update_program_controller_loop()
+
+        # Make sure that the unlock button actually unlocks the settings
+        self.assertTrue(setup_window.save_button.grid_info(), msg="Save button not on grid.")
+        self.assertEqual(str(setup_window.access_key_id_input_field.cget('state')), 'normal')
+        self.assertEqual(str(setup_window.secret_key_input_field.cget('state')), 'normal')
+        self.assertEqual(str(setup_window.region_name_input_field.cget('state')), 'readonly')
+
         self.pc.destroy()
 
 

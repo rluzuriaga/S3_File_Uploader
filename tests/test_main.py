@@ -1,6 +1,7 @@
 import os
 import time
 import unittest
+from shutil import which
 
 from dotenv import load_dotenv
 
@@ -44,6 +45,20 @@ class MainTestCase(unittest.TestCase):
             else:
                 break
 
+    def test_environ_vars_available(self):
+        """ Test if the environment variables a present. """
+        self.assertIsNotNone(os.environ.get('AWS_ACCESS_KEY_ID'))
+        self.assertIsNotNone(os.environ.get('AWS_SECRET_KEY'))
+        self.assertIsNotNone(os.environ.get('AWS_REGION_NAME'))
+
+    def test_ffmpeg_in_path(self):
+        """ Test if ffmpeg is added to path. """
+        self.assertIsNotNone(which('ffmpeg'))
+
+    def test_ffprobe_in_path(self):
+        """ Test if ffprobe is added to path. """
+        self.assertIsNotNone(which('ffprobe'))
+
     def test_aws_configuration(self):
         """ Test that there was a successful message given after saving AWS configuration. """
 
@@ -57,6 +72,7 @@ class MainTestCase(unittest.TestCase):
 
         self._update_program_controller_loop(1)
 
+        # Make sure that the settings saved message gets displayed.
         self.assertEqual(setup_window.setup_window_output_message_variable.get(), 'Settings saved.')
 
         self.pc.destroy()

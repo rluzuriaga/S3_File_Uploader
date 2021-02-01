@@ -1,6 +1,7 @@
 import os
 import time
 import unittest
+import warnings
 from shutil import which
 
 from dotenv import load_dotenv
@@ -22,7 +23,16 @@ def remove_db_file():
 
 
 class MainTestCase(unittest.TestCase):
-    pc = ProgramController()
+    @classmethod
+    def setUpClass(cls) -> None:
+        remove_db_file()
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
+        return super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        remove_db_file()
+        return super().tearDownClass()
 
     def _update_program_controller_loop(self, seconds: int) -> None:
         """ Run a loop for the guiven seconds that updates idle tasks and user input tasks.
@@ -62,6 +72,7 @@ class MainTestCase(unittest.TestCase):
 
     def test_aws_configuration(self):
         """ Test that there was a successful message given after saving AWS configuration. """
+        self.pc = ProgramController()
 
         self.pc.add_frame_to_paned_window(SetupWindow)
         setup_window = self.pc.select_frame(SetupWindow)
@@ -86,6 +97,4 @@ class MainTestCase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    remove_db_file()
-
     unittest.main(exit=False)

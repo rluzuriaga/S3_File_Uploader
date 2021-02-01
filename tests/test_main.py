@@ -14,10 +14,11 @@ load_dotenv()
 
 
 def remove_db_file():
-    # TODO: Figure out if this is searching in the right directory every time.
-    #       It for sure is wrong if running the file inside of the tests direcotry.
-    if os.path.exists(os.path.join(os.getcwd(), 'db.sqlite3')):
-        os.remove(os.path.join(os.getcwd(), 'db.sqlite3'))
+    # Get the full path to where the database file is located.
+    db_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')
+
+    if os.path.exists(db_file_path):
+        os.remove(db_file_path)
 
 
 class MainTestCase(unittest.TestCase):

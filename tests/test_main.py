@@ -34,13 +34,13 @@ class MainTestCase(unittest.TestCase):
         remove_db_file()
         return super().tearDownClass()
 
-    def _update_program_controller_loop(self, seconds: int) -> None:
+    def _update_program_controller_loop(self, seconds: int = 1) -> None:
         """ Run a loop for the guiven seconds that updates idle tasks and user input tasks.
         This function needs to be used because to be able to test Tkinter UI elements , the test
         cannot use the mainloop function of tkinter. That means that Tkinter needs to be updated manually.
 
         Args:
-            seconds (int): Seconds to run the loop.
+            seconds (int, optional): Seconds to run the loop. Defaults to 1.
                 Each second, the update and update_idletasks functions run around 2600 times (depending on CPU clock speed).
         """
 
@@ -56,38 +56,40 @@ class MainTestCase(unittest.TestCase):
             else:
                 break
 
-    def test_environ_vars_available(self):
+    def test_environ_vars_available(self) -> None:
         """ Test if the environment variables a present. """
         self.assertIsNotNone(os.environ.get('AWS_ACCESS_KEY_ID'))
         self.assertIsNotNone(os.environ.get('AWS_SECRET_KEY'))
         self.assertIsNotNone(os.environ.get('AWS_REGION_NAME'))
 
-    def test_ffmpeg_in_path(self):
+    def test_ffmpeg_in_path(self) -> None:
         """ Test if ffmpeg is added to path. """
         self.assertIsNotNone(which('ffmpeg'))
 
-    def test_ffprobe_in_path(self):
+    def test_ffprobe_in_path(self) -> None:
         """ Test if ffprobe is added to path. """
         self.assertIsNotNone(which('ffprobe'))
 
-    def test_aws_configuration(self):
-        """ Test that there was a successful message given after saving AWS configuration. """
+    def test_setup_window(self) -> None:
+        """ Test that everyting in the setup window is working correctly. """
+
         self.pc = ProgramController()
 
         self.pc.add_frame_to_paned_window(SetupWindow)
         setup_window = self.pc.select_frame(SetupWindow)
 
+        # Interact with the UI
         setup_window.access_key_id_string.set(os.environ.get('AWS_ACCESS_KEY_ID'))
         setup_window.secret_key_string.set(os.environ.get('AWS_SECRET_KEY'))
         setup_window.region_name_var.set(os.environ.get('AWS_REGION_NAME'))
         setup_window.save_button.invoke()
 
-        self._update_program_controller_loop(1)
+        self._update_program_controller_loop()
 
         # Make sure that the settings saved message gets displayed.
         self.assertEqual(setup_window.setup_window_output_message_variable.get(), 'Settings saved.')
 
-        # Make sure that the command actually locked the settings.
+        # Make sure that the save button/command actually locked the settings.
         self.assertFalse(setup_window.save_button.grid_info(), msg="Save button still on grid.")
         self.assertEqual(str(setup_window.access_key_id_input_field.cget('state')), 'disabled')
         self.assertEqual(str(setup_window.secret_key_input_field.cget('state')), 'disabled')

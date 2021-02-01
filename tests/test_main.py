@@ -76,6 +76,12 @@ class MainTestCase(unittest.TestCase):
         # Make sure that the settings saved message gets displayed.
         self.assertEqual(setup_window.setup_window_output_message_variable.get(), 'Settings saved.')
 
+        # Make sure that the command actually locked the settings.
+        self.assertFalse(setup_window.save_button.grid_info(), msg="Save button still on grid.")
+        self.assertEqual(str(setup_window.access_key_id_input_field.cget('state')), 'disabled')
+        self.assertEqual(str(setup_window.secret_key_input_field.cget('state')), 'disabled')
+        self.assertEqual(str(setup_window.region_name_input_field.cget('state')), 'disabled')
+
         self.pc.destroy()
 
 

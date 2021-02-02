@@ -2,8 +2,11 @@ import os
 import time
 import unittest
 import warnings
+from pathlib import Path
 
 from dotenv import load_dotenv
+
+from .utils import remove_db_file, update_program_controller_loop
 
 from S3_File_Uploader.UI.ProgramController import ProgramController
 from S3_File_Uploader.UI.MainWindow import MainWindow
@@ -11,14 +14,6 @@ from S3_File_Uploader.UI.SetupWindow import SetupWindow
 from S3_File_Uploader.UI.MassUpload import MassUpload
 
 load_dotenv()
-
-
-def remove_db_file():
-    # Get the full path to where the database file is located.
-    db_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')
-
-    if os.path.exists(db_file_path):
-        os.remove(db_file_path)
 
 
 class SetupWindowTestCase(unittest.TestCase):
@@ -32,28 +27,6 @@ class SetupWindowTestCase(unittest.TestCase):
     def tearDownClass(cls) -> None:
         remove_db_file()
         return super().tearDownClass()
-
-    def _update_program_controller_loop(self, seconds: int = 1) -> None:
-        """ Run a loop for the guiven seconds that updates idle tasks and user input tasks.
-        This function needs to be used because to be able to test Tkinter UI elements , the test
-        cannot use the mainloop function of tkinter. That means that Tkinter needs to be updated manually.
-
-        Args:
-            seconds (int, optional): Seconds to run the loop. Defaults to 1.
-                Each second, the update and update_idletasks functions run around 2600 times (depending on CPU clock speed).
-        """
-
-        secs = seconds
-        start_time = time.time()
-        while True:
-            current_time = time.time()
-            elapsed_time = current_time - start_time
-
-            if elapsed_time < secs:
-                self.pc.update_idletasks()
-                self.pc.update()
-            else:
-                break
 
     def test_setup_window_on_fresh_database(self) -> None:
         """ Test that everyting in the setup window is working correctly. """
@@ -73,7 +46,7 @@ class SetupWindowTestCase(unittest.TestCase):
         setup_window.region_name_var.set(os.environ.get('AWS_REGION_NAME'))
         setup_window.save_button.invoke()
 
-        self._update_program_controller_loop()
+        update_program_controller_loop(self.pc)
 
         # Make sure that the mass upload button is now enabled after the save
         self.assertEqual(str(main_window.mass_upload_window_button.cget('state')), 'normal')
@@ -89,7 +62,7 @@ class SetupWindowTestCase(unittest.TestCase):
 
         # Interact with the UI to unlock the settings
         setup_window.lock_unlock_button.invoke()
-        self._update_program_controller_loop()
+        update_program_controller_loop(self.pc)
 
         # Make sure that the unlock button actually unlocks the settings
         self.assertTrue(setup_window.save_button.grid_info(), msg="Save button not on grid.")

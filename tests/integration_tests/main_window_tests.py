@@ -2,7 +2,8 @@ import unittest
 
 from S3_File_Uploader.UI.MainWindow import MainWindow
 
-from tests.integration_tests.utils import remove_db_file, open_program, close_program
+from tests.integration_tests.utils import remove_db_file, open_program, \
+    close_program, update_program_controller_loop
 
 
 class MainWindowTestCase(unittest.TestCase):
@@ -23,6 +24,22 @@ class MainWindowTestCase(unittest.TestCase):
 
         # Make sure that the mass upload button is disabled before any settings are saved
         self.assertEqual(str(main_window.mass_upload_window_button.cget('state')), 'disabled')
+
+    def test_setup_window_button(self) -> None:
+        """ Test that when clicking the the Setup Window button, the SetupWindow pane gets added and removed. """
+        main_window = self.pc.select_frame(MainWindow)
+
+        # Make sure that the only active pane is mainwindow
+        self.assertEqual(len(self.pc.active_panes()), 1)
+        self.assertIn('mainwindow', self.pc.active_panes()[-1])
+
+        # Click on the Setup button
+        main_window.main_window_setup_button.invoke()
+        update_program_controller_loop(self.pc)
+
+        # Make sure that there are 2 active panes (MainWindow & SetupWindow)
+        self.assertEqual(len(self.pc.active_panes()), 2)
+        self.assertIn('setupwindow', self.pc.active_panes()[-1])
 
 
 if __name__ == "__main__":

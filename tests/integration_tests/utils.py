@@ -1,13 +1,20 @@
 import os
 import time
-from pathlib import Path
 
+from S3_File_Uploader import DatabasePath
 from S3_File_Uploader.UI.ProgramController import ProgramController
 
 
-def remove_db_file():
-    # Get the full path to where the database file is located.
-    db_file_path = os.path.join(Path(__file__).parents[2], 'db.sqlite3')
+def remove_db_file() -> None:
+    """ Function to remove a database file if it exists.
+
+    This function uses the DatabasePath class from `S3_File_Uploader.__init__.py` to determine what
+    database file to remove.
+    """
+    # Have to create an instance variable of DatabasePath since the tests create different databases
+    #   depending on the test that is running.
+    # I tested by just entering `DatabasePath.get()` in the os commands bellow and the tests fail.
+    db_file_path = DatabasePath.get()
 
     if os.path.exists(db_file_path):
         os.remove(db_file_path)

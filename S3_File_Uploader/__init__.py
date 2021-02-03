@@ -1,8 +1,20 @@
+import os
 import sys
-from S3_File_Uploader.Database import Database
 
-with Database() as DB:
-    DB_VERSION = DB.get_db_version()
+
+class DatabasePath:
+    path = os.path.join(os.getcwd(), 'db.sqlite3')
+
+    @classmethod
+    def get(cls) -> str:
+        return cls.path
+
+    @classmethod
+    def change_path(cls, new_path: str) -> None:
+        cls.path = new_path
+
+
+DB_VERSION = 2
 
 APP_TITLE = "S3 File Uploader"
 APP_VERSION = "0.4"

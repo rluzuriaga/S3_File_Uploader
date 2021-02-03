@@ -17,6 +17,13 @@ class MainWindowTestCase(unittest.TestCase):
         close_program(cls.pc)
         return super().tearDownClass()
 
+    def test_mass_upload_button_disabled(self) -> None:
+        """ Test that the the mass upload button is actually disabled when there is no setup data in database. """
+        main_window = self.pc.select_frame(MainWindow)
+
+        # Make sure that the mass upload button is disabled before any settings are saved
+        self.assertEqual(str(main_window.mass_upload_window_button.cget('state')), 'disabled')
+
 
 if __name__ == "__main__":
     unittest.main(exit=False)

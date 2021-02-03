@@ -34,3 +34,16 @@ def update_program_controller_loop(program_controller: ProgramController, second
             program_controller.update()
         else:
             break
+
+
+def open_program() -> None:
+    pc = ProgramController()
+    return pc
+
+
+def close_program(pc: ProgramController) -> None:
+    pc.quit()
+
+
+def destroy_program(pc: ProgramController) -> None:
+    pc.destroy()

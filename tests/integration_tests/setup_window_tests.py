@@ -8,7 +8,7 @@ from S3_File_Uploader import DatabasePath
 from S3_File_Uploader.UI.SetupWindow import SetupWindow
 
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
-from tests.integration_tests.utils import open_program, close_program, destroy_program
+from tests.integration_tests.utils import open_program, destroy_program
 
 
 DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
@@ -37,8 +37,8 @@ class SetupWindowTestCase(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        close_program(self.pc)
         destroy_program(self.pc)
+        del self.pc
         return super().tearDown()
 
     def test_setup_window_on_fresh_database(self) -> None:
@@ -46,6 +46,8 @@ class SetupWindowTestCase(unittest.TestCase):
 
         self.pc.add_frame_to_paned_window(SetupWindow)
         setup_window = self.pc.select_frame(SetupWindow)
+
+        update_program_controller_loop(self.pc)
 
         # Interact with the UI to add the AWS keys, region name, and "click" the save button
         setup_window.access_key_id_string.set(os.environ.get('AWS_ACCESS_KEY_ID'))

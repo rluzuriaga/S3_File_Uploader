@@ -4,7 +4,7 @@ import unittest
 from S3_File_Uploader import DatabasePath
 from S3_File_Uploader.UI.MainWindow import MainWindow
 
-from tests.integration_tests.utils import open_program, close_program, destroy_program
+from tests.integration_tests.utils import open_program, destroy_program
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 
 DatabasePath.change_path(os.path.join(os.getcwd(), 'main_window_test_db.sqlite3'))
@@ -26,8 +26,8 @@ class MainWindowTestCase(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        close_program(self.pc)
         destroy_program(self.pc)
+        del self.pc
         return super().tearDown()
 
     def test_mass_upload_button_disabled(self) -> None:

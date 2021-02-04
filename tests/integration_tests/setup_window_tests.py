@@ -25,15 +25,21 @@ class SetupWindowTestCase(unittest.TestCase):
         warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
 
         remove_db_file()
-        cls.pc = open_program()
         return super().setUpClass()
 
     @classmethod
     def tearDownClass(cls) -> None:
-        close_program(cls.pc)
-        destroy_program(cls.pc)
         remove_db_file()
         return super().tearDownClass()
+
+    def setUp(self) -> None:
+        self.pc = open_program()
+        return super().setUp()
+
+    def tearDown(self) -> None:
+        close_program(self.pc)
+        destroy_program(self.pc)
+        return super().tearDown()
 
     def test_setup_window_on_fresh_database(self) -> None:
         """ Test that everyting in the setup window is working correctly. """

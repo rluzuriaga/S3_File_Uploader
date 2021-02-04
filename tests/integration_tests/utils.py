@@ -55,10 +55,21 @@ def update_program_controller_loop(program_controller: ProgramController, second
 
 
 def open_program() -> None:
+    """ Open the application & update the program controller loop.
+
+    Returns:
+        pc (ProgramController): The program controller for the tkinter app.
+    """
     pc = ProgramController()
+    update_program_controller_loop(pc)
+
     return pc
 
 
 def destroy_program(pc: ProgramController) -> None:
+    """ Update the program controller loop then quit application. 
+    Need to update the controller loop so that there are no more tkinter processes still pending.
+    """
+    update_program_controller_loop(pc)
     pc.quit()
     pc.destroy()

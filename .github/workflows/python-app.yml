@@ -29,6 +29,10 @@ jobs:
       with:
         ref: fix-issue-27
 
+    - name: Setup FFmpeg
+      uses: FedericoCarboni/setup-ffmpeg@v1-beta
+
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:

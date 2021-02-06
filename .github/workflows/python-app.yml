@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+      - fix-issue-27
   pull_request:
     branches:
       - master
@@ -25,6 +26,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: fix-issue-27
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -85,3 +88,7 @@ jobs:
         if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
+    
+    - name: Run tests.
+      run: |
+        python -n unittest discover -s tests -p "*_tests.py"

@@ -2,7 +2,7 @@ import os
 import time
 import _tkinter
 
-from S3_File_Uploader import DatabasePath
+from S3_File_Uploader import DatabasePath, LOGS_DIRECTORY
 from S3_File_Uploader.UI.ProgramController import ProgramController
 
 
@@ -54,12 +54,35 @@ def update_program_controller_loop(program_controller: ProgramController, second
             break
 
 
+def setup_logs_for_tests() -> None:
+    import logging
+
+    log_file_path = os.path.join(LOGS_DIRECTORY, 'tests.log')
+
+    if not os.path.exists(LOGS_DIRECTORY):
+        os.makedirs(LOGS_DIRECTORY)
+
+    logger = logging.getLogger('main_logger')
+    logger.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler(log_file_path)
+    fh.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    logger.debug(f'Logger setup for tests.')
+
+
 def open_program() -> None:
     """ Open the application & update the program controller loop.
 
     Returns:
         pc (ProgramController): The program controller for the tkinter app.
     """
+    setup_logs_for_tests()
+
     pc = ProgramController()
     update_program_controller_loop(pc)
 

@@ -92,8 +92,8 @@ jobs:
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
     
-    - name: Create logs directory
-      run: mkdir logs
+    # - name: Create logs directory
+    #   run: mkdir logs
     
     - name: Run tests.
       run: |
@@ -106,7 +106,4 @@ jobs:
     - name: Return logs data
       if: ${{ failure() }}
       run: |
-        ls
-        ls logs
-        cd logs
-        cat *.log | grep "Returning region code"
+        cd logs && cat tests.log | grep "Returning region code"

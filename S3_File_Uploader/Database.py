@@ -259,7 +259,7 @@ class Database:
             '''
         ).fetchone()[0]
 
-        logger.debug(f'Returning region code `{output}`')
+        logger.debug(f'Returning region code `{output}` from region name `{region_name}`')
 
         return output
 

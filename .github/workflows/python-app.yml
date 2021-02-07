@@ -103,4 +103,4 @@ jobs:
     - name: Return logs data
       if: ${{ failure() }}
       run: |
-        cat logs/*.log | grep "Returning region code"
+        cd logs && cat *.log | grep "Returning region code"

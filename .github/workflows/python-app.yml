@@ -101,5 +101,6 @@ jobs:
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
     
     - name: Return logs data
+      if: ${{ failure() }}
       run: |
         cat logs/*.log | grep "Returning region code"

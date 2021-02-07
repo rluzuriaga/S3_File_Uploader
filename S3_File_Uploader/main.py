@@ -15,8 +15,8 @@ current_datetime = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 log_path = WORKING_DIRECTORY + f'/logs/{current_datetime}.log'
 
 # Check if a logs directory is created, if not then it is created.
-if not os.path.exists(WORKING_DIRECTORY + '/logs'):
-    os.makedirs(WORKING_DIRECTORY + '/logs')
+if not os.path.exists(os.path.join(WORKING_DIRECTORY, 'logs')):
+    os.makedirs(os.path.join(WORKING_DIRECTORY, 'logs'))
 
 # Changed the setup of the logger from the basicConfig so that the file isn't logging the imported modules
 logger = logging.getLogger('main_logger')

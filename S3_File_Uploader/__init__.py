@@ -20,6 +20,7 @@ APP_TITLE = "S3 File Uploader"
 APP_VERSION = "0.4"
 
 WORKING_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+LOGS_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'logs')
 
 if 'darwin' in sys.platform:
     IS_MAC = True

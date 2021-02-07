@@ -31,6 +31,14 @@ jobs:
 
     - name: Setup FFmpeg
       uses: FedericoCarboni/setup-ffmpeg@v1-beta
+    
+    - name: Test Secrets
+      run: |
+        echo "$SECRET_TEST_A"
+        echo "$SECRET_TEST_B"
+      env:
+        SECRET_TEST_A: ${{ secrets.SECRET_TEST_A }}
+        SECRET_TEST_B: ${{ secrets.SECRET_TEST_B }}
 
 
     - name: Set up Python ${{ matrix.python-version }}

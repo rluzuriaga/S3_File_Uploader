@@ -108,9 +108,9 @@ jobs:
         SECRET_TEST_A: ${{ secrets.SECRET_TEST_A }}
         SECRET_TEST_B: ${{ secrets.SECRET_TEST_B }}
     
-    # - name: Archive log file
-    #   uses: actions/upload-artifact@v2
-    #   if: ${{ always() }}
-    #   with:
-    #     name: test-logs
-    #     path: logs/tests.log
+    - name: Archive log file
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: test-logs
+        path: testing.txt

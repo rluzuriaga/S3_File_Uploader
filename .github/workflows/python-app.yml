@@ -97,19 +97,22 @@ jobs:
     
     - name: Run tests.
       run: |
-        python -m unittest discover -v -s tests -p "*_tests.py"
-      with:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        python -m unittest discover -v -s tests/ -p "*_tests.py"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
     
-    - name: Archive log file
-      uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      with:
-        name: test-logs
-        path: logs/tests.log
+    - name: Test env vars
+      run: |
+        python testing_env_vars.py
+      env:
+        SECRET_TEST_A: ${{ secrets.SECRET_TEST_A }}
+        SECRET_TEST_B: ${{ secrets.SECRET_TEST_B }}
+    
+    # - name: Archive log file
+    #   uses: actions/upload-artifact@v2
+    #   if: ${{ always() }}
+    #   with:
+    #     name: test-logs
+    #     path: logs/tests.log

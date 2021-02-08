@@ -7,12 +7,12 @@ from S3_File_Uploader.UI.MainWindow import MainWindow
 from tests.integration_tests.utils import open_program, destroy_program
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 
-DatabasePath.change_path(os.path.join(os.getcwd(), 'main_window_test_db.sqlite3'))
-
 
 class MainWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        DatabasePath.change_path(os.path.join(os.getcwd(), 'main_window_test_db.sqlite3'))
+
         remove_db_file()
         return super().setUpClass()
 

@@ -11,8 +11,6 @@ from tests.integration_tests.utils import remove_db_file, update_program_control
 from tests.integration_tests.utils import open_program, destroy_program
 
 
-DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
-
 load_dotenv()
 
 # Ignoring boto3 warning.
@@ -24,6 +22,8 @@ warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<
 class SetupWindowTestUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
+
         remove_db_file()
 
         cls.pc = open_program()
@@ -88,6 +88,8 @@ class SetupWindowTestUIElements(unittest.TestCase):
 class SetupWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
+
         remove_db_file()
         return super().setUpClass()
 

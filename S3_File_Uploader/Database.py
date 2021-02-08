@@ -594,6 +594,16 @@ class Database:
 
         return output
 
+    @_only_context
+    def get_tests_table(self):
+        logger.debug(f'Trying to retrieve everyting from the tests table.')
+        try:
+            output = self.cursor.execute('SELECT * FROM tests;').fetchone()
+            return output
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                return None
+
 
 class NotWithContext(Exception):
     pass

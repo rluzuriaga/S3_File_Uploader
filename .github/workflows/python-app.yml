@@ -103,9 +103,9 @@ jobs:
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
     
-    - name: Return logs data
-      if: ${{ failure() }}
-      run: |
-        cd logs 
-        ls
-        cat *.log | grep "Returning region code"
+    - name: Archive log file
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: test-logs
+        path: logs/tests.log

@@ -14,6 +14,7 @@ class MainTestCase(unittest.TestCase):
         self.assertIsNotNone(os.environ.get('AWS_ACCESS_KEY_ID'))
         self.assertIsNotNone(os.environ.get('AWS_SECRET_KEY'))
         self.assertIsNotNone(os.environ.get('AWS_REGION_NAME'))
+        self.assertIsNotNone(os.environ.get('S3_BUCKET'))
 
     def test_ffmpeg_in_path(self) -> None:
         """ Test if ffmpeg is added to path. """

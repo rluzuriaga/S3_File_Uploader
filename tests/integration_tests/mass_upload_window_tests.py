@@ -1,12 +1,17 @@
 import os
 import unittest
+import threading
 
 from S3_File_Uploader import DatabasePath
+from S3_File_Uploader.AWS import AWS
 from S3_File_Uploader.UI.MassUpload import MassUpload
 from S3_File_Uploader.UI.SetupWindow import SetupWindow
 
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 from tests.integration_tests.utils import open_program, destroy_program
+
+
+DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 
 class MassUploadWindowTestCase(unittest.TestCase):
@@ -24,7 +29,11 @@ class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         destroy_program(cls.pc)
+
+        AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
+
         remove_db_file()
+
         return super().tearDownClass()
 
     @classmethod
@@ -65,6 +74,37 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         # Assert that the buckets get updated
         self.assertTrue(mass_upload.s3_bucket_selector.cget('values'))
+
+    def test_2_all_file_upload(self) -> None:
+        """ Test that the all files method of uploading data is working.
+        This test uses the `data` directory to upload to the S3 bucket in the environment var.
+        """
+        mass_upload = self.pc.select_frame(MassUpload)
+
+        # Add data directory path to mass upload path entry box
+        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
+
+        # Set bucket to use from env var
+        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
+
+        # Click on the start upload button
+        mass_upload.start_upload_button.invoke()
+
+        # Have to run a new thread that would kill the mainloop after 2 seconds.
+        # This needs to be done because once the mainloop gets called it won't stop unless it is done
+        #   this way or manually.
+        threading.Thread(target=self.pc.after, args=(2000, self.pc.quit)).start()
+
+        # Run the mainloop so that the upload will execute on the same thread as the mainloop
+        # If the mainloop is not called, then an exception will be raised `RuntimeError: main thread is not in main loop`
+        self.pc.mainloop()
+
+        # Assert that the finished label gets added
+        self.assertEqual(mass_upload.update_label.cget('text'), 'Finished!')
+
+
+    # TODO: Add test for a file that does not upload because it is already in S3
+    # TODO: Add test for ffmpeg file upload
 
 
 if __name__ == "__main__":

@@ -30,6 +30,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
     def tearDownClass(cls) -> None:
         destroy_program(cls.pc)
 
+        # Need to remove the tests data before removing the DB file
         AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
 
         remove_db_file()
@@ -101,7 +102,6 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         # Assert that the finished label gets added
         self.assertEqual(mass_upload.update_label.cget('text'), 'Finished!')
-
 
     # TODO: Add test for a file that does not upload because it is already in S3
     # TODO: Add test for ffmpeg file upload

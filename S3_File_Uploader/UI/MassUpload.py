@@ -739,14 +739,14 @@ class MassUpload(ttk.Frame):
 
         self._add_cancel_buttons()
 
+        # Replace the `\` used in windows for `/`
+        if IS_WINDOWS:
+            upload_start_path = upload_start_path.replace('\\', '/')
+
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
-            # Replace the `\` used in windows for `/`
-            if IS_WINDOWS:
-                dirpath = dirpath.replace('\\', '/')
-
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
             for file in filenames:
@@ -808,15 +808,15 @@ class MassUpload(ttk.Frame):
             # Create secondary progressbar only if it uses ffmpeg
             self._create_ffmpeg_and_upload_progressbar(100)
 
+        # Replace the `\` used in windows for `/`
+        if IS_WINDOWS:
+            upload_start_path = upload_start_path.replace('\\', '/')
+
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
         # Iterate through the upload directory
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
-            # Replace the `\` used in windows for `/`
-            if IS_WINDOWS:
-                dirpath = dirpath.replace('\\', '/')
-
             # Get the directory path that is used for S3
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 

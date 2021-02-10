@@ -115,6 +115,24 @@ class MassUploadWindowTestCase(unittest.TestCase):
         # Assert that the finished label gets added
         self.assertEqual(mass_upload.update_label.cget('text'), 'Finished!')
 
+        # Get all the files with their file size (bytes) from AWS
+        all_files_in_s3_dict = AWS().get_bucket_objects_as_dict(os.environ.get('S3_BUCKET'))
+
+        # Get all the local file names from the data folder
+        all_local_files = []
+        for a, b, filenames in os.walk(DATA_DIRECTORY_PATH):
+            all_local_files = filenames
+
+        # Assert that the file name and size are the same from local to AWS
+        for s3_file, s3_file_size in all_files_in_s3_dict.items():
+            # Get just the filename without the `data/` prefix
+            s3_file = s3_file.split('/', 1)[1]
+
+            local_file_size = os.path.getsize(os.path.join(DATA_DIRECTORY_PATH, s3_file))
+
+            self.assertIn(s3_file, all_local_files)
+            self.assertEqual(local_file_size, s3_file_size)
+
     # TODO: Add test for a file that does not upload because it is already in S3
     # TODO: Add test for ffmpeg file upload
 

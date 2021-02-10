@@ -157,6 +157,23 @@ class AWS:
                     Key=id
                 )
 
+    @staticmethod
+    def get_all_objects_from_bucket(bucket_name):
+        """ Function to retrieve all data objects from bucket. """
+        with Database() as DB:
+            aws_config = DB.get_aws_config()
+
+            client = boto3.client(
+                's3',
+                aws_access_key_id=aws_config[0],
+                aws_secret_access_key=aws_config[1],
+                region_name=aws_config[2]
+            )
+
+            objects = client.list_objects_v2(Bucket=bucket_name)
+
+            return objects
+
 
 class AWSKeyException(Exception):
     pass

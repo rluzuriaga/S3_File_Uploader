@@ -38,6 +38,10 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
     def tearDown(self) -> None:
         destroy_program(self.pc)
+
+        # Need to delete the self.pc var
+        # Sometimes the GUI gets stuck but somehow this helps
+        del self.pc
         return super().tearDown()
 
     def _setup_app_data(self) -> None:
@@ -73,10 +77,10 @@ class MassUploadWindowTestCase(unittest.TestCase):
         # Click on the start upload button
         mass_upload.start_upload_button.invoke()
 
-        # Have to run a new thread that would kill the mainloop after 2 seconds.
+        # Have to run a new thread that would kill the mainloop after 3 seconds. If internet is slow make the number larger.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
         #   this way or manually.
-        threading.Thread(target=self.pc.after, args=(2000, self.pc.quit)).start()
+        threading.Thread(target=self.pc.after, args=(3000, self.pc.quit)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
         # If the mainloop is not called, then an exception will be raised `RuntimeError: main thread is not in main loop`
@@ -133,7 +137,22 @@ class MassUploadWindowTestCase(unittest.TestCase):
             self.assertIn(s3_file, all_local_files)
             self.assertEqual(local_file_size, s3_file_size)
 
-    # TODO: Add test for a file that does not upload because it is already in S3
+    def test_3_file_skip_already_in_s3(self) -> None:
+        """ Test that the files don't get uploaded again since they are already in S3. 
+        The function first retrieves the object data from the bucket after the upload from the previous test.
+        Then tries to upload the same files again, which should not actually upload since the files are already in the bucket.
+        Finally, it retrieves the object data from the bucket again and assert that the pre and post data are the same.
+
+        If the test fails, it is because there was a file that changes and actually got uploaded to S3.
+        """
+        aws_file_data_pre_upload = AWS().get_all_objects_from_bucket(os.environ.get('S3_BUCKET'))['Contents']
+
+        self._upload_all_files()
+
+        aws_file_data_post_upload = AWS().get_all_objects_from_bucket(os.environ.get('S3_BUCKET'))['Contents']
+
+        self.assertEqual(aws_file_data_pre_upload, aws_file_data_post_upload)
+
     # TODO: Add test for ffmpeg file upload
 
 

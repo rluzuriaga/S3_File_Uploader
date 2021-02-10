@@ -73,7 +73,6 @@ def setup_logs_for_tests() -> None:
     logger.addHandler(fh)
 
     logger.debug(f'Logger setup for tests.')
-    print(f"Setup logger for tests with file {log_file_path}.")
 
 
 def open_program() -> None:

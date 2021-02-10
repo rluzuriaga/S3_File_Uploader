@@ -21,15 +21,10 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         remove_db_file()
 
-        cls.pc = open_program()
-        cls._setup_app_data()
-
         return super().setUpClass()
 
     @classmethod
     def tearDownClass(cls) -> None:
-        destroy_program(cls.pc)
-
         # Need to remove the tests data before removing the DB file
         AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
 
@@ -37,12 +32,19 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         return super().tearDownClass()
 
-    @classmethod
-    def _setup_app_data(cls) -> None:
-        cls.pc.add_frame_to_paned_window(SetupWindow)
-        update_program_controller_loop(cls.pc)
+    def setUp(self) -> None:
+        self.pc = open_program()
+        return super().setUp()
 
-        setup_window = cls.pc.select_frame(SetupWindow)
+    def tearDown(self) -> None:
+        destroy_program(self.pc)
+        return super().tearDown()
+
+    def _setup_app_data(self) -> None:
+        self.pc.add_frame_to_paned_window(SetupWindow)
+        update_program_controller_loop(self.pc)
+
+        setup_window = self.pc.select_frame(SetupWindow)
 
         setup_window.access_key_id_string.set(os.environ.get('AWS_ACCESS_KEY_ID'))
         setup_window.secret_key_string.set(os.environ.get('AWS_SECRET_KEY'))
@@ -50,14 +52,40 @@ class MassUploadWindowTestCase(unittest.TestCase):
         setup_window.ffmpeg_input_var.set("-vcodec libx264 -crf 40")
         setup_window.save_button.invoke()
 
-        update_program_controller_loop(cls.pc)
+        update_program_controller_loop(self.pc)
 
-        cls.pc.remove_paned_window_frame(cls.pc.active_panes()[-1])
+        self.pc.remove_paned_window_frame(self.pc.active_panes()[-1])
 
-        update_program_controller_loop(cls.pc)
+        update_program_controller_loop(self.pc)
+
+    def _upload_all_files(self) -> None:
+        self.pc.add_frame_to_paned_window(MassUpload)
+        update_program_controller_loop(self.pc)
+
+        mass_upload = self.pc.select_frame(MassUpload)
+
+        # Add data directory path to mass upload path entry box
+        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
+
+        # Set bucket to use from env var
+        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
+
+        # Click on the start upload button
+        mass_upload.start_upload_button.invoke()
+
+        # Have to run a new thread that would kill the mainloop after 2 seconds.
+        # This needs to be done because once the mainloop gets called it won't stop unless it is done
+        #   this way or manually.
+        threading.Thread(target=self.pc.after, args=(2000, self.pc.quit)).start()
+
+        # Run the mainloop so that the upload will execute on the same thread as the mainloop
+        # If the mainloop is not called, then an exception will be raised `RuntimeError: main thread is not in main loop`
+        self.pc.mainloop()
 
     def test_1_refresh_aws_s3_buckets(self) -> None:
         """ Test that the S3 bucket update button works correctly. """
+        self._setup_app_data()
+
         self.pc.add_frame_to_paned_window(MassUpload)
         update_program_controller_loop(self.pc)
 
@@ -80,25 +108,9 @@ class MassUploadWindowTestCase(unittest.TestCase):
         """ Test that the all files method of uploading data is working.
         This test uses the `data` directory to upload to the S3 bucket in the environment var.
         """
+        self._upload_all_files()
+
         mass_upload = self.pc.select_frame(MassUpload)
-
-        # Add data directory path to mass upload path entry box
-        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
-
-        # Set bucket to use from env var
-        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
-
-        # Click on the start upload button
-        mass_upload.start_upload_button.invoke()
-
-        # Have to run a new thread that would kill the mainloop after 2 seconds.
-        # This needs to be done because once the mainloop gets called it won't stop unless it is done
-        #   this way or manually.
-        threading.Thread(target=self.pc.after, args=(2000, self.pc.quit)).start()
-
-        # Run the mainloop so that the upload will execute on the same thread as the mainloop
-        # If the mainloop is not called, then an exception will be raised `RuntimeError: main thread is not in main loop`
-        self.pc.mainloop()
 
         # Assert that the finished label gets added
         self.assertEqual(mass_upload.update_label.cget('text'), 'Finished!')

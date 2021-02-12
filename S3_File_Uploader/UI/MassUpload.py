@@ -1132,6 +1132,7 @@ class VideoCheckboxes(ttk.Frame):
         self.checkbox_text = ''
         self.checkbox_variables = []
         self.checkbox_text_and_variables = []
+        self.checkbox_text_and_widgets = []
 
         with Database() as DB:
             self.checkbox_text = DB.get_video_formats(labels=True)
@@ -1152,6 +1153,7 @@ class VideoCheckboxes(ttk.Frame):
 
             self.checkbox_variables.append(var)
             self.checkbox_text_and_variables.append(tuple([text_, var]))
+            self.checkbox_text_and_widgets.append(tuple([text_, checkbox]))
 
         logger.debug(f'Creating hover text label.')
         self.hover_text = ttk.Label(

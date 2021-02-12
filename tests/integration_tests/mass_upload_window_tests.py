@@ -62,6 +62,19 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         update_program_controller_loop(self.pc)
 
+    def _quit_mainloop_once_upload_is_done(self, mass_upload) -> None:
+        """ Check if the upload finished every second and once it is finished close the mainloop.
+        If the update label is not `Finished!`, then an after loop will start for after 1 second to run this function recursively.
+        If the update label is equal to `Finished!`, then the mainloop will exit using the quit() function 
+            and the program controller gets updated to actually remove the GUI from the screen.
+        """
+        if mass_upload.update_label.cget('text') != 'Finished!':
+            self.pc.after(1000, self._quit_mainloop_once_upload_is_done, mass_upload)
+        else:
+            self.pc.quit()
+            # Need to update the program controller loop so that the GUI actually gets removed from screen
+            update_program_controller_loop(self.pc)
+
     def _upload_all_files(self) -> None:
         self.pc.add_frame_to_paned_window(MassUpload)
         update_program_controller_loop(self.pc)
@@ -77,13 +90,14 @@ class MassUploadWindowTestCase(unittest.TestCase):
         # Click on the start upload button
         mass_upload.start_upload_button.invoke()
 
-        # Have to run a new thread that would kill the mainloop after 3 seconds. If internet is slow make the number larger.
+        # Have to run a new thread that would kill the mainloop after the upload is done.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
-        #   this way or manually.
-        threading.Thread(target=self.pc.after, args=(3000, self.pc.quit)).start()
+        #   this way or manually by clicking the X.
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload,)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
-        # If the mainloop is not called, then an exception will be raised `RuntimeError: main thread is not in main loop`
+        # If the mainloop is not called, then an exception will be raised
+        #   `RuntimeError: main thread is not in main loop`
         self.pc.mainloop()
 
     def test_1_refresh_aws_s3_buckets(self) -> None:

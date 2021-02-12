@@ -1,8 +1,7 @@
 import os
 import time
-import _tkinter
 
-from S3_File_Uploader import DatabasePath, LOGS_DIRECTORY
+from S3_File_Uploader import DatabasePath, LOGS_DIRECTORY, IS_WINDOWS
 from S3_File_Uploader.UI.ProgramController import ProgramController
 
 
@@ -40,7 +39,11 @@ def update_program_controller_loop(program_controller: ProgramController) -> Non
         program_controller (ProgramController): The open tkinter program controller.
     """
     try:
-        program_controller.dooneevent(_tkinter.ALL_EVENTS | _tkinter.DONT_WAIT)
+        # The dooneevent command doesn't work on Mac.
+        # Returning error: `Tcl_WaitForEvent: Notifier not initialized`
+        if IS_WINDOWS:
+            import _tkinter
+            program_controller.dooneevent(_tkinter.ALL_EVENTS | _tkinter.DONT_WAIT)
         program_controller.update()
     except RuntimeError:
         pass

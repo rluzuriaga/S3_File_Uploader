@@ -1,5 +1,6 @@
 import os
 import unittest
+import warnings
 import threading
 
 from S3_File_Uploader import DatabasePath
@@ -12,6 +13,8 @@ from tests.integration_tests.utils import open_program, destroy_program
 
 
 DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
 
 
 class MassUploadWindowTestCase(unittest.TestCase):

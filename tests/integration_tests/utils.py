@@ -28,30 +28,22 @@ def remove_db_file() -> None:
             remove_db_file()
 
 
-def update_program_controller_loop(program_controller: ProgramController, seconds: float = 0.1) -> None:
-    """ Run a loop for the guiven seconds that updates idle tasks and user input tasks.
-    This function needs to be used because to be able to test Tkinter UI elements , the test
-    cannot use the mainloop function of tkinter. That means that Tkinter needs to be updated manually.
+def update_program_controller_loop(program_controller: ProgramController) -> None:
+    """ Run program controller updates.
+
+    There is no need to update multiple times during a timeframe since the dooneevent function
+    makes doesn't end until all the events are completed.
+    The reason to include both dooneenvent() and update() is that dooneevent doesn't actually update all 
+    the graphics just the events.
 
     Args:
-        seconds (float, optional): Seconds to run the loop. Defaults to 0.1.
-            Each 0.1 seconds, the update and update_idletasks functions run around 880 times (depending on CPU clock speed).
+        program_controller (ProgramController): The open tkinter program controller.
     """
-
-    secs = seconds
-    start_time = time.time()
-    while True:
-        current_time = time.time()
-        elapsed_time = current_time - start_time
-
-        if elapsed_time < secs:
-            # Since the tests are not running with the mainloop, then the program needs to be forced to update
-            # TODO: Test which method is best. They should all do the same thing but I get weird issues if I don't include all three
-            program_controller.dooneevent(_tkinter.ALL_EVENTS | _tkinter.DONT_WAIT)
-            program_controller.update_idletasks()
-            program_controller.update()
-        else:
-            break
+    try:
+        program_controller.dooneevent(_tkinter.ALL_EVENTS | _tkinter.DONT_WAIT)
+        program_controller.update()
+    except RuntimeError:
+        pass
 
 
 def setup_logs_for_tests() -> None:

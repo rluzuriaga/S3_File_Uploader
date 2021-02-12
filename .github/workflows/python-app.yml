@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+      - fix-issue-27
   pull_request:
     branches:
       - master
@@ -93,11 +94,12 @@ jobs:
     
     - name: Run tests.
       run: |
-        python -m unittest discover -v -s tests/ -p "*_tests.py"
+        python -m unittest discover -v -s ./tests -p "*_tests.py"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
     
     # - name: Archive log file
     #   uses: actions/upload-artifact@v2

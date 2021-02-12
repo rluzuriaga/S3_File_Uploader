@@ -14,7 +14,7 @@ from tests.integration_tests.utils import open_program, destroy_program
 
 DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
+warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
 
 
 class MassUploadWindowTestCase(unittest.TestCase):
@@ -154,6 +154,8 @@ class MassUploadWindowTestCase(unittest.TestCase):
             self.assertIn(s3_file, all_local_files)
             self.assertEqual(local_file_size, s3_file_size)
 
+        update_program_controller_loop(self.pc)
+
     def test_3_file_skip_already_in_s3(self) -> None:
         """ Test that the files don't get uploaded again since they are already in S3. 
         The function first retrieves the object data from the bucket after the upload from the previous test.
@@ -207,7 +209,13 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         # Assert that the converted video is the right name and size
         self.assertIn('data/test_video_converted.mp4', bucket_files_and_sizes)
-        self.assertEqual(bucket_files_and_sizes['data/test_video_converted.mp4'], 247276)
+
+        # Get the original video file size
+        og_file_size = os.path.getsize(os.path.join(DATA_DIRECTORY_PATH, 'test_video.mp4'))
+
+        # Assert that the converted file is smaller than the original file
+        # Can't check for specific size because each computer makes the converted file a different size by a few bytes
+        self.assertTrue(bucket_files_and_sizes['data/test_video_converted.mp4'] < og_file_size)
 
 
 class MassUploadWindowUIElements(unittest.TestCase):

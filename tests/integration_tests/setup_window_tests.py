@@ -16,7 +16,7 @@ load_dotenv()
 # Ignoring boto3 warning.
 #   There is an open issue for boto3 about this error but is not fixed yet so I am forced to ignore the warning.
 #   More info: https://github.com/boto/boto3/issues/454
-warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
+warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
 
 
 class SetupWindowTestUIElements(unittest.TestCase):

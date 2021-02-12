@@ -64,12 +64,12 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
     def _quit_mainloop_once_upload_is_done(self, mass_upload) -> None:
         """ Check if the upload finished every second and once it is finished close the mainloop.
-        If the update label is not `Finished!`, then an after loop will start for after 1 second to run this function recursively.
+        If the update label is not `Finished!`, then an after loop will start for after 500ms to run this function recursively.
         If the update label is equal to `Finished!`, then the mainloop will exit using the quit() function 
             and the program controller gets updated to actually remove the GUI from the screen.
         """
         if mass_upload.update_label.cget('text') != 'Finished!':
-            self.pc.after(1000, self._quit_mainloop_once_upload_is_done, mass_upload)
+            self.pc.after(500, self._quit_mainloop_once_upload_is_done, mass_upload)
         else:
             self.pc.quit()
             # Need to update the program controller loop so that the GUI actually gets removed from screen
@@ -167,7 +167,44 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         self.assertEqual(aws_file_data_pre_upload, aws_file_data_post_upload)
 
-    # TODO: Add test for ffmpeg file upload
+    def test_4_ffmpeg_file_upload(self) -> None:
+        """ Test that the ffmpeg upload function works. """
+        self.pc.add_frame_to_paned_window(MassUpload)
+        update_program_controller_loop(self.pc)
+
+        mass_upload = self.pc.select_frame(MassUpload)
+
+        # Add data directory path to mass upload path entry box
+        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
+
+        # Set bucket to use from env var
+        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
+
+        # Click on the Videos Only radio button
+        mass_upload.radio_button_video.invoke()
+
+        # Click on the Use ffmpeg button
+        mass_upload.use_ffmpeg_checkbox.invoke()
+
+        # Click on the start upload button
+        mass_upload.start_upload_button.invoke()
+
+        # Have to run a new thread that would kill the mainloop after the upload is done.
+        # This needs to be done because once the mainloop gets called it won't stop unless it is done
+        #   this way or manually by clicking the X.
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload,)).start()
+
+        # Run the mainloop so that the upload will execute on the same thread as the mainloop
+        # If the mainloop is not called, then an exception will be raised
+        #   `RuntimeError: main thread is not in main loop`
+        self.pc.mainloop()
+
+        # Get the data from AWS
+        bucket_files_and_sizes = AWS().get_bucket_objects_as_dict(os.environ.get('S3_BUCKET'))
+
+        # Assert that the converted video is the right name and size
+        self.assertIn('data/test_video_converted.mp4', bucket_files_and_sizes)
+        self.assertEqual(bucket_files_and_sizes['data/test_video_converted.mp4'], 247276)
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import zipfile
 import requests
 from bs4 import BeautifulSoup
 
-if 'win' in sys.platform:
+if 'win32' in sys.platform:
     from shutil import move
 
     web = requests.get("https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-github")
@@ -38,6 +38,8 @@ if 'win' in sys.platform:
 
 
 if 'darwin' in sys.platform:
+    import subprocess
+
     if not os.path.exists(os.path.join(os.getcwd(), 'bin')):
         os.mkdir(os.path.join(os.getcwd(), 'bin'))
 
@@ -53,4 +55,9 @@ if 'darwin' in sys.platform:
         name = 'ffprobe' if 'ffprobe' in link else 'ffmpeg'
         ff_download = requests.get(link)
 
-        open(os.path.join(os.getcwd(), 'bin', name), 'wb').write(ff_download.content)
+        open(os.path.join(os.getcwd(), name + '.zip'), 'wb').write(ff_download.content)
+
+        with zipfile.ZipFile(os.path.join(os.getcwd(), name + '.zip'), 'r') as zip_ref:
+            zip_ref.extractall(os.path.join(os.getcwd(), 'bin'))
+
+        subprocess.call(['chmod', 'u+x', f'{os.path.join(os.getcwd(), "bin", name)}'])

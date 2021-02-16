@@ -149,7 +149,10 @@ class MassUploadWindowTestCase(unittest.TestCase):
             # Get just the filename without the `data/` prefix
             s3_file = s3_file.split('/', 1)[1]
 
-            local_file_size = os.path.getsize(os.path.join(DATA_DIRECTORY_PATH, s3_file))
+            try:
+                local_file_size = os.path.getsize(os.path.join(DATA_DIRECTORY_PATH, s3_file))
+            except FileNotFoundError:
+                pass
 
             self.assertIn(s3_file, all_local_files)
             self.assertEqual(local_file_size, s3_file_size)

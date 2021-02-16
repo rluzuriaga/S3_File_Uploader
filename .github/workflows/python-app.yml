@@ -71,7 +71,7 @@ jobs:
     - name: Check file structure
       run: |
         ls -l
-        ls -l bin
+        ls -l S3_File_Uploader/UI/images
     
     - name: Check if Windows build created MSI file
       if: matrix.os == 'windows-latest'

@@ -23,6 +23,18 @@ jobs:
       matrix:
         os: [macos-10.15, windows-latest]
         python-version: [3.8, 3.9]
+    if: matrix.os == 'macos-10.15' && matrix.python-version == 3.8
+      env:
+        S3_BUCKET: ${{ secrets.S3_BUCKET_MAC_3_8 }}
+    if: matrix.os == 'macos-10.15' && matrix.python-version == 3.9
+      env:
+        S3_BUCKET: ${{ secrets.S3_BUCKET_MAC_3_9 }}
+    if: matrix.os == 'windows-latest' && matrix.python-version == 3.8
+      env:
+        S3_BUCKET: ${{ secrets.S3_BUCKET_WINDOWS_3_8 }}
+    if: matrix.os == 'windows-latest' && matrix.python-version == 3.8
+      env:
+        S3_BUCKET: ${{ secrets.S3_BUCKET_WINDOWS_3_9 }}
 
     steps:
     - uses: actions/checkout@v2
@@ -101,18 +113,6 @@ jobs:
     - name: Run tests.
       run: |
         python -m unittest discover -v -s ./tests -p "*_tests.py"
-      if: matrix.os == 'macos-10.15' && matrix.python-version == 3.8
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET_MAC_3_8 }}
-      if: matrix.os == 'macos-10.15' && matrix.python-version == 3.9
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET_MAC_3_9 }}
-      if: matrix.os == 'windows-latest' && matrix.python-version == 3.8
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET_WINDOWS_3_8 }}
-      if: matrix.os == 'windows-latest' && matrix.python-version == 3.8
-        env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET_WINDOWS_3_9 }}
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}

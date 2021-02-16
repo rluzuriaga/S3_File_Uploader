@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - master
+      - fix-issue-27
   pull_request:
     branches:
       - master
@@ -28,10 +29,10 @@ jobs:
       with:
         ref: fix-issue-27
 
-    - name: Setup FFmpeg
-      uses: FedericoCarboni/setup-ffmpeg@v1-beta
-      # with:
-      #   token: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Setup FFmpeg
+    #   uses: FedericoCarboni/setup-ffmpeg@v1-beta
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
  
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -51,6 +52,11 @@ jobs:
       run: |
         python -m pip install py2app
     
+    - name: Setup ffmpeg and ffprobe
+      run: |
+        python ffmpeg_setup.py
+        echo "./bin" >> $GITHUB_PATH
+    
     - name: Build app
       run: |
         if [ -f setup.py ]; then python setup.py clean --full-clean create; else echo "There is no setup.py file."; fi
@@ -59,11 +65,11 @@ jobs:
       run: |
         if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
 
-    - name: Check file structure
-      run: |
-        pwd
-        ls -l
-        ls -l distribution
+    # - name: Check file structure
+    #   run: |
+    #     pwd
+    #     ls -l
+    #     ls -l distribution
     
     - name: Check if Windows build created MSI file
       if: matrix.os == 'windows-latest'

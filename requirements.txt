@@ -5,3 +5,4 @@ pexpect
 requests
 cx_Freeze
 python-dotenv
+beautifulsoup4

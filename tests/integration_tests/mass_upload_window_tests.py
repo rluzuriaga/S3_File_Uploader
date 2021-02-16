@@ -22,6 +22,8 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_test_db.sqlite3'))
 
+        AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
+
         remove_db_file()
 
         return super().setUpClass()

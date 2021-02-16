@@ -103,19 +103,25 @@ class MassUpload(ttk.Frame):
         self.aws = AWS()
 
         # Open photoimage files
-        if IS_MAC:
-            self.open_folder_icon_path = ImageTk.PhotoImage(Image.open(OPEN_FOLDER_ICON_PATH))
-            logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+        # if IS_MAC:
+        self.open_folder_icon_path = ImageTk.PhotoImage(Image.open(OPEN_FOLDER_ICON_PATH))
+        logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
 
-            self.refresh_button_image = ImageTk.PhotoImage(Image.open(REFRESH_BUTTON_ICON_PATH))
-            logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
+        self.refresh_button_image = ImageTk.PhotoImage(Image.open(REFRESH_BUTTON_ICON_PATH))
+        logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
 
-        if IS_WINDOWS:
-            self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
-            logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+        # if IS_WINDOWS:
+        #     self.open_folder_icon_path = tk.PhotoImage(Image.open(OPEN_FOLDER_ICON_PATH))
+        #     logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
 
-            self.refresh_button_image = tk.PhotoImage(file=REFRESH_BUTTON_ICON_PATH)
-            logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
+        #     self.refresh_button_image = tk.PhotoImage(Image.open(REFRESH_BUTTON_ICON_PATH))
+        #     logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
+
+        # self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+
+        # self.refresh_button_image = tk.PhotoImage(file=REFRESH_BUTTON_ICON_PATH)
+        # logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
 
         self.S3_BUCKET_VALUES = self.aws.get_s3_buckets()
 

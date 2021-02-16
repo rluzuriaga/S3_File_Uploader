@@ -18,7 +18,7 @@ DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
 class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*")
 
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_test_db.sqlite3'))
 
@@ -29,7 +29,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         # Need to remove the tests data before removing the DB file
-        # AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
+        AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
 
         remove_db_file()
 
@@ -221,7 +221,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
 class MassUploadWindowUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*")
 
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_UI_test_db.sqlite3'))
 

@@ -29,7 +29,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         # Need to remove the tests data before removing the DB file
-        AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
+        # AWS().remove_tests_data(os.environ.get('S3_BUCKET'))
 
         remove_db_file()
 

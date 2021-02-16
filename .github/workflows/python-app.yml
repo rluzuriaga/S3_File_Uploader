@@ -101,9 +101,18 @@ jobs:
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
     
-    - name: Run tests.
+    - name: Run unit tests.
       run: |
-        python -m unittest discover -v -s ./tests -p "*_tests.py"
+        python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+    - name: Run integration tests.
+      run: |
+        python -m unittest discover -v -s ./tests/integration_tests -p "*_tests.py"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}

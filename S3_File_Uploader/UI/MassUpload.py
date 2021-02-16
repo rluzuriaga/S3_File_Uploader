@@ -11,12 +11,15 @@ from typing import List
 import pexpect
 import ffmpeg
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS
+from S3_File_Uploader import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
 
 
 logger = logging.getLogger('main_logger')
+
+OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
+REFRESH_BUTTON_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png')
 
 
 class MassUpload(ttk.Frame):
@@ -98,20 +101,12 @@ class MassUpload(ttk.Frame):
 
         self.aws = AWS()
 
-        # Check if program is running through the .app or from direct python
-        if 'Resources' in os.getcwd():
-            self.open_folder_icon_path = tk.PhotoImage(file=os.getcwd() + '/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/images/open_folder_icon.png"')
+        # Open photoimage files
+        self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
+        logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
 
-            self.refresh_button_image = tk.PhotoImage(file=os.getcwd() + '/images/refresh_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/images/refresh_icon.png"')
-        else:
-            self.open_folder_icon_path = tk.PhotoImage(
-                file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/open_folder_icon.png"')
-
-            self.refresh_button_image = tk.PhotoImage(file=os.getcwd() + '/S3_File_Uploader/UI/images/refresh_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/refresh_icon.png"')
+        self.refresh_button_image = tk.PhotoImage(file=REFRESH_BUTTON_ICON_PATH)
+        logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
 
         self.S3_BUCKET_VALUES = self.aws.get_s3_buckets()
 

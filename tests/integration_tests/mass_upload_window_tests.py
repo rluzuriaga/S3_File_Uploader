@@ -14,12 +14,12 @@ from tests.integration_tests.utils import open_program, destroy_program
 
 DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
-warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
-
 
 class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
+
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_test_db.sqlite3'))
 
         remove_db_file()
@@ -221,6 +221,8 @@ class MassUploadWindowTestCase(unittest.TestCase):
 class MassUploadWindowUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*<ssl.SSLSocket*")
+
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_UI_test_db.sqlite3'))
 
         remove_db_file()

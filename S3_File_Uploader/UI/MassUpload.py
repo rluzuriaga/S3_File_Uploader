@@ -98,6 +98,7 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Initializing the MassUpload ttk frame.')
 
         self._is_cancel = False
+        self._upload_is_done = False
 
         style = ttk.Style()
         style.configure('TRadiobutton', font=('Helvetica', 15))
@@ -750,6 +751,7 @@ class MassUpload(ttk.Frame):
                               bucket_name, bucket_objects_dict):
         logger.debug(f'Starting mass upload for all files.')
 
+        # TODO: need to make this command work with a queue then run debug again to test
         self._add_cancel_buttons()
 
         # Replace the `\` used in windows for `/`
@@ -805,6 +807,8 @@ class MassUpload(ttk.Frame):
         self.enable_widgets()
 
         self._remove_cancel_buttons()
+
+        self._upload_is_done = True
 
     def start_mass_upload_video(self, upload_start_path, bucket_name,
                                 bucket_objects_dict, video_formats_to_use, use_ffmpeg):
@@ -1046,6 +1050,8 @@ class MassUpload(ttk.Frame):
         self.enable_widgets()
 
         self._remove_cancel_buttons()
+
+        self._upload_is_done = True
 
     def resume_mass_upload(self, not_finished_data):
         logger.debug(f'Starting resume mass upload.')

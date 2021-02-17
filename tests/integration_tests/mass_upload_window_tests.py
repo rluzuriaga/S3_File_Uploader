@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 import threading
 
@@ -69,14 +70,17 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
         update_program_controller_loop(self.pc)
 
-    def _quit_mainloop_once_upload_is_done(self, mass_upload) -> None:
+    def _quit_mainloop_once_upload_is_done(self, mass_upload, first_time=False) -> None:
         """ Check if the upload finished every second and once it is finished close the mainloop.
         If the update label is not `Finished!`, then an after loop will start for after 500ms to run this function recursively.
         If the update label is equal to `Finished!`, then the mainloop will exit using the quit() function 
             and the program controller gets updated to actually remove the GUI from the screen.
         """
-        if mass_upload.update_label.cget('text') != 'Finished!':
-            self.pc.after(500, self._quit_mainloop_once_upload_is_done, mass_upload)
+        if first_time:
+            time.sleep(1)
+
+        if mass_upload._upload_is_done is False:
+            self.pc.after(30000, self._quit_mainloop_once_upload_is_done, mass_upload)
         else:
             self.pc.quit()
             # Need to update the program controller loop so that the GUI actually gets removed from screen
@@ -100,7 +104,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
         # Have to run a new thread that would kill the mainloop after the upload is done.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
         #   this way or manually by clicking the X.
-        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload,)).start()
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload, True)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
         # If the mainloop is not called, then an exception will be raised
@@ -204,7 +208,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
         # Have to run a new thread that would kill the mainloop after the upload is done.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
         #   this way or manually by clicking the X.
-        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload,)).start()
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload, True)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
         # If the mainloop is not called, then an exception will be raised

@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: S3 File Uploader
+name: S3 File Uploader CI/CD
 
 defaults:
   run:
@@ -17,7 +17,8 @@ on:
       - master
 
 jobs:
-  build:
+
+  tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -26,12 +27,12 @@ jobs:
     
     environment:
       name: ${{ matrix.os }}_${{ matrix.python-version }}
-
+    
     steps:
     - uses: actions/checkout@v2
       with:
         ref: fix-issue-27
-
+    
     # - name: Setup FFmpeg
     #   uses: FedericoCarboni/setup-ffmpeg@v1-beta
     #   with:
@@ -49,16 +50,72 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-        
-    - name: Install py2app on Mac
-      if: matrix.os == 'macos-10.15'
-      run: |
-        python -m pip install py2app
     
     - name: Setup ffmpeg and ffprobe
       run: |
         python ffmpeg_setup.py
         echo "./bin" >> $GITHUB_PATH
+    
+    - name: Run unit tests.
+      run: python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+    - name: Run integration tests - MainWindow.
+      run: python.exe -m unittest -v tests.integration_tests.main_window_tests
+    
+    - name: Run integration tests - SetupWindow.
+      run: python.exe -m tests.integration_tests.setup_window_tests
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+    
+    - name: Run integration tests - UpdateDatabaseWindow.
+      run: python.exe -m unittest -v tests.integration_tests.update_database_window_tests
+
+    - name: Run integration tests - MassUploadWindow.
+      run: python.exe -m unittest -v tests.integration_tests.mass_upload_window_tests
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+  build:
+    needs: tests
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-10.15, windows-latest]
+        python-version: 3.9
+    
+    # environment:
+    #   name: ${{ matrix.os }}_${{ matrix.python-version }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: fix-issue-27
+ 
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+  
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+        
+    - name: Install py2app on Mac
+      if: matrix.os == 'macos-10.15'
+      run: |
+        python -m pip install py2app
     
     - name: Build app
       run: |
@@ -68,11 +125,11 @@ jobs:
       run: |
         if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
 
-    - name: Check file structure
-      run: |
-        ls -l
-        ls -l S3_File_Uploader/UI/images
-    
+    # - name: Check file structure
+    #   run: |
+    #     ls -l
+    #     ls -l S3_File_Uploader/UI/images
+
     - name: Check if Windows build created MSI file
       if: matrix.os == 'windows-latest'
       run: |
@@ -100,24 +157,6 @@ jobs:
         if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
-    
-    - name: Run unit tests.
-      run: |
-        python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        S3_BUCKET: ${{ secrets.S3_BUCKET }}
-
-    - name: Run integration tests.
-      run: |
-        python -m unittest discover -v -s ./tests/integration_tests -p "*_tests.py"
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        S3_BUCKET: ${{ secrets.S3_BUCKET }}
     
     # - name: Archive log file
     #   uses: actions/upload-artifact@v2

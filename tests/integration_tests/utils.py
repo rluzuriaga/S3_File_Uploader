@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 
 from S3_File_Uploader import DatabasePath, LOGS_DIRECTORY, IS_WINDOWS
 from S3_File_Uploader.UI.ProgramController import ProgramController
@@ -91,3 +92,10 @@ def destroy_program(pc: ProgramController) -> None:
     update_program_controller_loop(pc)
     pc.quit()
     pc.destroy()
+
+
+def ignore_aws_warning() -> None:
+    # Ignoring boto3 warning.
+    #   There is an open issue for boto3 about this error but is not fixed yet so I am forced to ignore the warning.
+    #   More info: https://github.com/boto/boto3/issues/454
+    warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*")

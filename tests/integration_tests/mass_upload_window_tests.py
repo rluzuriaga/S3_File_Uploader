@@ -1,7 +1,8 @@
 import os
 import unittest
-import warnings
 import threading
+
+from dotenv import load_dotenv
 
 from S3_File_Uploader import DatabasePath
 from S3_File_Uploader.AWS import AWS
@@ -10,15 +11,18 @@ from S3_File_Uploader.UI.SetupWindow import SetupWindow
 
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 from tests.integration_tests.utils import open_program, destroy_program
+from tests.integration_tests.utils import ignore_aws_warning
 
 
 DATA_DIRECTORY_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+load_dotenv()
 
 
 class MassUploadWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*")
+        ignore_aws_warning()
 
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_test_db.sqlite3'))
 
@@ -224,7 +228,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
 class MassUploadWindowUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*")
+        ignore_aws_warning()
 
         DatabasePath.change_path(os.path.join(os.getcwd(), 'mass_upload_window_UI_test_db.sqlite3'))
 

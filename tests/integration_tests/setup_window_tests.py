@@ -1,6 +1,5 @@
 import os
 import unittest
-import warnings
 
 from dotenv import load_dotenv
 
@@ -9,19 +8,16 @@ from S3_File_Uploader.UI.SetupWindow import SetupWindow
 
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 from tests.integration_tests.utils import open_program, destroy_program
+from tests.integration_tests.utils import ignore_aws_warning
 
 
 load_dotenv()
-
-# Ignoring boto3 warning.
-#   There is an open issue for boto3 about this error but is not fixed yet so I am forced to ignore the warning.
-#   More info: https://github.com/boto/boto3/issues/454
-warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed*")
 
 
 class SetupWindowTestUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        ignore_aws_warning()
         DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
 
         remove_db_file()
@@ -88,6 +84,8 @@ class SetupWindowTestUIElements(unittest.TestCase):
 class SetupWindowTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        ignore_aws_warning()
+
         DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
 
         remove_db_file()

@@ -68,7 +68,14 @@ jobs:
       run: python.exe -m unittest -v tests.integration_tests.main_window_tests
     
     - name: Run integration tests - SetupWindow.
-      run: python.exe -m tests.integration_tests.setup_window_tests
+      run: python.exe -m tests.integration_tests.setup_window_tests.SetupWindowTestCase
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+
+    - name: Run integration tests - SetupWindow UI.
+      run: python.exe -m tests.integration_tests.setup_window_tests.SetupWindowTestUIElements
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
@@ -78,7 +85,15 @@ jobs:
       run: python.exe -m unittest -v tests.integration_tests.update_database_window_tests
 
     - name: Run integration tests - MassUploadWindow.
-      run: python.exe -m unittest -v tests.integration_tests.mass_upload_window_tests
+      run: python.exe -m unittest -v tests.integration_tests.mass_upload_window_tests.MassUploadWindowTestCase
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+    - name: Run integration tests - MassUploadWindow UI.
+      run: python.exe -m unittest -v tests.integration_tests.mass_upload_window_tests.MassUploadWindowUIElements
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}

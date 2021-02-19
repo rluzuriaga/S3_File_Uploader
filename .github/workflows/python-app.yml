@@ -77,7 +77,7 @@ jobs:
       if: ${{ always() }}
       with:
         name: test-logs
-        path: testing.txt
+        path: ./logs/tests.log
 
     # - name: Run integration tests - MainWindow.
     #   run: python.exe -m unittest -v tests.integration_tests.main_window_tests

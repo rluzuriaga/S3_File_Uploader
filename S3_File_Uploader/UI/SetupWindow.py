@@ -14,7 +14,7 @@ from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyExceptio
 # Set up logging
 logger = logging.getLogger('main_logger')
 
-OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
+# OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
 
 
 class SetupWindow(ttk.Frame):
@@ -94,8 +94,8 @@ class SetupWindow(ttk.Frame):
         logger.debug('Initializing the SetupWindow ttk frame.')
 
         # Setup image for the open folder button
-        self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
-        logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+        # self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
 
         self._ff_in_path = self._check_if_in_path()
 
@@ -275,7 +275,8 @@ class SetupWindow(ttk.Frame):
 
         self.local_save_path_button = ttk.Button(
             self,
-            image=self.open_folder_icon_path,
+            text="Open Folder",
+            # image=self.open_folder_icon_path,
             command=self._open_folder_path
         )
 

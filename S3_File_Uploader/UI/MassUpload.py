@@ -22,8 +22,8 @@ logger = logging.getLogger('main_logger')
 # OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
 # REFRESH_BUTTON_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png')
 
-OPEN_FOLDER_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png'))
-REFRESH_BUTTON_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png'))
+# OPEN_FOLDER_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png'))
+# REFRESH_BUTTON_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png'))
 
 
 class MassUpload(ttk.Frame):
@@ -108,11 +108,11 @@ class MassUpload(ttk.Frame):
 
         # Open photoimage files
         # if IS_MAC:
-        self.open_folder_icon_path = ImageTk.PhotoImage(OPEN_FOLDER_ICON_IMAGE)
-        logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_IMAGE}"')
+        # self.open_folder_icon_path = ImageTk.PhotoImage(OPEN_FOLDER_ICON_IMAGE)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_IMAGE}"')
 
-        self.refresh_button_image = ImageTk.PhotoImage(REFRESH_BUTTON_ICON_IMAGE)
-        logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_IMAGE}"')
+        # self.refresh_button_image = ImageTk.PhotoImage(REFRESH_BUTTON_ICON_IMAGE)
+        # logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_IMAGE}"')
 
         # if IS_WINDOWS:
         #     self.open_folder_icon_path = tk.PhotoImage(Image.open(OPEN_FOLDER_ICON_PATH))
@@ -194,7 +194,8 @@ class MassUpload(ttk.Frame):
 
         self.mass_upload_path_button = ttk.Button(
             self,
-            image=self.open_folder_icon_path,
+            text="Open Folder",
+            # image=self.open_folder_icon_path,
             command=self._open_folder_path
         )
         self.mass_upload_path_button.grid(self.MASS_UPLOAD_PATH_BUTTON_GRID)
@@ -221,7 +222,8 @@ class MassUpload(ttk.Frame):
 
         self.refresh_s3_buckets_button = ttk.Button(
             self,
-            image=self.refresh_button_image,
+            text="Refresh",
+            # image=self.refresh_button_image,
             command=self._refresh_s3_buckets
         )
         self.refresh_s3_buckets_button.grid(

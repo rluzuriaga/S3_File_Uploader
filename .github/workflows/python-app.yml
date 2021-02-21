@@ -191,4 +191,4 @@ jobs:
     
     - name: Check file structure
       run: |
-        ls -l
+        ls -l distribution-files

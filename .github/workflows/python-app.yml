@@ -168,11 +168,12 @@ jobs:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
     
     - name: Save distribution files - TESTING
-      if: (github.event_name == 'push' && contains(github.ref, 'refs/tags/')) || (github.event_name == 'push' && contains(github.ref, 'refs/heads/v*'))
+      # if: (github.event_name == 'push' && contains(github.ref, 'refs/tags/')) || (github.event_name == 'push' && contains(github.ref, 'refs/heads/'))
       uses: actions/upload-artifact@v2
       with:
           name: distribution-files
           path: distribution
+          retention-days: 1
 
 
   release:

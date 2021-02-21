@@ -11,6 +11,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - master
@@ -162,3 +164,20 @@ jobs:
         if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
       env:
         MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
+    
+    - name: Save distribution files - TESTING
+      # if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v2
+      with:
+          name: distribution-files
+          path: distribution
+
+
+  # release:
+  #   needs: build
+
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [macos-10.15, windows-latest]
+  #       python-version: [3.9]

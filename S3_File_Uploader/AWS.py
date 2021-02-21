@@ -135,6 +135,45 @@ class AWS:
             except KeyError:
                 return {}
 
+    def remove_tests_data(self, bucket_name: str) -> None:
+        """ Function used after integration tests to remove from AWS S3 the files that were added during the test. """
+        with Database() as DB:
+            aws_config = DB.get_aws_config()
+
+            client = boto3.client(
+                's3',
+                aws_access_key_id=aws_config[0],
+                aws_secret_access_key=aws_config[1],
+                region_name=aws_config[2]
+            )
+
+            # Get all the files in the bucket
+            bucket_objects = self.get_bucket_objects_as_dict(bucket_name)
+
+            # Remove every file in the bucket
+            for id in bucket_objects:
+                client.delete_object(
+                    Bucket=bucket_name,
+                    Key=id
+                )
+
+    @staticmethod
+    def get_all_objects_from_bucket(bucket_name):
+        """ Function to retrieve all data objects from bucket. """
+        with Database() as DB:
+            aws_config = DB.get_aws_config()
+
+            client = boto3.client(
+                's3',
+                aws_access_key_id=aws_config[0],
+                aws_secret_access_key=aws_config[1],
+                region_name=aws_config[2]
+            )
+
+            objects = client.list_objects_v2(Bucket=bucket_name)
+
+            return objects
+
 
 class AWSKeyException(Exception):
     pass

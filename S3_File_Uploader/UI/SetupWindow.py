@@ -4,14 +4,17 @@ from tkinter import ttk
 from tkinter import filedialog
 
 import os
+import queue
 import threading
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS
+from S3_File_Uploader import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
 
 # Set up logging
 logger = logging.getLogger('main_logger')
+
+# OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
 
 
 class SetupWindow(ttk.Frame):
@@ -90,14 +93,9 @@ class SetupWindow(ttk.Frame):
 
         logger.debug('Initializing the SetupWindow ttk frame.')
 
-        if 'Resources' in os.getcwd():
-            self.open_folder_icon_path = tk.PhotoImage(
-                file=os.getcwd() + '/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/images/open_folder_icon.png"')
-        else:
-            self.open_folder_icon_path = tk.PhotoImage(
-                file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/open_folder_icon.png"')
+        # Setup image for the open folder button
+        # self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
 
         self._ff_in_path = self._check_if_in_path()
 
@@ -117,11 +115,13 @@ class SetupWindow(ttk.Frame):
         self.setup_window_top_label.grid(self.TOP_LABEL_GRID)
 
         # Row 1
+        self.setup_window_output_message_variable = tk.StringVar()
         self.setup_window_output_message = ttk.Label(
             self,
             text='',
             style='setup_window_output_message_label.TLabel',
-            justify=tk.CENTER
+            justify=tk.CENTER,
+            textvariable=self.setup_window_output_message_variable
         )
         self.setup_window_output_message.grid(self.OUTPUT_MESSAGE_GRID)
 
@@ -275,7 +275,8 @@ class SetupWindow(ttk.Frame):
 
         self.local_save_path_button = ttk.Button(
             self,
-            image=self.open_folder_icon_path,
+            text="Open Folder",
+            # image=self.open_folder_icon_path,
             command=self._open_folder_path
         )
 
@@ -509,7 +510,7 @@ class SetupWindow(ttk.Frame):
 
             return
 
-        self.setup_window_output_message.configure(text='')
+        self.setup_window_output_message_variable.set('')
 
         # Get AWS input data
         access_key_id = self.access_key_id_input_field.get()
@@ -533,16 +534,16 @@ class SetupWindow(ttk.Frame):
         # Check if the user left the converted file suffix input box empty.
         # If the input is empty then an error message is displayed that it cannot be empty.
         if converted_file_suffix == '':
-            self.setup_window_output_message.configure(
-                text='The converted file suffix cannot be empty.', foreground='red')
+            self.setup_window_output_message_variable.set('The converted file suffix cannot be empty.')
+            self.setup_window_output_message.configure(foreground='red')
             logger.warning(f'No converted file suffix provided.')
 
         # Check if the user checked the "Different output extension for AWS" box but didn't
         #  input the extension in the entry box.
         # If so, then an error message is displayed.
         if use_different_output_extension_for_aws and output_extension_for_aws == '':
-            self.setup_window_output_message.configure(
-                text='The output extension for AWS cannot be empty.', foreground='red')
+            self.setup_window_output_message_variable.set('The output extension for AWS cannot be empty.')
+            self.setup_window_output_message.configure(foreground='red')
             logger.warning('No extension entered when the `Different output extension for AWS`checkbox was selected.')
             return
 
@@ -550,8 +551,8 @@ class SetupWindow(ttk.Frame):
         #  the path in the entry box.
         # If so, then an error message is displayed.
         if use_local_save and local_save_path == '':
-            self.setup_window_output_message.configure(
-                text='The local save path cannot be empty.', foreground='red')
+            self.setup_window_output_message_variable.set('The local save path cannot be empty.')
+            self.setup_window_output_message.configure(foreground='red')
             logger.warning('No local save path entered when the `Save locally` checkbox was selected.')
             return
 
@@ -559,8 +560,8 @@ class SetupWindow(ttk.Frame):
         # input the extension in the entry box.
         # If so, then an error message is displayed.
         if use_different_output_extension_for_local and output_extension_for_local == '':
-            self.setup_window_output_message.configure(
-                text='The local output extension cannot be empty.', foreground='red')
+            self.setup_window_output_message_variable.set('The local output extension cannot be empty.')
+            self.setup_window_output_message.configure(foreground='red')
             logger.warning('No extension entered when the `Different local output extension` checkbox was selected.')
             return
 
@@ -583,17 +584,29 @@ class SetupWindow(ttk.Frame):
         # Else, a configuration message is given and a new thread is created
         #   to test and save the AWS connection
         if access_key_id == '' or secret_key == '' or region_name == '':
-            self.setup_window_output_message.configure(
-                text='All AWS fields must to be filled in.', foreground='red')
+            self.setup_window_output_message_variable.set('All AWS fields must to be filled in.')
+            self.setup_window_output_message.configure(foreground='red')
             logger.warning('Not all AWS fields are filled in.')
         else:
-            self.setup_window_output_message.configure(
-                text='Configuring AWS settings. Please wait.', foreground='black')
+            self.setup_window_output_message_variable.set('Configuring AWS settings. Please wait.')
+            self.setup_window_output_message.configure(foreground='black')
 
-            threading.Thread(
-                target=self.configure_aws,
-                args=(access_key_id, secret_key, region_name)
-            ).start()
+            # Force update any pending tasks before having to configure AWS
+            self.controller.update_idletasks()
+
+            # Originally was using threading so that the the program wouldn't get stuck while checking
+            # the credentials.
+            # Had to make it non-multithreaded because of some weird tkinter errors.
+            # The errors were not consistent and happened both when running the tests or running the
+            # app by itself.
+
+            # Original code:
+            #   threading.Thread(
+            #       target=self.configure_aws,
+            #       args=(access_key_id, secret_key, region_name)
+            #   ).start()
+
+            self.configure_aws(access_key_id, secret_key, region_name)
 
     def configure_aws(self, access_key_id, secret_key, region_name):
         """ Function to configure AWS settings.
@@ -628,10 +641,11 @@ class SetupWindow(ttk.Frame):
                     DB.set_aws_config(
                         access_key_id, secret_key, region_name_code)
 
-                    self.setup_window_output_message.configure(text='')
-                    self.setup_window_output_message.configure(
-                        text='Settings saved.', foreground='#3fe03f')  # Darker green than foreground='green'
+                    # Change setup_window_output_message_variable text to `Settings saved.` and set color to green
+                    self.setup_window_output_message_variable.set('Settings saved.')
+                    self.setup_window_output_message.configure(foreground='#3fe03f')
 
+                    # Enable the lock/unlock button.
                     self.lock_unlock_button.configure(state='normal')
 
                     # Enable all main window buttons
@@ -641,17 +655,20 @@ class SetupWindow(ttk.Frame):
                     self.lock_unlock_aws_settings()
                 else:
                     raise AWSAuthenticationException
+
             except AWSKeyException:
-                self.setup_window_output_message.configure(
-                    text='ERROR: Access Key ID or Secret Access Key invalid.', foreground='red')
+                self.setup_window_output_message_variable.set('ERROR: Access Key ID or Secret Access Key invalid.')
+                self.setup_window_output_message.configure(foreground='red')
                 logger.error('ERROR: Invalid AWS Access Key ID or Secret Access Key entered.')
+
             except AWSAuthenticationException:
-                self.setup_window_output_message.configure(
-                    text='ERROR: Keys are correct but they may be inactive.', foreground='red')
+                self.setup_window_output_message_variable.set('ERROR: Keys are correct but they may be inactive.')
+                self.setup_window_output_message.configure(foreground='red')
                 logger.error('ERROR: Innactive AWS keys entered.')
+
             except NoConnectionError:
-                self.setup_window_output_message.configure(
-                    text='ERROR: No Internet connection detected.', foreground='red')
+                self.setup_window_output_message_variable.set('ERROR: No Internet connection detected.')
+                self.setup_window_output_message.configure(foreground='red')
                 logger.error('ERROR: No Internet connection, cannot authenticate AWS keys.')
 
     def lock_unlock_aws_settings(self):

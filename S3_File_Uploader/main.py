@@ -7,22 +7,22 @@ from datetime import datetime
 from S3_File_Uploader.UI.ProgramController import ProgramController
 from S3_File_Uploader.UI.UpdateApp import UpdateApp
 from S3_File_Uploader.Database import Database
-from S3_File_Uploader import APP_VERSION, DB_VERSION
+from S3_File_Uploader import APP_VERSION, DB_VERSION, LOGS_DIRECTORY
 
 
 # Set up file based logger
 current_datetime = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-log_path = os.getcwd() + f'/logs/{current_datetime}.log'
+log_file_path = os.path.join(LOGS_DIRECTORY, f'{current_datetime}.log')
 
 # Check if a logs directory is created, if not then it is created.
-if not os.path.exists(os.getcwd() + '/logs'):
-    os.makedirs(os.getcwd() + '/logs')
+if not os.path.exists(LOGS_DIRECTORY):
+    os.makedirs(LOGS_DIRECTORY)
 
 # Changed the setup of the logger from the basicConfig so that the file isn't logging the imported modules
 logger = logging.getLogger('main_logger')
 logger.setLevel(logging.DEBUG)
 
-fh = logging.FileHandler(log_path)
+fh = logging.FileHandler(log_file_path)
 fh.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s - %(levelname)s - %(message)s')

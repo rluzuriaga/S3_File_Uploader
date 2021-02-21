@@ -10,13 +10,20 @@ from typing import List
 
 import pexpect
 import ffmpeg
+from PIL import ImageTk, Image
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS
+from S3_File_Uploader import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
 
 
 logger = logging.getLogger('main_logger')
+
+# OPEN_FOLDER_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png')
+# REFRESH_BUTTON_ICON_PATH = os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png')
+
+# OPEN_FOLDER_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'open_folder_icon.png'))
+# REFRESH_BUTTON_ICON_IMAGE = Image.open(os.path.join(WORKING_DIRECTORY, 'UI', 'images', 'refresh_icon.png'))
 
 
 class MassUpload(ttk.Frame):
@@ -91,6 +98,7 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Initializing the MassUpload ttk frame.')
 
         self._is_cancel = False
+        self._upload_is_done = False
 
         style = ttk.Style()
         style.configure('TRadiobutton', font=('Helvetica', 15))
@@ -98,20 +106,26 @@ class MassUpload(ttk.Frame):
 
         self.aws = AWS()
 
-        # Check if program is running through the .app or from direct python
-        if 'Resources' in os.getcwd():
-            self.open_folder_icon_path = tk.PhotoImage(file=os.getcwd() + '/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/images/open_folder_icon.png"')
+        # Open photoimage files
+        # if IS_MAC:
+        # self.open_folder_icon_path = ImageTk.PhotoImage(OPEN_FOLDER_ICON_IMAGE)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_IMAGE}"')
 
-            self.refresh_button_image = tk.PhotoImage(file=os.getcwd() + '/images/refresh_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/images/refresh_icon.png"')
-        else:
-            self.open_folder_icon_path = tk.PhotoImage(
-                file=os.getcwd() + '/S3_File_Uploader/UI/images/open_folder_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/open_folder_icon.png"')
+        # self.refresh_button_image = ImageTk.PhotoImage(REFRESH_BUTTON_ICON_IMAGE)
+        # logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_IMAGE}"')
 
-            self.refresh_button_image = tk.PhotoImage(file=os.getcwd() + '/S3_File_Uploader/UI/images/refresh_icon.png')
-            logger.debug(f'Retrieving image "{os.getcwd()}/S3_File_Uploader/UI/images/refresh_icon.png"')
+        # if IS_WINDOWS:
+        #     self.open_folder_icon_path = tk.PhotoImage(Image.open(OPEN_FOLDER_ICON_PATH))
+        #     logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+
+        #     self.refresh_button_image = tk.PhotoImage(Image.open(REFRESH_BUTTON_ICON_PATH))
+        #     logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
+
+        # self.open_folder_icon_path = tk.PhotoImage(file=OPEN_FOLDER_ICON_PATH)
+        # logger.debug(f'Retrieving image "{OPEN_FOLDER_ICON_PATH}"')
+
+        # self.refresh_button_image = tk.PhotoImage(file=REFRESH_BUTTON_ICON_PATH)
+        # logger.debug(f'Retrieving image "{REFRESH_BUTTON_ICON_PATH}"')
 
         self.S3_BUCKET_VALUES = self.aws.get_s3_buckets()
 
@@ -180,7 +194,8 @@ class MassUpload(ttk.Frame):
 
         self.mass_upload_path_button = ttk.Button(
             self,
-            image=self.open_folder_icon_path,
+            text="Open Folder",
+            # image=self.open_folder_icon_path,
             command=self._open_folder_path
         )
         self.mass_upload_path_button.grid(self.MASS_UPLOAD_PATH_BUTTON_GRID)
@@ -207,7 +222,8 @@ class MassUpload(ttk.Frame):
 
         self.refresh_s3_buckets_button = ttk.Button(
             self,
-            image=self.refresh_button_image,
+            text="Refresh",
+            # image=self.refresh_button_image,
             command=self._refresh_s3_buckets
         )
         self.refresh_s3_buckets_button.grid(
@@ -737,16 +753,17 @@ class MassUpload(ttk.Frame):
                               bucket_name, bucket_objects_dict):
         logger.debug(f'Starting mass upload for all files.')
 
+        # TODO: need to make this command work with a queue then run debug again to test
         self._add_cancel_buttons()
+
+        # Replace the `\` used in windows for `/`
+        if IS_WINDOWS:
+            upload_start_path = upload_start_path.replace('\\', '/')
 
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
-            # Replace the `\` used in windows for `/`
-            if IS_WINDOWS:
-                dirpath = dirpath.replace('\\', '/')
-
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
             for file in filenames:
@@ -793,6 +810,8 @@ class MassUpload(ttk.Frame):
 
         self._remove_cancel_buttons()
 
+        self._upload_is_done = True
+
     def start_mass_upload_video(self, upload_start_path, bucket_name,
                                 bucket_objects_dict, video_formats_to_use, use_ffmpeg):
         logger.debug(f'Starting mass upload for video files.')
@@ -808,15 +827,15 @@ class MassUpload(ttk.Frame):
             # Create secondary progressbar only if it uses ffmpeg
             self._create_ffmpeg_and_upload_progressbar(100)
 
+        # Replace the `\` used in windows for `/`
+        if IS_WINDOWS:
+            upload_start_path = upload_start_path.replace('\\', '/')
+
         # Get the position of the actual folder that will get uploaded
         length_to_remove = upload_start_path.rfind('/') + 1
 
         # Iterate through the upload directory
         for dirpath, dirnames, filenames in os.walk(upload_start_path):
-            # Replace the `\` used in windows for `/`
-            if IS_WINDOWS:
-                dirpath = dirpath.replace('\\', '/')
-
             # Get the directory path that is used for S3
             bucket_dir_path = dirpath[length_to_remove:] + '/'
 
@@ -1034,6 +1053,8 @@ class MassUpload(ttk.Frame):
 
         self._remove_cancel_buttons()
 
+        self._upload_is_done = True
+
     def resume_mass_upload(self, not_finished_data):
         logger.debug(f'Starting resume mass upload.')
 
@@ -1132,6 +1153,7 @@ class VideoCheckboxes(ttk.Frame):
         self.checkbox_text = ''
         self.checkbox_variables = []
         self.checkbox_text_and_variables = []
+        self.checkbox_text_and_widgets = []
 
         with Database() as DB:
             self.checkbox_text = DB.get_video_formats(labels=True)
@@ -1152,6 +1174,7 @@ class VideoCheckboxes(ttk.Frame):
 
             self.checkbox_variables.append(var)
             self.checkbox_text_and_variables.append(tuple([text_, var]))
+            self.checkbox_text_and_widgets.append(tuple([text_, checkbox]))
 
         logger.debug(f'Creating hover text label.')
         self.hover_text = ttk.Label(

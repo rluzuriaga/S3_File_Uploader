@@ -3,30 +3,27 @@ import sqlite3
 import logging
 from functools import wraps
 
+from S3_File_Uploader import DatabasePath, DB_VERSION
 
 logger = logging.getLogger('main_logger')
 
 
 class Database:
-    def __init__(self, custom_db_path=None):
+    def __init__(self):
         logger.info('Initializing the database.')
 
         self.create_db = False
         self.context = False
-        self.db_path = custom_db_path
-
-        if custom_db_path == None:
-            self.db_path = os.getcwd() + "/db.sqlite3"
 
     def __enter__(self):
         logger.info('Entering database context.')
 
         self.context = True
 
-        if not os.path.exists(self.db_path):
+        if not os.path.exists(DatabasePath.get()):
             self.create_db = True
 
-        self.connection = sqlite3.connect(self.db_path)
+        self.connection = sqlite3.connect(DatabasePath.get())
         self.cursor = self.connection.cursor()
 
         if self.create_db:
@@ -56,7 +53,7 @@ class Database:
         logger.debug('Creating database.')
 
         self.cursor.executescript(
-            '''
+            f'''
             CREATE TABLE IF NOT EXISTS aws_regions (
                 region_name_text text PRIMARY KEY,
                 region_code text NOT NULL
@@ -164,7 +161,7 @@ class Database:
                 db_version INTEGER NOT NULL
             );
 
-            INSERT INTO versioning (db_version) VALUES (2);
+            INSERT INTO versioning (db_version) VALUES ({DB_VERSION});
 
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'mp4');
             INSERT INTO file_extensions (type_of_file, general_file_extension, file_extension) VALUES ('video', 'MP4', 'm4a');
@@ -262,7 +259,7 @@ class Database:
             '''
         ).fetchone()[0]
 
-        logger.debug(f'Returning region code `{output}`')
+        logger.debug(f'Returning region code `{output}` from region name `{region_name}`')
 
         return output
 
@@ -589,12 +586,23 @@ class Database:
 
         return bool(output)
 
+    # TODO: Make sure this function is actually not being used.
     @_only_context
     def get_db_version(self):
         logger.debug(f'Retrieving DB version.')
         output = self.cursor.execute('SELECT db_version FROM versioning;').fetchone()[0]
 
         return output
+
+    @_only_context
+    def get_tests_table(self):
+        logger.debug(f'Trying to retrieve everyting from the tests table.')
+        try:
+            output = self.cursor.execute('SELECT * FROM tests;').fetchone()
+            return output
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                return None
 
 
 class NotWithContext(Exception):

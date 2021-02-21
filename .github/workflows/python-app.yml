@@ -47,7 +47,7 @@ jobs:
         if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
     
     - name: Setup FFmpeg
-      uses: FedericoCarboni/setup-ffmpeg@v1-beta
+      uses: FedericoCarboni/setup-ffmpeg@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     
@@ -192,3 +192,7 @@ jobs:
     - name: Check file structure
       run: |
         ls -l distribution-files
+    
+    - name: Get commit message
+      run: |
+        echo ${{ github.event.head_commit.message }}

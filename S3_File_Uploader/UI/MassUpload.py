@@ -345,7 +345,7 @@ class MassUpload(ttk.Frame):
 
     def _open_folder_path(self):
         """ Function that runs when the open folder button is clicked. """
-        logger.debug('Opening file dialog window for selecting local save path.')
+        logger.debug(f'Opening file dialog window for selecting local save path.')
 
         path = filedialog.askdirectory()
         self.mass_upload_path.set(path)
@@ -921,13 +921,13 @@ class MassUpload(ttk.Frame):
                         logger.debug(f'Trying to run ffprobe through `ffmpeg-python` module.')
                         total_video_frames = ffmpeg.probe(f"{dirpath}/{file}")['streams'][0]['nb_frames']
                     except Exception as e:
-                        logger.warning(f"ffprobe exception occurred: {e}.")
+                        logger.warning(f'ffprobe exception occurred: {e}.')
 
                         try:
                             logger.debug(f'Trying to run ffprobe command.')
                             total_video_frames = self._ffprobe_controller(f"{dirpath}/{file}")
                         except Exception as e:
-                            logger.warning(f"Secondary ffprobe exception occurred: {e}\nSkipping ffprobe.")
+                            logger.warning(f'Secondary ffprobe exception occurred: {e}\nSkipping ffprobe.')
                             total_video_frames = 10000
 
                     # Run the FFMPEG program

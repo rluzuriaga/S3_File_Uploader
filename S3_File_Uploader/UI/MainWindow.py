@@ -20,12 +20,12 @@ class MainWindow(ttk.Frame):
                            height=300, relief=tk.RIDGE)
         self.controller = controller
 
-        logger.debug("Initializing the MainWindow ttk frame.")
+        logger.debug(f'Initializing the MainWindow ttk frame.')
 
         self.ui_elements()
         # Set the status bar labels to always be on the bottom when opening a new pane window.
         self.rowconfigure(100, weight=1)
-        logger.debug("Created MainWindow UI elements.")
+        logger.debug(f'Created MainWindow UI elements.')
 
         with Database() as DB:
             if DB.are_settings_saved():
@@ -86,7 +86,7 @@ class MainWindow(ttk.Frame):
         #  then the SetupWindow pane will be added and start the after() function
         if len(self.controller.active_panes()) == 1:
             self.controller.add_frame_to_paned_window(SetupWindow)
-            logger.debug(f"Attaching SetupWindow frame to window.")
+            logger.debug(f'Attaching SetupWindow frame to window.')
 
             # Start the after() function to change the example ffmpeg label
             #  with what the user typed into the ffmpeg input
@@ -96,10 +96,10 @@ class MainWindow(ttk.Frame):
         #  the SetupWindow pane is added, and the after() function is started
         elif "massupload" in self.controller.active_panes()[-1]:
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
-            logger.debug("Removing MassUpload frame from window.")
+            logger.debug(f'Removing MassUpload frame from window.')
 
             self.controller.add_frame_to_paned_window(SetupWindow)
-            logger.debug(f"Attaching SetupWindow frame to window.")
+            logger.debug(f'Attaching SetupWindow frame to window.')
 
             # Start the after() function to change the example ffmpeg label
             #  with what the user typed into the ffmpeg input
@@ -121,7 +121,7 @@ class MainWindow(ttk.Frame):
         # If the active pane is SetupWindow, then that pane is removed
         else:
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
-            logger.debug("Removing SetupWindow frame from window.")
+            logger.debug(f'Removing SetupWindow frame from window.')
 
             # Cancel the after() function so that the program doesn't eat all the CPU and RAM
             self.controller.setup_stop_after()
@@ -139,7 +139,7 @@ class MainWindow(ttk.Frame):
         #   and the UpdateDatabase pane is added.
         elif "massupload" in self.controller.active_panes()[-1]:
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
-            logger.debug('Removing MassUpload frame from window.')
+            logger.debug(f'Removing MassUpload frame from window.')
 
             self.controller.add_frame_to_paned_window(UpdateDatabase)
             logger.debug(f'Attaching SetupWindow frame to window.')
@@ -168,7 +168,7 @@ class MainWindow(ttk.Frame):
         #  then the MassUpload pane is added
         if len(self.controller.active_panes()) == 1:
             self.controller.add_frame_to_paned_window(MassUpload)
-            logger.debug("Attaching MassUpload frame to window.")
+            logger.debug(f'Attaching MassUpload frame to window.')
 
         # If SetupWindow is the active pane, then the after() function is canceled
         #  the SetupWindow pane is removed, and the MassUpload pane is added
@@ -177,10 +177,10 @@ class MainWindow(ttk.Frame):
             self.controller.setup_stop_after()
 
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
-            logger.debug("Removing SetupWindow frame from window.")
+            logger.debug(f'Removing SetupWindow frame from window.')
 
             self.controller.add_frame_to_paned_window(MassUpload)
-            logger.debug("Attaching MassUpload frame to window.")
+            logger.debug(f'Attaching MassUpload frame to window.')
 
         # If UpdateDatabase is the active pane, then the UpdateDatabase pane is removed,
         #   and the MassUpload pane is added
@@ -194,16 +194,16 @@ class MainWindow(ttk.Frame):
         # If the active pane is MassUpload, then that pane is removed
         else:
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
-            logger.debug("Removing MassUpload frame from window.")
+            logger.debug(f'Removing MassUpload frame from window.')
 
     def enable_all_buttons(self):
         self.main_window_setup_button.configure(state='normal')
         self.update_database_button.configure(state='normal')
         self.mass_upload_window_button.configure(state='normal')
-        logger.debug("Enable setup and mass upload buttons.")
+        logger.debug(f'Enable setup and mass upload buttons.')
 
     def disable_all_buttons(self):
         self.main_window_setup_button.configure(state='disabled')
         self.update_database_button.configure(state='disabled')
         self.mass_upload_window_button.configure(state='disabled')
-        logger.debug("Disable setup and mass upload buttons.")
+        logger.debug(f'Disable setup and mass upload buttons.')

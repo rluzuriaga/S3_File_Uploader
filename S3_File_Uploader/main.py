@@ -30,7 +30,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 
-logger.debug("Logger setup.")
+logger.debug(f'Logger setup.')
 
 
 def request_data_from_gist():
@@ -93,12 +93,12 @@ def database_updater(response):
 
 
 def main():
-    logger.debug("Starting program.")
+    logger.debug(f'Starting program.')
 
     pc = ProgramController()
     pc.mainloop()
 
-    logger.debug("Exiting program.")
+    logger.debug(f'Exiting program.')
 
 
 if __name__ == "__main__":

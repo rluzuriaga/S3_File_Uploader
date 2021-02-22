@@ -10,13 +10,13 @@ logger = logging.getLogger('main_logger')
 
 class Database:
     def __init__(self):
-        logger.info('Initializing the database.')
+        logger.info(f'Initializing the database.')
 
         self.create_db = False
         self.context = False
 
     def __enter__(self):
-        logger.info('Entering database context.')
+        logger.info(f'Entering database context.')
 
         self.context = True
 
@@ -32,7 +32,7 @@ class Database:
         return self
 
     def __exit__(self, type, value, traceback):
-        logger.info('Exiting database context.')
+        logger.info(f'Exiting database context.')
 
         del self.cursor
 
@@ -50,7 +50,7 @@ class Database:
 
     @_only_context
     def create_database(self):
-        logger.debug('Creating database.')
+        logger.debug(f'Creating database.')
 
         self.cursor.executescript(
             f'''
@@ -196,7 +196,7 @@ class Database:
         )
 
         self.connection.commit()
-        logger.debug('Commiting database creation.')
+        logger.debug(f'Commiting database creation.')
 
     @_only_context
     def update_database_with_sql_file(self, sql_file: str) -> None:

@@ -17,7 +17,7 @@ logger = logging.getLogger('main_logger')
 class ProgramController(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-        logger.debug("Initializing the Tkinter program controller.")
+        logger.debug(f'Initializing the Tkinter program controller.')
 
         Styles()
 
@@ -36,7 +36,7 @@ class ProgramController(tk.Tk):
             frame = F(self.container, self)
             self.frames[F] = frame
 
-            logger.debug(f"Adding {F.__name__} to the program controller frames.")
+            logger.debug(f'Adding {F.__name__} to the program controller frames.')
 
         # Open main page
         self.add_frame_to_paned_window(MainWindow)
@@ -53,13 +53,13 @@ class ProgramController(tk.Tk):
 
         self.geometry(f"+{positionRight}+{positionDown}")
 
-        logger.debug("Set location of main window on the screen.")
+        logger.debug(f'Set location of main window on the screen.')
 
     def get_screen_size(self):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
-        logger.debug("Returning screen size.")
+        logger.debug(f'Returning screen size.')
 
         return screen_width, screen_height
 
@@ -84,23 +84,23 @@ class ProgramController(tk.Tk):
         mw = self.frames[MainWindow]
         mw.enable_all_buttons()
 
-        logger.debug('Enabling all "MainWindow" buttons.')
+        logger.debug(f'Enabling all "MainWindow" buttons.')
 
     def disable_main_window_buttons(self):
         mw = self.frames[MainWindow]
         mw.disable_all_buttons()
 
-        logger.debug('Disabling all "MainWindow" buttons.')
+        logger.debug(f'Disabling all "MainWindow" buttons.')
 
     def setup_start_after(self):
         self.frames[SetupWindow].start_after()
 
-        logger.debug('Starting the tkinter after method for "SetupWindow".')
+        logger.debug(f'Starting the tkinter after method for "SetupWindow".')
 
     def setup_stop_after(self):
         self.frames[SetupWindow].stop_after()
 
-        logger.debug('Stopping the tkinter after method for "SetupWindow".')
+        logger.debug(f'Stopping the tkinter after method for "SetupWindow".')
 
     def select_frame(self, frame_):
         return self.frames[frame_]

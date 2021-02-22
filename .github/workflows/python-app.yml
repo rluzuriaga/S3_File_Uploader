@@ -136,6 +136,11 @@ jobs:
       - name: Distribute created executables
         run: |
           if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
+      
+      - name: Check file structure
+        run: |
+          ls -l
+          ls -l distribution
 
       - name: Check if Windows build created MSI file
         if: matrix.os == 'windows-latest'

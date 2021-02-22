@@ -220,13 +220,27 @@ if WINDOWS:
 class Distribute(distutils.core.Command):
     user_options = []
 
+    def _make_app_bundle_to_zip(self) -> None:
+        from zipfile import ZipFile
+
+        if MAC:
+            app_bundle_path = os.path.join(DIST_DIR, APP_TITLE + '.app')
+
+            with ZipFile(f'{app_bundle_path}.zip', 'w') as zipObj:
+                for folderName, subfolders, filenames in os.walk(app_bundle_path):
+                    for filename in filenames:
+                        filePath = os.path.join(folderName, filename)
+                        zipObj.write(filePath, os.path.basename(filePath))
+
     def initialize_options(self) -> None:
         if not os.path.exists(FINAL_DISTRIBUTION_DIR):
             os.mkdir(FINAL_DISTRIBUTION_DIR)
 
         if MAC:
+            self._make_app_bundle_to_zip()
+
             self.dist_package_path = [
-                os.path.join(DIST_DIR, APP_TITLE + '.app'),
+                os.path.join(DIST_DIR, APP_TITLE + '.app.zip'),
                 os.path.join(DIST_DIR, DMG_NAME + '.dmg')
             ]
 

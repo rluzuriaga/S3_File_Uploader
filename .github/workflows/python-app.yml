@@ -136,11 +136,6 @@ jobs:
       - name: Distribute created executables
         run: |
           if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
-      
-      - name: Check file structure
-        run: |
-          ls -l
-          ls -l distribution
 
       - name: Check if Windows build created MSI file
         if: matrix.os == 'windows-latest'
@@ -166,7 +161,7 @@ jobs:
       - name: Check if Mac build created APP bundle
         if: matrix.os == 'macos-10.15'
         run: |
-          if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
+          if [ -f "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
         env:
           MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app.zip"
       

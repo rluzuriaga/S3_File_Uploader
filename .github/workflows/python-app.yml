@@ -203,54 +203,54 @@ jobs:
           echo ::set-env name=MAC_APP_ZIP_FILE_PATH::${MAC_APP_ZIP_FILE_PATH}
 
       - name: Create Release
-          id: create_release
-          uses: actions/create-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: ${{ github.ref }}
-            release_name: Release ${{ github.ref }}
-            body: |
-              ${{ github.event.head_commit.message }}
-            draft: false
-            prerelease: false
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
       
       - name: Upload MSI installer to release
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./distribution-files/${{ env.WINDOWS_MSI_FILE_PATH }}
-            asset_name: ${{ env.WINDOWS_MSI_FILE_PATH }}
-            asset_content_type: application/x-msi
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./distribution-files/${{ env.WINDOWS_MSI_FILE_PATH }}
+          asset_name: ${{ env.WINDOWS_MSI_FILE_PATH }}
+          asset_content_type: application/x-msi
 
       - name: Upload Windows Zip folder to release
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./distribution-files/${{ env.WINDOWS_ZIP_FILE_PATH }}
-            asset_name: ${{ env.WINDOWS_ZIP_FILE_PATH }}
-            asset_content_type: application/zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./distribution-files/${{ env.WINDOWS_ZIP_FILE_PATH }}
+          asset_name: ${{ env.WINDOWS_ZIP_FILE_PATH }}
+          asset_content_type: application/zip
 
       - name: Upload DMG installer to release
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./distribution-files/${{ env.MAC_DMG_FILE_PATH }}
-            asset_name: ${{ env.MAC_DMG_FILE_PATH }}
-            asset_content_type: application/x-apple-diskimage
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./distribution-files/${{ env.MAC_DMG_FILE_PATH }}
+          asset_name: ${{ env.MAC_DMG_FILE_PATH }}
+          asset_content_type: application/x-apple-diskimage
 
       - name: Upload DMG installer to release
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./distribution-files/${{ env.MAC_APP_ZIP_FILE_PATH }}
-            asset_name: ${{ env.MAC_APP_ZIP_FILE_PATH }}
-            asset_content_type: application/zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./distribution-files/${{ env.MAC_APP_ZIP_FILE_PATH }}
+          asset_name: ${{ env.MAC_APP_ZIP_FILE_PATH }}
+          asset_content_type: application/zip

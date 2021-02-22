@@ -31,75 +31,75 @@ jobs:
       name: ${{ matrix.os }}_${{ matrix.python-version }}
     
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+        
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+    
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       
-    - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
-  
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-    
-    - name: Setup FFmpeg
-      uses: FedericoCarboni/setup-ffmpeg@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: BACKUP - Setup ffmpeg and ffprobe
-      if: ${{ failure() }}
-      run: |
-        python ffmpeg_setup.py
-        echo "./bin" >> $GITHUB_PATH
-    
-    - name: Run unit tests.
-      run: python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: BACKUP - Setup ffmpeg and ffprobe
+        if: ${{ failure() }}
+        run: |
+          python ffmpeg_setup.py
+          echo "./bin" >> $GITHUB_PATH
+      
+      - name: Run unit tests.
+        run: python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
-    - name: Run integration tests - MainWindow.
-      run: python -m unittest -v tests.integration_tests.main_window_tests
-    
-    - name: Run integration tests - SetupWindow.
-      run: python -m tests.integration_tests.setup_window_tests
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      - name: Run integration tests - MainWindow.
+        run: python -m unittest -v tests.integration_tests.main_window_tests
+      
+      - name: Run integration tests - SetupWindow.
+        run: python -m tests.integration_tests.setup_window_tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
-    - name: Run integration tests - SetupWindow UI.
-      run: python -m tests.integration_tests.setup_window_ui_elements_tests
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-    
-    - name: Run integration tests - UpdateDatabaseWindow.
-      run: python -m unittest -v tests.integration_tests.update_database_window_tests
+      - name: Run integration tests - SetupWindow UI.
+        run: python -m tests.integration_tests.setup_window_ui_elements_tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      
+      - name: Run integration tests - UpdateDatabaseWindow.
+        run: python -m unittest -v tests.integration_tests.update_database_window_tests
 
-    - name: Run integration tests - MassUploadWindow.
-      run: python -m unittest -v tests.integration_tests.mass_upload_window_tests
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      - name: Run integration tests - MassUploadWindow.
+        run: python -m unittest -v tests.integration_tests.mass_upload_window_tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
-    - name: Run integration tests - MassUploadWindow UI.
-      run: python -m unittest -v tests.integration_tests.mass_upload_window_ui_elements_tests
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
-        AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      - name: Run integration tests - MassUploadWindow UI.
+        run: python -m unittest -v tests.integration_tests.mass_upload_window_ui_elements_tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
 
   build:
@@ -112,66 +112,66 @@ jobs:
         python-version: [3.9]
 
     steps:
-    - uses: actions/checkout@v2
- 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2
   
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-        
-    - name: Install py2app on Mac
-      if: matrix.os == 'macos-10.15'
-      run: |
-        python -m pip install py2app
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
     
-    - name: Build app
-      run: |
-        if [ -f setup.py ]; then python setup.py clean --full-clean create; else echo "There is no setup.py file."; fi
-    
-    - name: Distribute created executables
-      run: |
-        if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
-
-    - name: Check if Windows build created MSI file
-      if: matrix.os == 'windows-latest'
-      run: |
-        if [ -f "$WINDOWS_MSI_FILE_NAME" ]; then echo "MSI file (${WINDOWS_MSI_FILE_NAME}) created successfully."; else exit 1; fi
-      env:
-        WINDOWS_MSI_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.msi"
-
-    - name: Check if Windows build created ZIP file
-      if: matrix.os == 'windows-latest'
-      run: |
-        if [ -f "$WINDOWS_ZIP_FILE_NAME" ]; then echo "ZIP file (${WINDOWS_ZIP_FILE_NAME}) created successfully."; else exit 1; fi
-      env:
-        WINDOWS_ZIP_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.zip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+          
+      - name: Install py2app on Mac
+        if: matrix.os == 'macos-10.15'
+        run: |
+          python -m pip install py2app
       
-    - name: Check if Mac build created DMG file
-      if: matrix.os == 'macos-10.15'
-      run: |
-        if [ -f "$MAC_DMG_FILE_NAME" ]; then echo "DMG file (${MAC_DMG_FILE_NAME}) created successfully."; else exit 1; fi
-      env:
-        MAC_DMG_FILE_NAME: "distribution/S3 File Uploader Installer.dmg"
+      - name: Build app
+        run: |
+          if [ -f setup.py ]; then python setup.py clean --full-clean create; else echo "There is no setup.py file."; fi
+      
+      - name: Distribute created executables
+        run: |
+          if [ -f setup.py ]; then python setup.py distribute; else echo "There is no setup.py file."; fi
 
-    - name: Check if Mac build created APP bundle
-      if: matrix.os == 'macos-10.15'
-      run: |
-        if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
-      env:
-        MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
-    
-    - name: Save distribution files - TESTING
-      if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-      uses: actions/upload-artifact@v2
-      with:
+      - name: Check if Windows build created MSI file
+        if: matrix.os == 'windows-latest'
+        run: |
+          if [ -f "$WINDOWS_MSI_FILE_NAME" ]; then echo "MSI file (${WINDOWS_MSI_FILE_NAME}) created successfully."; else exit 1; fi
+        env:
+          WINDOWS_MSI_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.msi"
+
+      - name: Check if Windows build created ZIP file
+        if: matrix.os == 'windows-latest'
+        run: |
+          if [ -f "$WINDOWS_ZIP_FILE_NAME" ]; then echo "ZIP file (${WINDOWS_ZIP_FILE_NAME}) created successfully."; else exit 1; fi
+        env:
+          WINDOWS_ZIP_FILE_NAME: "distribution/S3_File_Uploader-0.4-windows_amd64.zip"
+        
+      - name: Check if Mac build created DMG file
+        if: matrix.os == 'macos-10.15'
+        run: |
+          if [ -f "$MAC_DMG_FILE_NAME" ]; then echo "DMG file (${MAC_DMG_FILE_NAME}) created successfully."; else exit 1; fi
+        env:
+          MAC_DMG_FILE_NAME: "distribution/S3 File Uploader Installer.dmg"
+
+      - name: Check if Mac build created APP bundle
+        if: matrix.os == 'macos-10.15'
+        run: |
+          if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
+        env:
+          MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
+      
+      - name: Save distribution files - TESTING
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v2
+        with:
           name: distribution-files
           path: distribution
-            retention-days: 1
+          retention-days: 1
 
 
   release:

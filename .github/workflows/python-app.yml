@@ -163,7 +163,7 @@ jobs:
         run: |
           if [ -d "$MAC_APP_FILE_NAME" ]; then echo "APP bundle (${MAC_APP_FILE_NAME}) created successfully."; else exit 1; fi
         env:
-          MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app"
+          MAC_APP_FILE_NAME: "distribution/S3 File Uploader.app.zip"
       
       - name: Save distribution files - TESTING
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')

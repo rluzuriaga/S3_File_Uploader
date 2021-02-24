@@ -19,7 +19,7 @@ DB_VERSION: int = 2
 APP_TITLE: str = "S3 File Uploader"
 APP_VERSION: str = "0.4"
 
-WORKING_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+WORKING_DIRECTORY = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'S3_File_Uploader')
 LOGS_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'logs')
 
 IS_MAC: bool

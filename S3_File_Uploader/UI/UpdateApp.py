@@ -2,7 +2,7 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 
-from S3_File_Uploader import APP_VERSION, APP_TITLE
+from config import APP_VERSION, APP_TITLE
 
 logger = logging.getLogger('main_logger')
 

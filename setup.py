@@ -28,7 +28,7 @@ import subprocess
 import distutils.core
 from setuptools import find_packages
 
-from S3_File_Uploader import APP_TITLE, APP_VERSION
+from config import APP_TITLE, APP_VERSION
 
 
 WINDOWS = sys.platform.startswith('win32')

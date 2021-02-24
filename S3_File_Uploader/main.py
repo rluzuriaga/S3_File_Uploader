@@ -7,7 +7,8 @@ from datetime import datetime
 from S3_File_Uploader.UI.ProgramController import ProgramController
 from S3_File_Uploader.UI.UpdateApp import UpdateApp
 from S3_File_Uploader.Database import Database
-from S3_File_Uploader import APP_VERSION, DB_VERSION, LOGS_DIRECTORY
+
+from config import APP_VERSION, DB_VERSION, LOGS_DIRECTORY
 
 
 # Set up file based logger

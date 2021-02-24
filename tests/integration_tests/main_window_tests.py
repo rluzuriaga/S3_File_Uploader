@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from S3_File_Uploader import DatabasePath
+from config import DatabasePath
 from S3_File_Uploader.UI.MainWindow import MainWindow
 
 from tests.integration_tests.utils import open_program, destroy_program

@@ -7,7 +7,7 @@ import os
 import queue
 import threading
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
+from config import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
 

@@ -2,7 +2,7 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 
-from S3_File_Uploader import APP_TITLE
+from config import APP_TITLE
 
 from .MainWindow import MainWindow
 from .SetupWindow import SetupWindow

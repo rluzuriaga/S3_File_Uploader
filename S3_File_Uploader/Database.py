@@ -3,7 +3,7 @@ import sqlite3
 import logging
 from functools import wraps
 
-from S3_File_Uploader import DatabasePath, DB_VERSION
+from config import DatabasePath, DB_VERSION
 
 logger = logging.getLogger('main_logger')
 

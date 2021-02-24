@@ -12,7 +12,7 @@ import pexpect
 import ffmpeg
 from PIL import ImageTk, Image
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
+from config import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
 

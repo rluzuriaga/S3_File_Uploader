@@ -1,6 +1,6 @@
 from tkinter import ttk
 
-from S3_File_Uploader import IS_MAC, IS_WINDOWS
+from config import IS_MAC, IS_WINDOWS
 
 
 class Styles:

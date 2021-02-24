@@ -2,8 +2,8 @@ import logging
 import tkinter as tk
 from tkinter import ttk
 
+from config import APP_VERSION, DB_VERSION
 from S3_File_Uploader.Database import Database
-from S3_File_Uploader import APP_VERSION, DB_VERSION
 
 from .SetupWindow import SetupWindow
 from .UpdateDatabase import UpdateDatabase

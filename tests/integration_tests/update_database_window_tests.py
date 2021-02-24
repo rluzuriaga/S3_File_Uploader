@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from S3_File_Uploader import DatabasePath
+from config import DatabasePath
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.UI.UpdateDatabase import UpdateDatabase
 

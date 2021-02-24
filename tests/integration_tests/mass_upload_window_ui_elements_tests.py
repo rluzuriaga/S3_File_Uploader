@@ -3,7 +3,7 @@ import unittest
 
 from dotenv import load_dotenv
 
-from S3_File_Uploader import DatabasePath
+from config import DatabasePath
 from S3_File_Uploader.UI.MassUpload import MassUpload
 from S3_File_Uploader.UI.SetupWindow import SetupWindow
 

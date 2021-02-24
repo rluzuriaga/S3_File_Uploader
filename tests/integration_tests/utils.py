@@ -2,7 +2,7 @@ import os
 import time
 import warnings
 
-from S3_File_Uploader import DatabasePath, LOGS_DIRECTORY, IS_WINDOWS
+from config import DatabasePath, LOGS_DIRECTORY, IS_WINDOWS
 from S3_File_Uploader.UI.ProgramController import ProgramController
 
 

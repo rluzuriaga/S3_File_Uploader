@@ -80,7 +80,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
             time.sleep(1)
 
         if mass_upload._upload_is_done is False:
-            self.pc.after(30000, self._quit_mainloop_once_upload_is_done, mass_upload)
+            self.pc.after(5000, self._quit_mainloop_once_upload_is_done, mass_upload)
         else:
             self.pc.quit()
             # Need to update the program controller loop so that the GUI actually gets removed from screen

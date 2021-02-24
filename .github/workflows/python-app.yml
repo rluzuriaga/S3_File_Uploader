@@ -189,15 +189,10 @@ jobs:
       - name: Create environment variables for file names
         run: |
           cd distribution-files
-          WINDOWS_MSI_FILE_PATH=$(ls -d *.msi)
-          WINDOWS_ZIP_FILE_PATH=$(ls -d *windows*.zip)
-          MAC_DMG_FILE_PATH=$(ls -d *.dmg)
-          MAC_APP_ZIP_FILE_PATH=$(ls -d *.app.zip)
-
-          echo ::set-env name=WINDOWS_MSI_FILE_PATH::${WINDOWS_MSI_FILE_PATH}
-          echo ::set-env name=WINDOWS_ZIP_FILE_PATH::${WINDOWS_ZIP_FILE_PATH}
-          echo ::set-env name=MAC_DMG_FILE_PATH::${MAC_DMG_FILE_PATH}
-          echo ::set-env name=MAC_APP_ZIP_FILE_PATH::${MAC_APP_ZIP_FILE_PATH}
+          echo "WINDOWS_MSI_FILE_PATH=$(ls -d *.msi)" >> $GITHUB_ENV
+          echo "WINDOWS_ZIP_FILE_PATH=$(ls -d *windows*.zip)" >> $GITHUB_ENV
+          echo "MAC_DMG_FILE_PATH=$(ls -d *.dmg)" >> $GITHUB_ENV
+          echo "MAC_APP_ZIP_FILE_PATH=$(ls -d *.app.zip)" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release

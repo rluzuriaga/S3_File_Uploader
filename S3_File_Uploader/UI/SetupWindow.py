@@ -497,9 +497,10 @@ class SetupWindow(ttk.Frame):
         logger.debug(f'Starting save configuration process.')
 
         if not self._ff_in_path:
-            self.setup_window_output_message.configure(
-                text='Did not find ffmpeg or ffprobe on the system PATH.\nPlease install and add ffmpeg and ffprobe to PATH to use this program correctly.\nNo data saved.',
-                foreground='red')
+            self.setup_window_output_message_variable.set(
+                'Did not find ffmpeg or ffprobe on the system PATH.\nPlease install and add ffmpeg and ffprobe to PATH to use this program correctly.\nNo data saved.'
+            )
+            self.setup_window_output_message.configure(foreground='red')
 
             return
 

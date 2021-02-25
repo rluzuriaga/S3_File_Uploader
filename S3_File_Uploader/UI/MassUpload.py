@@ -304,8 +304,8 @@ class MassUpload(ttk.Frame):
 
     def _cancel_upload(self):
         """ Function that runs when canceling an upload. """
-        self._destroy_overall_progressbar()
         self._destroy_ffmpeg_and_upload_progressbar()
+        self._destroy_overall_progressbar()
 
         self.update_label.configure(text='Upload Canceled', foreground='black')
 
@@ -407,10 +407,13 @@ class MassUpload(ttk.Frame):
 
     def _destroy_ffmpeg_and_upload_progressbar(self):
         """ Function to remove the secondary progressbar from grid. """
-        logger.debug(f'Destroying secondary (ffmpeg & upload) progressbar.')
-
-        self.ffmpeg_and_upload_progressbar_label.grid_remove()
-        self.ffmpeg_and_upload_pb.grid_remove()
+        try:
+            logger.debug(f'Trying to destroy secondary (ffmpeg & upload) progressbar.')
+            self.ffmpeg_and_upload_progressbar_label.grid_remove()
+            self.ffmpeg_and_upload_pb.grid_remove()
+        except AttributeError:
+            logger.debug(f'Secondary progressbar was never added to grid because it wasn\'t a ffmpeg upload.')
+            pass
 
     @staticmethod
     def _parse_ffmpeg_command(ffmpeg_config, input_file_path,

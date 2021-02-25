@@ -44,6 +44,18 @@ FINAL_DISTRIBUTION_DIR = os.path.join(os.getcwd(), 'distribution')
 DIST_NAME = f'{APP_TITLE.replace(" ", "_")}-{APP_VERSION}-{platform.system().lower()}_{platform.machine().lower()}'
 DIST_PATH = os.path.join(BUILD_DIR, DIST_NAME)
 
+PACKAGES = [
+    'botocore',
+    'boto3',
+    'ffmpeg',
+    'pexpect',
+    'requests',
+    'dotenv',
+    'bs4',
+]
+if WINDOWS:
+    PACKAGES.append('html')
+
 ICON = None
 BASE = None
 EXEC_NAME = None
@@ -269,22 +281,8 @@ if WINDOWS:
     extra_options = dict(
         options={
             'build_exe': {
-                'packages': [
-                    'botocore',
-                    'boto3',
-                    'ffmpeg',
-                    'pexpect',
-                    'requests',
-                    'html'
-                ],
-                'includes': [
-                    'botocore',
-                    'boto3',
-                    'ffmpeg',
-                    'pexpect',
-                    'requests',
-                    'html'
-                ],
+                'packages': PACKAGES,
+                'includes': PACKAGES,
                 'include_files': [
                     ('S3_File_Uploader', 'S3_File_Uploader')
                 ]
@@ -357,13 +355,7 @@ if MAC:
                 ],
                 # Any package that is not part of the standard library
                 # that is used as an import, needs to be added here
-                'packages': [
-                    'botocore',
-                    'boto3',
-                    'ffmpeg',
-                    'pexpect',
-                    'requests',
-                ]
+                'packages': PACKAGES
             }
         },
         setup_requires=['py2app']

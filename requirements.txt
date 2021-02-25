@@ -1,3 +1,4 @@
+# MAKE SURE TO ADD THE PACKAGE TO SETUP.PY TOO!!
 botocore
 boto3
 ffmpeg-python
@@ -6,4 +7,3 @@ requests
 cx_Freeze
 python-dotenv
 beautifulsoup4
-pillow

@@ -543,6 +543,9 @@ class MassUpload(ttk.Frame):
                 if IS_WINDOWS:
                     thread.kill(signal.SIG_DFL)
 
+            elif i == 2:
+                pass
+
         logger.debug(f'Ffmpeg conversion completed.')
 
     def _ffprobe_controller(full_file_name: str) -> int:
@@ -558,7 +561,12 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Retrieving video frames using command: {command}')
 
-        thread = pexpect.spawn(command)
+        if IS_MAC:
+            thread = pexpect.spawn(command)
+
+        if IS_WINDOWS:
+            from pexpect import popen_spawn
+            thread = popen_spawn.PopenSpawn(command)
 
         cpl = thread.compile_pattern_list([
             pexpect.EOF,
@@ -574,7 +582,14 @@ class MassUpload(ttk.Frame):
                 break
             elif i == 1:
                 frames = thread.match.group(0)
-                thread.close
+
+                if IS_MAC:
+                    thread.close
+
+                if IS_WINDOWS:
+                    thread.kill(signal.SIG_DFL)
+            elif i == 2:
+                pass
 
         number_of_frames = str(frames, 'utf-8').replace('nb_frames=', '')
 
@@ -726,7 +741,6 @@ class MassUpload(ttk.Frame):
                               bucket_name, bucket_objects_dict):
         logger.debug(f'Starting mass upload for all files.')
 
-        # TODO: need to make this command work with a queue then run debug again to test
         self._add_cancel_buttons()
 
         # Replace the `\` used in windows for `/`

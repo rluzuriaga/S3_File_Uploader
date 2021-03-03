@@ -51,10 +51,13 @@ PACKAGES = [
     'pexpect',
     'requests',
     'dotenv',
-    'bs4',
 ]
 if WINDOWS:
     PACKAGES.append('html')
+
+# pip packages used in setup()
+requirements_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'requirements.txt')
+INSTALL_REQUIRES = [line.strip() for line in open(requirements_file, 'r')]
 
 ICON = None
 BASE = None
@@ -331,7 +334,9 @@ if WINDOWS:
             cx_Freeze.Executable(
                 'S3_File_Uploader/main.py',
                 targetName=EXEC_NAME,
-                base=BASE,
+                # pexpect doesn't work on win32gui applications so for now until a different solution
+                #   is found need to make the application a console app by commenting out base=BASE
+                # base=BASE,
                 icon=ICON
             )
         ]
@@ -376,12 +381,8 @@ setup(
         'S3_File_Uploader': ['UI/images/*.*']
     },
     install_requires=[
-        'botocore',
-        'boto3',
-        'ffmpeg-python',
-        'pexpect',
-        'requests',
-        'html' if WINDOWS else ''
+        'html' if WINDOWS else '',
+        *INSTALL_REQUIRES
     ],
     zip_safe=True,
     classifiers=[

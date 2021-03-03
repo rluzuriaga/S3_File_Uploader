@@ -97,6 +97,10 @@ jobs:
           AWS_REGION_NAME: ${{ secrets.AWS_REGION_NAME }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      
+      # TODO: Add a way to remove AWS test data if any tests fail.
+      # - name: Remove AWS test data if tests failed
+      #   if: failure()
 
 
   build:

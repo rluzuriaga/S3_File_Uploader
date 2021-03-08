@@ -351,6 +351,14 @@ class Database:
         logger.debug(f'Commiting database.')
 
     @_only_context
+    def make_aws_config_inactive(self) -> None:
+        self.cursor.execute("Update aws_config SET is_active = 0 WHERE is_active = 1;")
+        logger.debug(f'Setting saved AWS config to not active.')
+
+        self.connection.commit()
+        logger.debug(f'Commiting database.')
+
+    @_only_context
     def are_settings_saved(self):
         logger.debug(f'Checking if settings are saved on the database.')
 

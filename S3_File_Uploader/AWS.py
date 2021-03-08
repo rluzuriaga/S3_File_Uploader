@@ -1,3 +1,4 @@
+import sys
 import logging
 
 import boto3
@@ -52,7 +53,22 @@ class AWS:
                     region_name=aws_config[2]
                 )
 
-                buckets_dict = client.list_buckets()
+                # Trying to retrieve a dictionary of all the buckets.
+                try:
+                    buckets_dict = client.list_buckets()
+
+                # This exception is raised when the saved AWS keys in the database are not valid anymore
+                #   or are inactive.
+                except botocore.exceptions.ClientError as e:
+                    if "InvalidAccessKeyId" in str(e):
+                        DB.make_aws_config_inactive()
+
+                        # Using `input` so that the message doesn't just go away immediately after displaying it.
+                        input("Please close and reopen the application")
+                        sys.exit()
+                    else:
+                        logger.error(f'ERROR: {e}')
+                        sys.exit()
 
                 buckets_values = tuple(bucket_name['Name'] for bucket_name in buckets_dict['Buckets'])
 

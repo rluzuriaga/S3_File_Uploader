@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import os
 import sqlite3
 import logging
 from functools import wraps
+from typing import Callable, List, Optional, Tuple, Any
 
 from config import DatabasePath, DB_VERSION
 
@@ -9,13 +12,13 @@ logger = logging.getLogger('main_logger')
 
 
 class Database:
-    def __init__(self):
+    def __init__(self) -> None:
         logger.info(f'Initializing the database.')
 
         self.create_db = False
         self.context = False
 
-    def __enter__(self):
+    def __enter__(self) -> Database:
         logger.info(f'Entering database context.')
 
         self.context = True
@@ -31,7 +34,7 @@ class Database:
 
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, *args: Any) -> None:
         logger.info(f'Exiting database context.')
 
         del self.cursor
@@ -39,9 +42,9 @@ class Database:
         self.connection.close()
         del self.connection
 
-    def _only_context(func):
+    def _only_context(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args: Any, **kwargs: Any) -> Callable:
             if not self.context:
                 raise NotWithContext(
                     "Database should only be used as a context manager. Call it by using 'with Database()'.")
@@ -49,7 +52,7 @@ class Database:
         return wrapper
 
     @_only_context
-    def create_database(self):
+    def create_database(self) -> None:
         logger.debug(f'Creating database.')
 
         self.cursor.executescript(
@@ -235,7 +238,7 @@ class Database:
         logger.debug(f'Commiting database insertion.')
 
     @_only_context
-    def finish_mass_upload(self):
+    def finish_mass_upload(self) -> None:
         logger.debug(f'Updating mass upload table with finish_date_time.')
 
         self.cursor.execute(
@@ -250,7 +253,7 @@ class Database:
         logger.debug(f'Commiting database update.')
 
     @_only_context
-    def get_region_name_code(self, region_name):
+    def get_region_name_code(self, region_name: str) -> str:
         output = self.cursor.execute(
             f'''
             SELECT region_code 
@@ -264,7 +267,7 @@ class Database:
         return output
 
     @_only_context
-    def get_region_name_labels(self):
+    def get_region_name_labels(self) -> Tuple[str, ...]:
         output = self.cursor.execute(
             '''
             SELECT region_name_text
@@ -279,7 +282,7 @@ class Database:
         return output_tuple
 
     @_only_context
-    def get_aws_config(self, label=False):
+    def get_aws_config(self, label: bool = False) -> Tuple[str, ...]:
         if label:
             output = self.cursor.execute(
                 '''
@@ -306,7 +309,7 @@ class Database:
         return output
 
     @_only_context
-    def set_aws_config(self, access_key_id, secret_key, region_name_code):
+    def set_aws_config(self, access_key_id: str, secret_key: str, region_name_code: str) -> None:
         # Check if currect saved setting is the same as new one,
         # If so then nothing is changed
         # If they are different, then the old setting will change `is_active` to false
@@ -359,7 +362,7 @@ class Database:
         logger.debug(f'Commiting database.')
 
     @_only_context
-    def are_settings_saved(self):
+    def are_settings_saved(self) -> bool:
         logger.debug(f'Checking if settings are saved on the database.')
 
         if self.get_aws_config() is None:
@@ -371,7 +374,7 @@ class Database:
         return True
 
     @_only_context
-    def get_ffmpeg_config(self):
+    def get_ffmpeg_config(self) -> Tuple[Optional[str], ...]:
         try:
             output = self.cursor.execute(
                 '''
@@ -400,9 +403,12 @@ class Database:
         return output
 
     @_only_context
-    def set_ffmpeg_config(self, ffmpeg_parameters,
-                          file_suffix, aws_different_output_extension,
-                          local_save_path, local_different_output_extension):
+    def set_ffmpeg_config(self, ffmpeg_parameters: str,
+                          file_suffix: str, aws_different_output_extension: str,
+                          local_save_path: str, local_different_output_extension: str) -> None:
+
+        # TODO: check why this prints a string in a string    print(aws_different_output_extension)
+
         output = self.cursor.execute(
             '''
             SELECT ffmpeg_parameters, file_suffix, aws_different_output_extension, local_save_path, local_different_output_extension
@@ -434,7 +440,7 @@ class Database:
         logger.debug(f'Commiting database.')
 
     @_only_context
-    def get_video_formats(self, labels=False, general_file_ext=None):
+    def get_video_formats(self, labels: bool = False, general_file_ext: Optional[str] = None) -> List[str]:
         if labels:
             output = self.cursor.execute(
                 '''
@@ -465,7 +471,7 @@ class Database:
         return output_
 
     @_only_context
-    def get_mass_upload_not_ended_data(self):
+    def get_mass_upload_not_ended_data(self) -> List[Optional[Tuple[int, str, str, str, int]]]:
         output = self.cursor.execute(
             '''
             SELECT upload_id, mass_upload_path, s3_bucket, upload_type, use_ffmpeg
@@ -479,7 +485,8 @@ class Database:
         return output
 
     @_only_context
-    def add_file_upload(self, file_path, file_name, file_size, s3_bucket):
+    def add_file_upload(self, file_path: str, file_name: str,
+                        file_size: int, s3_bucket: str) -> None:
         logger.debug(f'Adding file upload data to database.')
 
         output = self.cursor.execute(
@@ -506,7 +513,7 @@ class Database:
         logger.debug(f'Commiting database.')
 
     @_only_context
-    def finish_file_upload(self, file_path, file_name):
+    def finish_file_upload(self, file_path: str, file_name: str) -> None:
         self.cursor.execute(
             f"""
             UPDATE file_upload
@@ -522,7 +529,7 @@ class Database:
         logger.debug(f'Commiting database.')
 
     @_only_context
-    def get_file_upload_size(self, file_path, file_name) -> int:
+    def get_file_upload_size(self, file_path: str, file_name: str) -> int:
         output = self.cursor.execute(
             f'''
             SELECT file_size_bytes
@@ -545,8 +552,8 @@ class Database:
         return file_size
 
     @_only_context
-    def add_ffmpeg_conversion(self, original_file_path, original_file_name, original_file_size,
-                              converted_file_path, converted_file_name, converted_file_size):
+    def add_ffmpeg_conversion(self, original_file_path: str, original_file_name: str, original_file_size: str,
+                              converted_file_path: str, converted_file_name: str, converted_file_size: str) -> None:
 
         self.cursor.execute(
             f'''
@@ -594,23 +601,18 @@ class Database:
 
         return bool(output)
 
-    # TODO: Make sure this function is actually not being used.
     @_only_context
-    def get_db_version(self):
-        logger.debug(f'Retrieving DB version.')
-        output = self.cursor.execute('SELECT db_version FROM versioning;').fetchone()[0]
-
-        return output
-
-    @_only_context
-    def get_tests_table(self):
+    def get_tests_table(self) -> Optional[Tuple[str]]:
         logger.debug(f'Trying to retrieve everyting from the tests table.')
         try:
             output = self.cursor.execute('SELECT * FROM tests;').fetchone()
-            return output
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
-                return None
+                output = None
+            else:
+                raise sqlite3.OperationalError(str(e))
+
+        return output
 
 
 class NotWithContext(Exception):

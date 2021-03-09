@@ -1,19 +1,24 @@
+from __future__ import annotations
+
 import os
-import sys
 import signal
 import logging
 import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from typing import List
+from typing import Dict, Iterable, List, Tuple, Optional, TYPE_CHECKING
 
 import pexpect
 import ffmpeg
 
-from config import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
+from config import IS_MAC, IS_WINDOWS
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS
+
+if TYPE_CHECKING:
+    from tkinter import ttk
+    from S3_File_Uploader.UI.ProgramController import ProgramController
 
 
 logger = logging.getLogger('main_logger')
@@ -83,9 +88,9 @@ class MassUpload(ttk.Frame):
     # Row 14
     START_UPLOAD_AND_CANCEL_BUTTON_GRID = {'row': 14, 'column': 0, 'columnspan': 5, 'pady': (20, 15)}
 
-    def __init__(self, parent, controller):
-        ttk.Frame.__init__(self, parent, width=100,
-                           height=300, relief=tk.RIDGE)
+    def __init__(self, parent: ttk.PanedWindow, controller: ProgramController) -> None:
+        ttk.Frame.__init__(self, parent, width=100, height=300, relief=tk.RIDGE)
+
         self.controller = controller
 
         logger.debug(f'Initializing the MassUpload ttk frame.')
@@ -106,7 +111,7 @@ class MassUpload(ttk.Frame):
 
         self.radio_button_var.set(1)
 
-    def _ui_elements(self):
+    def _ui_elements(self) -> None:
         # Row 0
         self.header_label = ttk.Label(
             self,
@@ -271,7 +276,7 @@ class MassUpload(ttk.Frame):
             command=self._cancel_upload_button_pressed
         )
 
-    def _add_cancel_buttons(self):
+    def _add_cancel_buttons(self) -> None:
         """ Function that removes the Start Upload button from grid and add the Cancel Upload button in its place. """
         logger.debug(f'Removing `Start Upload` button from grid.')
         self.start_upload_button.grid_remove()
@@ -280,7 +285,7 @@ class MassUpload(ttk.Frame):
         self.cancel_upload_button.configure(state='normal')
         self.cancel_upload_button.grid(self.START_UPLOAD_AND_CANCEL_BUTTON_GRID)
 
-    def _remove_cancel_buttons(self):
+    def _remove_cancel_buttons(self) -> None:
         """ Function that removes the Cancel Upload button from the grid and add the Start Upload button in its place. """
         logger.debug(f'Removing cancel buttons from the grid.')
         self.cancel_upload_button.grid_remove()
@@ -291,7 +296,7 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Adding the `Start Upload` button to the grid.')
         self.start_upload_button.grid(self.START_UPLOAD_AND_CANCEL_BUTTON_GRID)
 
-    def _cancel_upload_button_pressed(self):
+    def _cancel_upload_button_pressed(self) -> None:
         """ Function that runs when the Cancel Upload button is pressed.
 
         The function makes the `self._is_cancel` instance variable True and disables the cancel button.
@@ -302,7 +307,7 @@ class MassUpload(ttk.Frame):
         logger.debug(f'disabling the cancel button')
         self.cancel_upload_button.configure(state='disabled')
 
-    def _cancel_upload(self):
+    def _cancel_upload(self) -> None:
         """ Function that runs when canceling an upload. """
         self._destroy_ffmpeg_and_upload_progressbar()
         self._destroy_overall_progressbar()
@@ -313,7 +318,7 @@ class MassUpload(ttk.Frame):
 
         self.enable_widgets()
 
-    def _open_folder_path(self):
+    def _open_folder_path(self) -> None:
         """ Function that runs when the open folder button is clicked. """
         logger.debug(f'Opening file dialog window for selecting local save path.')
 
@@ -322,7 +327,7 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Setting local save path to: "{path}"')
 
-    def _refresh_s3_buckets(self):
+    def _refresh_s3_buckets(self) -> None:
         """ Function that runs when the refresh button is clicked. """
         logger.debug(f'Refreshing S3 buckets.')
 
@@ -336,7 +341,7 @@ class MassUpload(ttk.Frame):
             foreground='#3fe03f'  # Darker green
         )
 
-    def _all_files_radio_active(self):
+    def _all_files_radio_active(self) -> None:
         logger.debug(f'All files radio button is selected.')
 
         # When the All files radio button is clicked,
@@ -348,7 +353,7 @@ class MassUpload(ttk.Frame):
         self.use_ffmpeg_checkbox.grid_forget()
         self.use_ffmpeg_checkbox_var.set(0)
 
-    def _video_only_radio_active(self):
+    def _video_only_radio_active(self) -> None:
         logger.debug(f'Video only radio button is selected.')
 
         # Add the VideoCheckboxes frame
@@ -357,14 +362,14 @@ class MassUpload(ttk.Frame):
         # Add the use FFMPEG checkbox
         self.use_ffmpeg_checkbox.grid(self.USE_FFMPEG_GRID)
 
-    def _audio_only_radio_active(self):
+    def _audio_only_radio_active(self) -> None:
         logger.debug(f'Audio only radio button is selected.')
 
         self.video_checkboxes.grid_forget()
         self.use_ffmpeg_checkbox.grid_forget()
         self.use_ffmpeg_checkbox_var.set(0)
 
-    def _create_overall_progressbar(self, number_of_files):
+    def _create_overall_progressbar(self, number_of_files: int) -> None:
         """ Function to remove the update label from the grid and add the overall progressbar and label to grid.
 
         Args:
@@ -383,7 +388,7 @@ class MassUpload(ttk.Frame):
         self.overall_pb = ProgressBar(self, self.controller, 400, number_of_files)
         self.overall_pb.grid(self.OVERALL_PROGRESSBAR_GRID)
 
-    def _destroy_overall_progressbar(self):
+    def _destroy_overall_progressbar(self) -> None:
         """ Function to remove the overall progressbar from grid and add the update label. """
         logger.debug(f'Destroying overall progressbar.')
 
@@ -391,7 +396,7 @@ class MassUpload(ttk.Frame):
         self.overall_pb.grid_remove()
         self.update_label.grid(self.UPDATE_LABEL_GRID)
 
-    def _create_ffmpeg_and_upload_progressbar(self, length_of_bar):
+    def _create_ffmpeg_and_upload_progressbar(self, length_of_bar: int) -> None:
         """ Function to add the secondary progressbar that is used to track ffmpeg and upload progress to grid.
 
         Args:
@@ -405,7 +410,7 @@ class MassUpload(ttk.Frame):
         self.ffmpeg_and_upload_pb = ProgressBar(self, self.controller, 400, length_of_bar)
         self.ffmpeg_and_upload_pb.grid(self.FFMPEG_AND_UPLOAD_PROGRESSBAR_GRID)
 
-    def _destroy_ffmpeg_and_upload_progressbar(self):
+    def _destroy_ffmpeg_and_upload_progressbar(self) -> None:
         """ Function to remove the secondary progressbar from grid. """
         try:
             logger.debug(f'Trying to destroy secondary (ffmpeg & upload) progressbar.')
@@ -416,9 +421,9 @@ class MassUpload(ttk.Frame):
             pass
 
     @staticmethod
-    def _parse_ffmpeg_command(ffmpeg_config, input_file_path,
-                              input_file_name, input_file_extension,
-                              directory_structure_for_local_save):
+    def _parse_ffmpeg_command(ffmpeg_config: Tuple[Optional[str], ...], input_file_path: str,
+                              input_file_name: str, input_file_extension: str,
+                              directory_structure_for_local_save: str) -> Tuple[str, str]:
         """ Function to parse together the FFMPEG command to a string.
 
         This function parses together the FFMPEG command from that data the user entered on the setup page,
@@ -429,6 +434,7 @@ class MassUpload(ttk.Frame):
             input_file_path (str): The path to the file that will be converted.
             input_file_name (str): The file name of the file that will be converted
             input_file_extension (str): The extension of the file that will be converted.
+            directory_structure_for_local_save (str): String of parent directory structure of file being converted.
 
         Returns:
             ffmpeg_command_string (str): The parsed together string of the ffmpeg commad
@@ -476,7 +482,8 @@ class MassUpload(ttk.Frame):
 
         return ffmpeg_command_string, first_full_output_string
 
-    def _ffmpeg_controller(self, parsed_ffmpeg_command, ffmpeg_progressbar, total_video_frames: int):
+    def _ffmpeg_controller(self, parsed_ffmpeg_command: str, ffmpeg_progressbar: ttk.Progressbar,
+                           total_video_frames: int) -> None:
         """ Function to run FFMPEG using the parsed ffmpeg command.
 
         Args:
@@ -535,7 +542,7 @@ class MassUpload(ttk.Frame):
                     frame_number, 'utf-8').replace('frame=', '').lstrip()
 
                 logger.debug(f'Updating ffmpeg progressbar: {frame_num} of {str(total_video_frames)} frames.')
-                ffmpeg_progressbar.update_progressbar_value(int(frame_num))
+                ffmpeg_progressbar.update_progressbar_value(float(frame_num))
 
                 if IS_MAC:
                     thread.close
@@ -597,7 +604,7 @@ class MassUpload(ttk.Frame):
 
         return int(number_of_frames)
 
-    def start_upload(self):
+    def start_upload(self) -> None:
         logger.debug(f'Start Upload button pressed.')
 
         logger.debug(f'Disabling widgets.')
@@ -737,8 +744,8 @@ class MassUpload(ttk.Frame):
         # elif radio_button == 3:  # Audio only
         #     print('audio selected')
 
-    def start_mass_upload_all(self, upload_start_path,
-                              bucket_name, bucket_objects_dict):
+    def start_mass_upload_all(self, upload_start_path: str,
+                              bucket_name: str, bucket_objects_dict: Dict[str, int]) -> None:
         logger.debug(f'Starting mass upload for all files.')
 
         self._add_cancel_buttons()
@@ -799,8 +806,8 @@ class MassUpload(ttk.Frame):
 
         self._upload_is_done = True
 
-    def start_mass_upload_video(self, upload_start_path, bucket_name,
-                                bucket_objects_dict, video_formats_to_use, use_ffmpeg):
+    def start_mass_upload_video(self, upload_start_path: str, bucket_name: str, bucket_objects_dict: Dict[str, int],
+                                video_formats_to_use: List[str], use_ffmpeg: int) -> None:
         logger.debug(f'Starting mass upload for video files.')
 
         self._add_cancel_buttons()
@@ -1042,7 +1049,7 @@ class MassUpload(ttk.Frame):
 
         self._upload_is_done = True
 
-    def resume_mass_upload(self, not_finished_data):
+    def resume_mass_upload(self, not_finished_data: Tuple[int, str, str, str, int]) -> None:
         logger.debug(f'Starting resume mass upload.')
 
         logger.debug(f'Disabling widgets.')
@@ -1089,7 +1096,7 @@ class MassUpload(ttk.Frame):
                 )
             ).start()
 
-    def disable_widgets(self):
+    def disable_widgets(self) -> None:
         logger.debug(f'Disabling all main window buttons.')
         self.controller.disable_main_window_buttons()
 
@@ -1109,7 +1116,7 @@ class MassUpload(ttk.Frame):
         self.video_checkboxes.disable_all_widgets()
         self.video_checkboxes.unbind_widgets()
 
-    def enable_widgets(self):
+    def enable_widgets(self) -> None:
         logger.debug(f'Enabling all main window buttons.')
         self.controller.enable_main_window_buttons()
 
@@ -1131,7 +1138,7 @@ class MassUpload(ttk.Frame):
 
 
 class VideoCheckboxes(ttk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent: MassUpload, controller: ProgramController) -> None:
         logger.debug(f'Initializing VideoCheckboxes ttk frame.')
 
         ttk.Frame.__init__(self, parent, relief=tk.FLAT)
@@ -1182,12 +1189,12 @@ class VideoCheckboxes(ttk.Frame):
             else:
                 checkbox[1].set(0)
 
-    def state(self):
+    def state(self) -> Iterable[int]:
         """ Returns a map of 0 or 1 for which video extension checkbox is selected. """
         logger.debug(f'Returning a map of which video extension is select/not selected.')
         return map((lambda var: var.get()), self.checkbox_variables)
 
-    def enter_bind(self, event):
+    def enter_bind(self, event: tk.Event) -> None:
         text_ = "Includes:  "
 
         with Database() as DB:
@@ -1198,26 +1205,26 @@ class VideoCheckboxes(ttk.Frame):
 
         self.hover_text.configure(text=text_.rstrip(', '))
 
-    def leave_bind(self, event):
+    def leave_bind(self, event: tk.Event) -> None:
         self.hover_text.configure(text='')
 
-    def disable_all_widgets(self):
+    def disable_all_widgets(self) -> None:
         logger.debug(f'Disabling all checkboxes.')
         for child in self.winfo_children():
             child.configure(state='disabled')
 
-    def enable_all_widgets(self):
+    def enable_all_widgets(self) -> None:
         logger.debug(f'Enabling all checkboxes.')
         for child in self.winfo_children():
             child.configure(state='enable')
 
-    def unbind_widgets(self):
+    def unbind_widgets(self) -> None:
         logger.debug(f'Unbinding all checkboxes.')
         for child in self.winfo_children():
             child.unbind("<Enter>")
             child.unbind("<Leave>")
 
-    def bind_widgets(self):
+    def bind_widgets(self) -> None:
         logger.debug(f'Binding all checkboxes.')
         for child in self.winfo_children():
             if "checkbutton" in child.widgetName:
@@ -1226,7 +1233,7 @@ class VideoCheckboxes(ttk.Frame):
 
 
 class ProgressBar(ttk.Frame):
-    def __init__(self, parent, controller, bar_size, number_of_steps):
+    def __init__(self, parent: MassUpload, controller: ProgramController, bar_size: int, number_of_steps: int) -> None:
         logger.debug(f'Initializing Progressbar.')
 
         ttk.Frame.__init__(self, parent, relief=tk.FLAT)
@@ -1234,7 +1241,7 @@ class ProgressBar(ttk.Frame):
 
         self.number_of_steps = number_of_steps
 
-        self.var = tk.IntVar()
+        self.var = tk.DoubleVar()
         self.progressbar = ttk.Progressbar(
             self,
             orient=tk.HORIZONTAL,
@@ -1245,7 +1252,7 @@ class ProgressBar(ttk.Frame):
         )
         self.progressbar.pack()
 
-    def step(self):
+    def step(self) -> None:
         # If this step is the last one to complete the progressbar
         # then change the maximum to 100 and the value to 100
         # Doing this because if it is an odd number of steps the progressbar restarts
@@ -1255,20 +1262,20 @@ class ProgressBar(ttk.Frame):
 
         self.progressbar.step()
 
-    def change_progressbar_maximum(self, maximum):
+    def change_progressbar_maximum(self, maximum: int) -> None:
         self.progressbar.configure(maximum=maximum)
 
-    def reset_progressbar_value(self):
+    def reset_progressbar_value(self) -> None:
         self.var.set(0)
 
-    def update_progressbar_value(self, value):
+    def update_progressbar_value(self, value: float) -> None:
         # Have to update the variable and not the actual value of progressbar.
         # For some reason this is the only way to make it work.
         self.var.set(value)
 
 
 class NotFinishedWindow(tk.Toplevel):
-    def __init__(self, controller, not_finished_data):
+    def __init__(self, controller: ProgramController, not_finished_data: Tuple[int, str, str, str, int]) -> None:
         logger.debug(f'Creating NotFinishedWindow.')
         tk.Toplevel.__init__(self, controller)
         self.controller = controller
@@ -1328,32 +1335,34 @@ class NotFinishedWindow(tk.Toplevel):
 
         self.geometry(f"+{positionRight}+{positionDown}")
 
-    def no_button_press(self):
+    def no_button_press(self) -> None:
         self.no_button_pressed = True
         # self.controller.full_opacity()
         self.destroy()
 
-    def yes_button_press(self):
+    def yes_button_press(self) -> None:
         self.yes_button_pressed = True
         # self.controller.full_opacity()
         self.destroy()
 
-    def retrieve_button_pressed(self):
+    def retrieve_button_pressed(self) -> str:
         if self.no_button_pressed:
             return 'n'
-        elif self.yes_button_pressed:
-            return 'y'
+
+        return 'y'
 
 
 class S3UploadProgress(object):
-    def __init__(self, progressbar):
+    def __init__(self, progressbar: ProgressBar) -> None:
         logger.debug(f'Initializing S3UploadProgress.')
         self._progressbar = progressbar
         self._seen_so_far = 0
         self._lock = threading.Lock()
 
-    def __call__(self, bytes_amount):
+    def __call__(self, bytes_amount: int) -> None:
         logger.debug(f'Updating S3UploadProgress progressbar')
+        # print(bytes_amount)
         with self._lock:
-            self._seen_so_far += int(bytes_amount)
+            # self._seen_so_far += int(bytes_amount)
+            self._seen_so_far += bytes_amount
             self._progressbar.update_progressbar_value(self._seen_so_far)

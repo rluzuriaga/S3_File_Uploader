@@ -1,13 +1,20 @@
+from __future__ import annotations
+
 import logging
 import tkinter as tk
 from tkinter import ttk
+from typing import TYPE_CHECKING
 
 from config import APP_VERSION, DB_VERSION
 from S3_File_Uploader.Database import Database
 
-from .SetupWindow import SetupWindow
-from .UpdateDatabase import UpdateDatabase
-from .MassUpload import MassUpload
+from S3_File_Uploader.UI.SetupWindow import SetupWindow
+from S3_File_Uploader.UI.UpdateDatabase import UpdateDatabase
+from S3_File_Uploader.UI.MassUpload import MassUpload
+
+if TYPE_CHECKING:
+    from tkinter import ttk
+    from S3_File_Uploader.UI.ProgramController import ProgramController
 
 
 # Set up logger
@@ -15,9 +22,9 @@ logger = logging.getLogger('main_logger')
 
 
 class MainWindow(ttk.Frame):
-    def __init__(self, parent, controller):
-        ttk.Frame.__init__(self, parent, width=100,
-                           height=300, relief=tk.RIDGE)
+    def __init__(self, parent: ttk.PanedWindow, controller: ProgramController) -> None:
+        ttk.Frame.__init__(self, parent, width=100, height=300, relief=tk.RIDGE)
+
         self.controller = controller
 
         logger.debug(f'Initializing the MainWindow ttk frame.')
@@ -31,7 +38,7 @@ class MainWindow(ttk.Frame):
             if DB.are_settings_saved():
                 self.enable_all_buttons()
 
-    def ui_elements(self):
+    def ui_elements(self) -> None:
         self.main_window_top_label = ttk.Label(
             self,
             text='Please select one of the options below.',
@@ -79,7 +86,7 @@ class MainWindow(ttk.Frame):
         )
         self.statusbar_db_version.grid(row=100, column=1, padx=4, pady=(15, 2), sticky='es')
 
-    def initial_setup_button_press(self):
+    def initial_setup_button_press(self) -> None:
         """ Function that determines what happens when the 'Initial Setup' button is pressed """
 
         # If there is no open pane (other than the main window),
@@ -126,7 +133,7 @@ class MainWindow(ttk.Frame):
             # Cancel the after() function so that the program doesn't eat all the CPU and RAM
             self.controller.setup_stop_after()
 
-    def update_database_button_press(self):
+    def update_database_button_press(self) -> None:
         """ Function that determines what happens when the 'Update Database' button is pressed """
 
         # If there is no open pane (other than the main window),
@@ -161,7 +168,7 @@ class MainWindow(ttk.Frame):
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
             logger.debug(f'Removing UpdateDatabase frame from window.')
 
-    def mass_upload_button_press(self):
+    def mass_upload_button_press(self) -> None:
         """ Function that determines what happens when the 'Start Mass Upload' button is pressed """
 
         # If there is no open pane (other than the main window),
@@ -196,13 +203,13 @@ class MainWindow(ttk.Frame):
             self.controller.remove_paned_window_frame(self.controller.active_panes()[-1])
             logger.debug(f'Removing MassUpload frame from window.')
 
-    def enable_all_buttons(self):
+    def enable_all_buttons(self) -> None:
         self.main_window_setup_button.configure(state='normal')
         self.update_database_button.configure(state='normal')
         self.mass_upload_window_button.configure(state='normal')
         logger.debug(f'Enable setup and mass upload buttons.')
 
-    def disable_all_buttons(self):
+    def disable_all_buttons(self) -> None:
         self.main_window_setup_button.configure(state='disabled')
         self.update_database_button.configure(state='disabled')
         self.mass_upload_window_button.configure(state='disabled')

@@ -1,16 +1,23 @@
+from __future__ import annotations
+
 import logging
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from typing import TYPE_CHECKING
 
 from config import IS_MAC
 from S3_File_Uploader.Database import Database
+
+if TYPE_CHECKING:
+    from tkinter import ttk
+    from S3_File_Uploader.UI.ProgramController import ProgramController
 
 logger = logging.getLogger('main_logger')
 
 
 class UpdateDatabase(ttk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent: ttk.PanedWindow, controller: ProgramController) -> None:
         ttk.Frame.__init__(self, parent, width=100, height=300, relief=tk.RIDGE)
         self.controller = controller
 
@@ -19,7 +26,7 @@ class UpdateDatabase(ttk.Frame):
         self.ui_elements()
         logger.debug(f'Created UpdateDatabase UI elements.')
 
-    def ui_elements(self):
+    def ui_elements(self) -> None:
         top_label = ttk.Label(
             self,
             text="Update the program's database.",
@@ -61,7 +68,7 @@ class UpdateDatabase(ttk.Frame):
         )
         self.update_button.grid(row=3, column=0, columnspan=2, padx=30, pady=10)
 
-    def _select_sql_file(self):
+    def _select_sql_file(self) -> None:
         """ Function that runs when the `Select SQL File` button is pressed. """
 
         # Open a file dialog window to select an sql file
@@ -79,7 +86,7 @@ class UpdateDatabase(ttk.Frame):
         self.file_path.set(file_path.name)
         logger.debug(f'Setting the file path in the file path entry field.')
 
-    def _update_database(self):
+    def _update_database(self) -> None:
         """ Function that runs when the `Update` button is pressed. """
         # TODO: Need to find a way to validate the database update.
 

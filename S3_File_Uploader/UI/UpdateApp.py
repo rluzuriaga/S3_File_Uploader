@@ -8,7 +8,7 @@ logger = logging.getLogger('main_logger')
 
 
 class UpdateApp:
-    def __init__(self):
+    def __init__(self) -> None:
         logger.debug(f'Opening window letting the user know to download the new version of the app.')
         root = tk.Tk()
         root.title(APP_TITLE)

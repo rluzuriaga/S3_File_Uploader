@@ -1,5 +1,6 @@
 import sys
 import logging
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import boto3
 import botocore
@@ -14,7 +15,8 @@ class AWS:
     #     pass
 
     @staticmethod
-    def test_connection(aws_access_key_id, aws_secret_access_key, region_code):
+    def test_connection(aws_access_key_id: str, aws_secret_access_key: str,
+                        region_code: str) -> Optional[Union[Dict[str, str], Dict[str, dict]]]:
         logger.debug(f'Testing AWS connection.')
 
         try:
@@ -41,7 +43,7 @@ class AWS:
         logger.debug(f'Connection successful.')
 
     @staticmethod
-    def get_s3_buckets():
+    def get_s3_buckets() -> Tuple[str, ...]:
         with Database() as DB:
             if DB.are_settings_saved():
                 # try:
@@ -77,7 +79,8 @@ class AWS:
                 return buckets_values
 
     @staticmethod
-    def upload_file(file_path, bucket_name, file_name, ProgressCallback=None):
+    def upload_file(file_path: str, bucket_name: str, file_name: str,
+                    ProgressCallback: Optional[Callable] = None) -> None:
         with Database() as DB:
             aws_config = DB.get_aws_config()
 
@@ -94,7 +97,7 @@ class AWS:
                                Callback=ProgressCallback)
 
     @staticmethod
-    def create_single_folder_in_bucket(bucket_name, folder_name):
+    def create_single_folder_in_bucket(bucket_name: str, folder_name: str) -> None:
         with Database() as DB:
             aws_config = DB.get_aws_config()
 
@@ -109,7 +112,7 @@ class AWS:
 
             client.put_object(Bucket=bucket_name, Key=(folder_name+'/'))
 
-    def create_multiple_folders_in_bucket(self, bucket_name, list_of_folder_names):
+    def create_multiple_folders_in_bucket(self, bucket_name: str, list_of_folder_names: List[str]) -> None:
         with Database() as DB:
             aws_config = DB.get_aws_config()
 
@@ -130,7 +133,7 @@ class AWS:
                                       Key=(folder_name+'/'))
 
     @staticmethod
-    def get_bucket_objects_as_dict(bucket_name):
+    def get_bucket_objects_as_dict(bucket_name: str) -> Optional[Dict[str, int]]:
         """ Example output: {'file_name': int(filesize)} """
         with Database() as DB:
             aws_config = DB.get_aws_config()
@@ -174,7 +177,7 @@ class AWS:
                 )
 
     @staticmethod
-    def get_all_objects_from_bucket(bucket_name):
+    def get_all_objects_from_bucket(bucket_name: str) -> Union[Dict[str, str], Dict[str, Dict[str, str]]]:
         """ Function to retrieve all data objects from bucket. """
         with Database() as DB:
             aws_config = DB.get_aws_config()

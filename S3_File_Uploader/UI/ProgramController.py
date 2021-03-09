@@ -1,6 +1,7 @@
 import logging
 import tkinter as tk
 from tkinter import ttk
+from typing import Tuple, Type, Union, Any
 
 from config import APP_TITLE
 
@@ -10,12 +11,14 @@ from .MassUpload import MassUpload
 from .UpdateDatabase import UpdateDatabase
 from .Styles import Styles
 
+TtkFrameClasses = Type[Union[MainWindow, SetupWindow, MassUpload, UpdateDatabase]]
+
 # Setup logger
 logger = logging.getLogger('main_logger')
 
 
 class ProgramController(tk.Tk):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         tk.Tk.__init__(self, *args, **kwargs)
         logger.debug(f'Initializing the Tkinter program controller.')
 
@@ -55,7 +58,7 @@ class ProgramController(tk.Tk):
 
         logger.debug(f'Set location of main window on the screen.')
 
-    def get_screen_size(self):
+    def get_screen_size(self) -> Tuple[int, int]:
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
@@ -63,44 +66,40 @@ class ProgramController(tk.Tk):
 
         return screen_width, screen_height
 
-    def add_frame_to_paned_window(self, frame_):
+    def add_frame_to_paned_window(self, frame_: TtkFrameClasses) -> None:
         frame = self.frames[frame_]
         self.container.add(frame, weight=1)
 
         logger.debug(f'Adding "{frame_.__name__}" frame to paned window.')
 
-    def remove_paned_window_frame(self, frame_from_active_panes):
+    def remove_paned_window_frame(self, frame_from_active_panes: str) -> None:
         self.container.forget(frame_from_active_panes)
         logger.debug(f'Removing "{str(frame_from_active_panes)}" frame from paned window.')
 
-    def active_panes(self):
+    def active_panes(self) -> Tuple[str, ...]:
         return self.container.panes()
 
-    def get_last_frame(self):
-        last_frame = list(self.frames.keys())[-1]
-        return last_frame
-
-    def enable_main_window_buttons(self):
+    def enable_main_window_buttons(self) -> None:
         mw = self.frames[MainWindow]
         mw.enable_all_buttons()
 
         logger.debug(f'Enabling all "MainWindow" buttons.')
 
-    def disable_main_window_buttons(self):
+    def disable_main_window_buttons(self) -> None:
         mw = self.frames[MainWindow]
         mw.disable_all_buttons()
 
         logger.debug(f'Disabling all "MainWindow" buttons.')
 
-    def setup_start_after(self):
+    def setup_start_after(self) -> None:
         self.frames[SetupWindow].start_after()
 
         logger.debug(f'Starting the tkinter after method for "SetupWindow".')
 
-    def setup_stop_after(self):
+    def setup_stop_after(self) -> None:
         self.frames[SetupWindow].stop_after()
 
         logger.debug(f'Stopping the tkinter after method for "SetupWindow".')
 
-    def select_frame(self, frame_):
+    def select_frame(self, frame_: TtkFrameClasses):
         return self.frames[frame_]

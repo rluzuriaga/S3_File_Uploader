@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import logging
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from typing import TYPE_CHECKING
 
-import os
-import queue
-import threading
-
-from config import IS_MAC, IS_WINDOWS, WORKING_DIRECTORY
+from config import IS_MAC, IS_WINDOWS
 from S3_File_Uploader.Database import Database
 from S3_File_Uploader.AWS import AWS, AWSAuthenticationException, AWSKeyException, NoConnectionError
+
+if TYPE_CHECKING:
+    from tkinter import ttk
+    from S3_File_Uploader.UI.ProgramController import ProgramController
 
 # Set up logging
 logger = logging.getLogger('main_logger')
@@ -84,9 +87,9 @@ class SetupWindow(ttk.Frame):
     LOCK_UNLOCK_BUTTON_GRID = {'row': 13, 'column': 2, 'columnspan': 2,
                                'padx': (0, 40), 'pady': (20, 10), 'sticky': 'E'}
 
-    def __init__(self, parent, controller):
-        ttk.Frame.__init__(self, parent, width=100,
-                           height=300, relief=tk.RIDGE)
+    def __init__(self, parent: ttk.PanedWindow, controller: ProgramController) -> None:
+        ttk.Frame.__init__(self, parent, width=100, height=300, relief=tk.RIDGE)
+
         self.controller = controller
 
         logger.debug(f'Initializing the SetupWindow ttk frame.')
@@ -98,7 +101,7 @@ class SetupWindow(ttk.Frame):
 
         self.populate_setup_fields()
 
-    def ui_elements(self):
+    def ui_elements(self) -> None:
         # Row 0
         self.setup_window_top_label = ttk.Label(
             self,
@@ -319,7 +322,8 @@ class SetupWindow(ttk.Frame):
         )
         self.lock_unlock_button.grid(self.LOCK_UNLOCK_BUTTON_GRID)
 
-    def _check_if_in_path(self) -> bool:
+    @staticmethod
+    def _check_if_in_path() -> bool:
         """ Check if ffmpeg and ffprobe are in the PATH.
 
         Returns:
@@ -335,13 +339,13 @@ class SetupWindow(ttk.Frame):
         logger.debug(f'Both ffmpeg and ffprobe in PATH.')
         return True
 
-    def _open_folder_path(self):
+    def _open_folder_path(self) -> None:
         logger.debug(f'Opening file dialog window for selecting local save path.')
         path = filedialog.askdirectory()
         self.local_save_path_var.set(path)
         logger.debug(f'Setting local save path to: "{path}"')
 
-    def _update_ffmpeg_data(self):
+    def _update_ffmpeg_data(self) -> None:
         """ Function to update the example ffmpeg label.
 
         The function puts together the label with the user entered options, 
@@ -370,7 +374,7 @@ class SetupWindow(ttk.Frame):
         #   was that a thread was created every 750 milliseconds.
         self.after_id = self.ffmpeg_input.after(750, self._update_ffmpeg_data)
 
-    def _ffmpeg_extension_checkbutton_press(self):
+    def _ffmpeg_extension_checkbutton_press(self) -> None:
         """ Function that runs when the `Use different extension for AWS` checkbox is pressed.
 
         The function adds and removes the `different_ffmpeg_output_extension_input` entry box
@@ -387,7 +391,7 @@ class SetupWindow(ttk.Frame):
             self.different_output_extension_var.set("avi")
             logger.debug(f'Removing the `different output extension` entry box from the grid.')
 
-    def _local_save_press(self):
+    def _local_save_press(self) -> None:
         """ Function that runs when the `Save locally` checkbox is pressed.
 
         The function adds and removes the local save path Entry box and button to 
@@ -409,7 +413,7 @@ class SetupWindow(ttk.Frame):
             self.local_save_different_output_extension_input.grid_remove()
             logger.debug(f'Removing the `local save` input field, button and different extension checkbox from the grid.')
 
-    def _local_save_different_extension_press(self):
+    def _local_save_different_extension_press(self) -> None:
         """ Function that runs when the `Different local output extension` checkbox is pressed.
 
         The function adds and removes the Entry box for the different local output extension
@@ -424,7 +428,7 @@ class SetupWindow(ttk.Frame):
             self.local_save_different_output_extension_input.grid_remove()
             logger.debug(f'Removing the local save different extension from the grid.')
 
-    def _disable_all_widgets(self):
+    def _disable_all_widgets(self) -> None:
         """ Function to disable all of the input widgets in the SetupWindow. """
         # AWS widgets
         self.access_key_id_input_field.configure(state='disabled', foreground='gray')
@@ -448,7 +452,7 @@ class SetupWindow(ttk.Frame):
         self.local_save_different_output_extension_input.configure(state='disabled', foreground='grey')
         logger.debug(f'Disabling the FFMPEG input fields.')
 
-    def _enable_all_widgets(self):
+    def _enable_all_widgets(self) -> None:
         """ Function to enable all of the input widgets in the SetupWindow. """
         # AWS options
         self.access_key_id_input_field.configure(state='normal', foreground='black')
@@ -472,7 +476,7 @@ class SetupWindow(ttk.Frame):
         self.local_save_different_output_extension_input.configure(state='normal', foreground='black')
         logger.debug(f'Enabling the FFMPEG input fields.')
 
-    def start_after(self):
+    def start_after(self) -> None:
         """ Function to activate the method that updates the FFMPEG example label.
 
         This function is created so that it can be called when the SetupWindow pane 
@@ -482,7 +486,7 @@ class SetupWindow(ttk.Frame):
         self._update_ffmpeg_data()
         logger.debug(f'Starting the tkinter after() method for updating the example ffmpeg text.')
 
-    def stop_after(self):
+    def stop_after(self) -> None:
         """ Function to cancel the method that updates the FFMPEG example label.
 
         This function is created so that it can be called when the SetupWindow pane 
@@ -492,7 +496,7 @@ class SetupWindow(ttk.Frame):
         self.ffmpeg_input.after_cancel(self.after_id)
         logger.debug(f'Stopping the tkinter after() method.')
 
-    def save_configuration(self):
+    def save_configuration(self) -> None:
         """ Function that runs when the `Save Configuration` button is pressed. """
         logger.debug(f'Starting save configuration process.')
 
@@ -602,7 +606,7 @@ class SetupWindow(ttk.Frame):
 
             self.configure_aws(access_key_id, secret_key, region_name)
 
-    def configure_aws(self, access_key_id, secret_key, region_name):
+    def configure_aws(self, access_key_id: str, secret_key: str, region_name: str) -> None:
         """ Function to configure AWS settings.
 
         This function should be ran on another thread so that the UI elements are
@@ -665,7 +669,7 @@ class SetupWindow(ttk.Frame):
                 self.setup_window_output_message.configure(foreground='red')
                 logger.error(f'ERROR: No Internet connection, cannot authenticate AWS keys.')
 
-    def lock_unlock_aws_settings(self):
+    def lock_unlock_aws_settings(self) -> None:
         """ This function executes when the 'Lock/Unlock' button is clicked. """
         with Database() as DB:
 
@@ -703,7 +707,7 @@ class SetupWindow(ttk.Frame):
                     text='Lock', state='disabled')
                 self.save_button.grid(self.SAVE_BUTTON_GRID)
 
-    def populate_setup_fields(self):
+    def populate_setup_fields(self) -> None:
         """ Populate the setup fields with the information from the database. 
 
         This function checks if there are settings saved in the database. 

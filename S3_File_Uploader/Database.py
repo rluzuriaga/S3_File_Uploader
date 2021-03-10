@@ -42,7 +42,7 @@ class Database:
         self.connection.close()
         del self.connection
 
-    def _only_context(func: Callable) -> Callable:
+    def _only_context(func: Callable) -> Callable:  # type: ignore
         @wraps(func)
         def wrapper(self, *args: Any, **kwargs: Any) -> Callable:
             if not self.context:

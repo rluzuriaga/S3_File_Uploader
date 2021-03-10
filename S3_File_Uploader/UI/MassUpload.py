@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import signal
 import logging
+import subprocess
 import threading
 import tkinter as tk
 from tkinter import ttk
@@ -555,6 +556,7 @@ class MassUpload(ttk.Frame):
 
         logger.debug(f'Ffmpeg conversion completed.')
 
+    @staticmethod
     def _ffprobe_controller(full_file_name: str) -> int:
         """ Function to run the ffprobe command to get the number of frames in the video.
 
@@ -564,41 +566,13 @@ class MassUpload(ttk.Frame):
         Returns:
             int: Number of frames in the video
         """
-        command = f'ffprobe -count_frames -select_streams v:0 -show_entries stream=nb_frames "{full_file_name}"'
+        command = f'ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 "{full_file_name}"'
 
         logger.debug(f'Retrieving video frames using command: {command}')
 
-        if IS_MAC:
-            thread = pexpect.spawn(command)
+        frames = subprocess.run(command, stdout=subprocess.PIPE).stdout
 
-        if IS_WINDOWS:
-            from pexpect import popen_spawn
-            thread = popen_spawn.PopenSpawn(command)
-
-        cpl = thread.compile_pattern_list([
-            pexpect.EOF,
-            'nb_frames=\d+',
-            '(.+)'
-        ])
-
-        frames = "0"
-
-        while True:
-            i = thread.expect_list(cpl, timeout=None)
-            if i == 0:
-                break
-            elif i == 1:
-                frames = thread.match.group(0)
-
-                if IS_MAC:
-                    thread.close
-
-                if IS_WINDOWS:
-                    thread.kill(signal.SIG_DFL)
-            elif i == 2:
-                pass
-
-        number_of_frames = str(frames, 'utf-8').replace('nb_frames=', '')
+        number_of_frames = frames.decode('utf-8').replace('\r', '').replace('\n', '')
 
         logger.debug(f'Returning number of frames: `{number_of_frames}`')
 

@@ -8,7 +8,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from typing import Dict, Iterable, List, Tuple, Optional, TYPE_CHECKING
+from typing import Callable, Dict, Iterable, List, Tuple, Optional, TYPE_CHECKING, Any
 
 import pexpect
 import ffmpeg
@@ -386,7 +386,7 @@ class MassUpload(ttk.Frame):
         self.overall_progressbar_label.grid(self.OVERALL_PROGRESSBAL_LABEL_GRID)
 
         # Create the overall progressbar and add it to the grid
-        self.overall_pb = ProgressBar(self, self.controller, 400, number_of_files)
+        self.overall_pb: ProgressBar = ProgressBar(self, self.controller, 400, number_of_files)
         self.overall_pb.grid(self.OVERALL_PROGRESSBAR_GRID)
 
     def _destroy_overall_progressbar(self) -> None:
@@ -408,7 +408,7 @@ class MassUpload(ttk.Frame):
         logger.debug(f'Creating secondary (ffmpeg & upload) progressbar with a maximum of `{length_of_bar}`')
 
         self.ffmpeg_and_upload_progressbar_label.grid(self.FFMPEG_AND_UPLOAD_PROGRESSBAR_LABEL_GRID)
-        self.ffmpeg_and_upload_pb = ProgressBar(self, self.controller, 400, length_of_bar)
+        self.ffmpeg_and_upload_pb: ProgressBar = ProgressBar(self, self.controller, 400, length_of_bar)
         self.ffmpeg_and_upload_pb.grid(self.FFMPEG_AND_UPLOAD_PROGRESSBAR_GRID)
 
     def _destroy_ffmpeg_and_upload_progressbar(self) -> None:
@@ -422,7 +422,7 @@ class MassUpload(ttk.Frame):
             pass
 
     @staticmethod
-    def _parse_ffmpeg_command(ffmpeg_config: Tuple[Optional[str], ...], input_file_path: str,
+    def _parse_ffmpeg_command(ffmpeg_config: List[Optional[str]], input_file_path: str,
                               input_file_name: str, input_file_extension: str,
                               directory_structure_for_local_save: str) -> Tuple[str, str]:
         """ Function to parse together the FFMPEG command to a string.
@@ -483,7 +483,7 @@ class MassUpload(ttk.Frame):
 
         return ffmpeg_command_string, first_full_output_string
 
-    def _ffmpeg_controller(self, parsed_ffmpeg_command: str, ffmpeg_progressbar: ttk.Progressbar,
+    def _ffmpeg_controller(self, parsed_ffmpeg_command: str, ffmpeg_progressbar: ProgressBar,
                            total_video_frames: int) -> None:
         """ Function to run FFMPEG using the parsed ffmpeg command.
 
@@ -1119,14 +1119,16 @@ class VideoCheckboxes(ttk.Frame):
         self.controller = controller
 
         self.checkbox_text = ''
-        self.checkbox_variables = []
-        self.checkbox_text_and_variables = []
-        self.checkbox_text_and_widgets = []
+        self.checkbox_variables: List[tk.IntVar] = []
+        self.checkbox_text_and_variables: List[Tuple[Any, ...]] = []
+        self.checkbox_text_and_widgets: List[Tuple[Any, ...]] = []
 
         with Database() as DB:
             self.checkbox_text = DB.get_video_formats(labels=True)
 
         logger.debug(f'Creating checkboxes.')
+        text_: str
+
         for i, text_ in enumerate(self.checkbox_text):
             var = tk.IntVar()
 

@@ -671,7 +671,7 @@ class MassUpload(ttk.Frame):
             logger.debug(f'Retrieving the video checkbox selection.')
             # Get the checkboxes that are selected
             video_checkbox_selection = [
-                a for a in self.video_checkboxes.state()]
+                a for a in self.video_checkboxes.get_state()]
 
             with Database() as DB:
                 all_video_formats_labels = DB.get_video_formats(labels=True)
@@ -1165,7 +1165,7 @@ class VideoCheckboxes(ttk.Frame):
             else:
                 checkbox[1].set(0)
 
-    def state(self) -> Iterable[int]:
+    def get_state(self) -> Iterable[int]:
         """ Returns a map of 0 or 1 for which video extension checkbox is selected. """
         logger.debug(f'Returning a map of which video extension is select/not selected.')
         return map((lambda var: var.get()), self.checkbox_variables)

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import logging
 import tkinter as tk
 from tkinter import ttk
-from typing import Tuple, Type, Union, Any
+from typing import Tuple, Type, Union, Any, Dict
 
 from config import APP_TITLE
 
@@ -33,7 +35,9 @@ class ProgramController(tk.Tk):
         self.container = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
         self.container.pack(fill=tk.BOTH, expand=True)
 
-        self.frames = {}
+        # TODO: Figure out how to type hint this better
+        # I have tried Dict[TtkFrameClasses, TtkFrameClasses] but it is still not correct
+        self.frames: Dict[Any, Any] = {}
 
         for F in (MainWindow, SetupWindow, UpdateDatabase, MassUpload):
             frame = F(self.container, self)
@@ -80,13 +84,13 @@ class ProgramController(tk.Tk):
         return self.container.panes()
 
     def enable_main_window_buttons(self) -> None:
-        mw = self.frames[MainWindow]
+        mw: MainWindow = self.frames[MainWindow]
         mw.enable_all_buttons()
 
         logger.debug(f'Enabling all "MainWindow" buttons.')
 
     def disable_main_window_buttons(self) -> None:
-        mw = self.frames[MainWindow]
+        mw: MainWindow = self.frames[MainWindow]
         mw.disable_all_buttons()
 
         logger.debug(f'Disabling all "MainWindow" buttons.')

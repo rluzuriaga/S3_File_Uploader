@@ -27,6 +27,7 @@ import cx_Freeze
 import subprocess
 import distutils.core
 from setuptools import find_packages
+from typing import Any, Dict, List
 
 from config import APP_TITLE, APP_VERSION
 
@@ -65,7 +66,7 @@ EXEC_NAME = None
 UPGRADE_CODE = None
 PRODUCT_CODE = None
 
-COMMANDS = dict()
+COMMANDS: Dict[str, Any] = dict()
 
 
 if WINDOWS:
@@ -134,16 +135,21 @@ class Clean(distutils.core.Command):
 
 COMMANDS['clean'] = Clean
 
-if MAC:
-    class Create(distutils.core.Command):
-        user_options = []
 
-        def initialize_options(self) -> None:
-            pass
+class Create(distutils.core.Command):
+    user_options: List[Any] = []
 
-        def finalize_options(self) -> None:
-            pass
+    def initialize_options(self) -> None:
+        pass
 
+    def finalize_options(self) -> None:
+        pass
+
+    if WINDOWS:
+        def run(self) -> None:
+            self.run_command('bdist_msi')
+
+    if MAC:
         def run(self) -> None:
             self.run_command('py2app')
             self.execute(self.create_application_folder_shortcut, ())
@@ -171,21 +177,10 @@ if MAC:
         def remove_application_folder_shortcut(self) -> None:
             os.remove(os.path.join(DIST_DIR, 'Applications'))
 
-    COMMANDS['create'] = Create
+
+COMMANDS['create'] = Create
 
 if WINDOWS:
-    class Create(distutils.core.Command):
-        user_options = []
-
-        def initialize_options(self) -> None:
-            pass
-
-        def finalize_options(self) -> None:
-            pass
-
-        def run(self) -> None:
-            self.run_command('bdist_msi')
-
     class BuildExe(cx_Freeze.build_exe):
         def initialize_options(self) -> None:
             self.dist_dir = None
@@ -233,7 +228,7 @@ if WINDOWS:
 
 
 class Distribute(distutils.core.Command):
-    user_options = []
+    user_options: List[Any] = []
 
     def _make_app_bundle_to_zip(self) -> None:
         from zipfile import ZipFile

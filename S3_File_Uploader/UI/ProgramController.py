@@ -105,5 +105,5 @@ class ProgramController(tk.Tk):
 
         logger.debug(f'Stopping the tkinter after method for "SetupWindow".')
 
-    def select_frame(self, frame_: TtkFrameClasses):
+    def select_frame(self, frame_: TtkFrameClasses) -> Union[MainWindow, SetupWindow, MassUpload, UpdateDatabase]:
         return self.frames[frame_]

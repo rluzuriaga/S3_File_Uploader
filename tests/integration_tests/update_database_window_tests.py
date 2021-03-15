@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
 import unittest
+from typing import TYPE_CHECKING
 
 from config import DatabasePath
 from S3_File_Uploader.Database import Database
@@ -9,8 +12,14 @@ from tests.integration_tests.utils import open_program, destroy_program
 from tests.integration_tests.utils import remove_db_file, update_program_controller_loop
 from tests.integration_tests.utils import ignore_aws_warning
 
+if TYPE_CHECKING:
+    from S3_File_Uploader.UI.ProgramController import ProgramController
+
 
 class UpdateDatabaseWindowTestCase(unittest.TestCase):
+    pc: ProgramController
+    update_window: UpdateDatabase
+
     @classmethod
     def setUpClass(cls) -> None:
         ignore_aws_warning()
@@ -23,7 +32,8 @@ class UpdateDatabaseWindowTestCase(unittest.TestCase):
         cls.pc.add_frame_to_paned_window(UpdateDatabase)
         update_program_controller_loop(cls.pc)
 
-        cls.update_window = cls.pc.select_frame(UpdateDatabase)
+        # MYPY ERROR: Incompatible types in assignment (expression has type "Union[MainWindow, SetupWindow, MassUpload, UpdateDatabase]", variable has type "UpdateDatabase")
+        cls.update_window = cls.pc.select_frame(UpdateDatabase)  # type: ignore
         return super().setUpClass()
 
     @classmethod

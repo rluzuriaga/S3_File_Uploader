@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
 import unittest
+from typing import TYPE_CHECKING, Any
 
 from config import DatabasePath
 from S3_File_Uploader.UI.SetupWindow import SetupWindow
@@ -8,8 +11,14 @@ from tests.integration_tests.utils import remove_db_file, update_program_control
 from tests.integration_tests.utils import open_program, destroy_program
 from tests.integration_tests.utils import ignore_aws_warning
 
+if TYPE_CHECKING:
+    from S3_File_Uploader.UI.ProgramController import ProgramController
+
 
 class SetupWindowTestUIElements(unittest.TestCase):
+    pc: ProgramController
+    setup_window: Any  # TODO: Figure out how to effectively annotate this
+
     @classmethod
     def setUpClass(cls) -> None:
         ignore_aws_warning()

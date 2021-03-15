@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
 import unittest
+from typing import Any, TYPE_CHECKING
 
 from dotenv import load_dotenv
 
@@ -11,10 +14,16 @@ from tests.integration_tests.utils import remove_db_file, update_program_control
 from tests.integration_tests.utils import open_program, destroy_program
 from tests.integration_tests.utils import ignore_aws_warning
 
+if TYPE_CHECKING:
+    from S3_File_Uploader.UI.ProgramController import ProgramController
+
 load_dotenv()
 
 
 class MassUploadWindowUIElements(unittest.TestCase):
+    pc: ProgramController
+    mass_upload: Any  # TODO: Figure out how to effectively annotate this
+
     @classmethod
     def setUpClass(cls) -> None:
         ignore_aws_warning()
@@ -50,7 +59,7 @@ class MassUploadWindowUIElements(unittest.TestCase):
         cls.pc.add_frame_to_paned_window(SetupWindow)
         update_program_controller_loop(cls.pc)
 
-        setup_window = cls.pc.select_frame(SetupWindow)
+        setup_window: Any = cls.pc.select_frame(SetupWindow)  # TODO: Figure out how to effectively annotate this
 
         setup_window.access_key_id_string.set(os.environ.get('AWS_ACCESS_KEY_ID'))
         setup_window.secret_key_string.set(os.environ.get('AWS_SECRET_KEY'))

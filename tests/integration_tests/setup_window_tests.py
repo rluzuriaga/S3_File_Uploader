@@ -1,5 +1,6 @@
 import os
 import unittest
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -42,7 +43,7 @@ class SetupWindowTestCase(unittest.TestCase):
         """ Test that everyting in the setup window is working correctly. """
 
         self.pc.add_frame_to_paned_window(SetupWindow)
-        setup_window = self.pc.select_frame(SetupWindow)
+        setup_window: Any = self.pc.select_frame(SetupWindow)  # TODO: Figure out how to effectively annotate this
 
         update_program_controller_loop(self.pc)
 

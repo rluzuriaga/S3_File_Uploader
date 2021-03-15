@@ -2,6 +2,7 @@ import os
 import time
 import unittest
 import threading
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -21,6 +22,8 @@ load_dotenv()
 
 
 class MassUploadWindowTestCase(unittest.TestCase):
+    mass_upload: Any
+
     @classmethod
     def setUpClass(cls) -> None:
         ignore_aws_warning()
@@ -42,6 +45,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.pc = open_program()
+        self.mass_upload = self.pc.select_frame(MassUpload)
         return super().setUp()
 
     def tearDown(self) -> None:
@@ -56,7 +60,7 @@ class MassUploadWindowTestCase(unittest.TestCase):
         self.pc.add_frame_to_paned_window(SetupWindow)
         update_program_controller_loop(self.pc)
 
-        setup_window = self.pc.select_frame(SetupWindow)
+        setup_window: Any = self.pc.select_frame(SetupWindow)  # TODO: Figure out how to effectively annotate this
 
         setup_window.access_key_id_string.set(os.environ.get('AWS_ACCESS_KEY_ID'))
         setup_window.secret_key_string.set(os.environ.get('AWS_SECRET_KEY'))
@@ -90,21 +94,19 @@ class MassUploadWindowTestCase(unittest.TestCase):
         self.pc.add_frame_to_paned_window(MassUpload)
         update_program_controller_loop(self.pc)
 
-        mass_upload = self.pc.select_frame(MassUpload)
-
         # Add data directory path to mass upload path entry box
-        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
+        self.mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
 
         # Set bucket to use from env var
-        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
+        self.mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
 
         # Click on the start upload button
-        mass_upload.start_upload_button.invoke()
+        self.mass_upload.start_upload_button.invoke()
 
         # Have to run a new thread that would kill the mainloop after the upload is done.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
         #   this way or manually by clicking the X.
-        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload, True)).start()
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(self.mass_upload, True)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
         # If the mainloop is not called, then an exception will be raised
@@ -118,20 +120,18 @@ class MassUploadWindowTestCase(unittest.TestCase):
         self.pc.add_frame_to_paned_window(MassUpload)
         update_program_controller_loop(self.pc)
 
-        mass_upload = self.pc.select_frame(MassUpload)
-
         # Assert that there is no data for S3 buckets
-        self.assertFalse(mass_upload.s3_bucket_selector.cget('values'))
+        self.assertFalse(self.mass_upload.s3_bucket_selector.cget('values'))
 
         # Click on refresh aws s3 bucket button
-        mass_upload.refresh_s3_buckets_button.invoke()
+        self.mass_upload.refresh_s3_buckets_button.invoke()
         update_program_controller_loop(self.pc)
 
         # Assert that the updated label gets added
-        self.assertEqual(mass_upload.update_label.cget('text'), 'S3 buckets updated')
+        self.assertEqual(self.mass_upload.update_label.cget('text'), 'S3 buckets updated')
 
         # Assert that the buckets get updated
-        self.assertTrue(mass_upload.s3_bucket_selector.cget('values'))
+        self.assertTrue(self.mass_upload.s3_bucket_selector.cget('values'))
 
     def test_2_all_file_upload(self) -> None:
         """ Test that the all files method of uploading data is working.
@@ -139,10 +139,8 @@ class MassUploadWindowTestCase(unittest.TestCase):
         """
         self._upload_all_files()
 
-        mass_upload = self.pc.select_frame(MassUpload)
-
         # Assert that the finished label gets added
-        self.assertEqual(mass_upload.update_label.cget('text'), 'Finished!')
+        self.assertEqual(self.mass_upload.update_label.cget('text'), 'Finished!')
 
         # Get all the files with their file size (bytes) from AWS
         all_files_in_s3_dict = AWS().get_bucket_objects_as_dict(os.environ.get('S3_BUCKET'))
@@ -188,27 +186,25 @@ class MassUploadWindowTestCase(unittest.TestCase):
         self.pc.add_frame_to_paned_window(MassUpload)
         update_program_controller_loop(self.pc)
 
-        mass_upload = self.pc.select_frame(MassUpload)
-
         # Add data directory path to mass upload path entry box
-        mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
+        self.mass_upload.mass_upload_path.set(DATA_DIRECTORY_PATH)
 
         # Set bucket to use from env var
-        mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
+        self.mass_upload.s3_bucket_name.set(os.environ.get('S3_BUCKET'))
 
         # Click on the Videos Only radio button
-        mass_upload.radio_button_video.invoke()
+        self.mass_upload.radio_button_video.invoke()
 
         # Click on the Use ffmpeg button
-        mass_upload.use_ffmpeg_checkbox.invoke()
+        self.mass_upload.use_ffmpeg_checkbox.invoke()
 
         # Click on the start upload button
-        mass_upload.start_upload_button.invoke()
+        self.mass_upload.start_upload_button.invoke()
 
         # Have to run a new thread that would kill the mainloop after the upload is done.
         # This needs to be done because once the mainloop gets called it won't stop unless it is done
         #   this way or manually by clicking the X.
-        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(mass_upload, True)).start()
+        threading.Thread(target=self._quit_mainloop_once_upload_is_done, args=(self.mass_upload, True)).start()
 
         # Run the mainloop so that the upload will execute on the same thread as the mainloop
         # If the mainloop is not called, then an exception will be raised

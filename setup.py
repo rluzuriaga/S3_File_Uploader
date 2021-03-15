@@ -76,7 +76,7 @@ if WINDOWS:
     BASE = 'Win32GUI'
     EXEC_NAME = f'{APP_TITLE}.exe'
     UPGRADE_CODE = '{6ADD4904-6A36-4D2F-BF96-8241B3D8D474}'
-    PRODUCT_CODE = msilib.gen_uuid()
+    PRODUCT_CODE = msilib.gen_uuid()  # type:ignore
     ICON = os.path.join(os.getcwd(), 'S3_File_Uploader', 'UI', 'images', 'logo.ico')
 
 if MAC:

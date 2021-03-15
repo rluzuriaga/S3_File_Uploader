@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import time
 import warnings
@@ -71,7 +73,7 @@ def setup_logs_for_tests() -> None:
     logger.debug(f'Logger setup for tests.')
 
 
-def open_program() -> None:
+def open_program() -> ProgramController:
     """ Open the application & update the program controller loop.
 
     Returns:

@@ -1,14 +1,19 @@
 import os
 import sys
 import logging
-import requests
 from datetime import datetime
+from typing import Dict, Optional
+
+import requests
 
 from S3_File_Uploader.UI.ProgramController import ProgramController
 from S3_File_Uploader.UI.UpdateApp import UpdateApp
 from S3_File_Uploader.Database import Database
 
 from config import APP_VERSION, DB_VERSION, LOGS_DIRECTORY
+
+
+RequestsResponseAlias = Optional[Dict]
 
 
 # Set up file based logger
@@ -34,7 +39,7 @@ logger.addHandler(fh)
 logger.debug(f'Logger setup.')
 
 
-def request_data_from_gist():
+def request_data_from_gist() -> RequestsResponseAlias:
     logger.debug(f'Retrieving response from gist.')
 
     header = {"Accept": "application/vnd.github.v3+json"}
@@ -52,7 +57,7 @@ def request_data_from_gist():
     return response
 
 
-def check_app_version(response):
+def check_app_version(response: RequestsResponseAlias) -> None:
     logger.debug(f'Checking if app version is out of date.')
     try:
         newest_app_version = response['files']['app_version.txt']['content']
@@ -72,7 +77,7 @@ def check_app_version(response):
         sys.exit(0)
 
 
-def database_updater(response):
+def database_updater(response: RequestsResponseAlias) -> None:
     logger.debug(f'Starting database updater.')
     try:
         newest_db_version = response['files']['db_version.txt']['content']
@@ -93,7 +98,7 @@ def database_updater(response):
             os.remove(sql_file_name)
 
 
-def main():
+def main() -> None:
     logger.debug(f'Starting program.')
 
     pc = ProgramController()

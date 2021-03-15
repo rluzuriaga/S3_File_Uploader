@@ -54,6 +54,9 @@ jobs:
           python ffmpeg_setup.py
           echo "./bin" >> $GITHUB_PATH
       
+      - name: Run mypy
+        run: mypy tests/ S3_File_Uploader/ config.py ffmpeg_setup.py setup.py
+      
       - name: Run unit tests.
         run: python -m unittest discover -v -s ./tests/unit_tests -p "*_tests.py"
         env:

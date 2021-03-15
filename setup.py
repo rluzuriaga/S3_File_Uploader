@@ -89,9 +89,9 @@ class Clean(distutils.core.Command):
     """
     Custom clean command to tidy up the project root before creating a new distribution package.
     """
-    user_options = [('full-clean', None, 'remove distribution, logs, and database file')]
+    user_options: List[Any] = [('full-clean', None, 'remove distribution, logs, and database file')]
 
-    def initialize_options(self):
+    def initialize_options(self) -> None:
         """
         Initialize command options.
         """
@@ -102,13 +102,13 @@ class Clean(distutils.core.Command):
             os.path.join(os.getcwd(), 'S3_File_Uploader', 'UI', '__pycache__')
         ]
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         """
         Finalize command options.
         """
         pass
 
-    def run(self):
+    def run(self) -> None:
         """
         Command execution.
         """

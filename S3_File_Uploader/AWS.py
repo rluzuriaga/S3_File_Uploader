@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import boto3
 import botocore
@@ -16,8 +16,10 @@ class AWS:
 
     @staticmethod
     def test_connection(aws_access_key_id: str, aws_secret_access_key: str,
-                        region_code: str) -> Optional[Union[Dict[str, str], Dict[str, dict]]]:
+                        region_code: str) -> Optional[Dict[str, Any]]:
         logger.debug(f'Testing AWS connection.')
+
+        response = None
 
         try:
             client = boto3.client(
@@ -28,8 +30,6 @@ class AWS:
             )
 
             response = client.get_caller_identity()
-
-            return response
         except botocore.exceptions.ClientError as err:
             if 'SignatureDoesNotMatch' in str(err) or 'InvalidClientTokenId' in str(err):
                 logger.warning(f'Raising AWSKeyException.')
@@ -40,10 +40,11 @@ class AWS:
 
             raise NoConnectionError
 
+        return response
         logger.debug(f'Connection successful.')
 
     @staticmethod
-    def get_s3_buckets() -> Tuple[str, ...]:
+    def get_s3_buckets() -> Optional[Tuple[str, ...]]:
         with Database() as DB:
             if DB.are_settings_saved():
                 # try:
@@ -77,6 +78,8 @@ class AWS:
                 logger.debug(f'Retrieving all S3 buckets.')
 
                 return buckets_values
+
+        return None
 
     @staticmethod
     def upload_file(file_path: str, bucket_name: str, file_name: str,

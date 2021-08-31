@@ -8,3 +8,4 @@ cx_Freeze
 python-dotenv
 beautifulsoup4
 mypy
+types-requests

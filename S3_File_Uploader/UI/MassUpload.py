@@ -1187,12 +1187,14 @@ class VideoCheckboxes(ttk.Frame):
     def disable_all_widgets(self) -> None:
         logger.debug(f'Disabling all checkboxes.')
         for child in self.winfo_children():
-            child.configure(state='disabled')
+            if type(child) is ttk.Checkbutton:
+                child.configure(state='disabled')
 
     def enable_all_widgets(self) -> None:
         logger.debug(f'Enabling all checkboxes.')
         for child in self.winfo_children():
-            child.configure(state='enable')
+            if type(child) is ttk.Checkbutton:
+                child.configure(state='enable')
 
     def unbind_widgets(self) -> None:
         logger.debug(f'Unbinding all checkboxes.')

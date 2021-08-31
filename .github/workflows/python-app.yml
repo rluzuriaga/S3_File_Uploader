@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - master
+      - testing-branch
+      - dev-branch
     tags:
       - 'v*'
 

@@ -22,7 +22,8 @@ class SetupWindowTestUIElements(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         ignore_aws_warning()
-        DatabasePath.change_path(os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3'))
+
+        DatabasePath.path = os.path.join(os.getcwd(), 'setup_window_test_db.sqlite3')
 
         remove_db_file()
 

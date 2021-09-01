@@ -14,7 +14,7 @@ class MainWindowTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        DatabasePath.change_path(os.path.join(os.getcwd(), 'main_window_test_db.sqlite3'))
+        DatabasePath.path = os.path.join(os.getcwd(), 'main_window_test_db.sqlite3')
 
         remove_db_file()
         return super().setUpClass()

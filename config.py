@@ -1,17 +1,12 @@
 import os
 import sys
 
+from dataclasses import dataclass
 
+
+@dataclass
 class DatabasePath:
     path: str = os.path.join(os.getcwd(), 'db.sqlite3')
-
-    @classmethod
-    def get(cls) -> str:
-        return cls.path
-
-    @classmethod
-    def change_path(cls, new_path: str) -> None:
-        cls.path = new_path
 
 
 DB_VERSION: int = 2

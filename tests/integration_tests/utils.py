@@ -14,17 +14,12 @@ def remove_db_file() -> None:
     This function uses the DatabasePath class from `S3_File_Uploader.__init__.py` to determine what
     database file to remove.
     """
-    # Have to create an instance variable of DatabasePath since the tests create different databases
-    #   depending on the test that is running.
-    # I tested by just entering `DatabasePath.get()` in the os commands bellow and the tests fail.
-    db_file_path = DatabasePath.get()
-
-    if os.path.exists(db_file_path):
+    if os.path.exists(DatabasePath.path):
         # Since the tests run faster than what Python can remove the file,
         #  the function is now recursive to wait until the program actually ends
         #  before removing the database file.
         try:
-            os.remove(db_file_path)
+            os.remove(DatabasePath.path)
         except PermissionError:
             time.sleep(1)
             remove_db_file()

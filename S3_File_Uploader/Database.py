@@ -23,10 +23,10 @@ class Database:
 
         self.context = True
 
-        if not os.path.exists(DatabasePath.get()):
+        if not os.path.exists(DatabasePath.path):
             self.create_db = True
 
-        self.connection = sqlite3.connect(DatabasePath.get())
+        self.connection = sqlite3.connect(DatabasePath.path)
         self.cursor = self.connection.cursor()
 
         if self.create_db:
